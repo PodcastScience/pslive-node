@@ -52,10 +52,13 @@ block chatroom
         block message-form
 
         
-    div.span2.well(style="height:500px;")
+    div.span2.well(style="height:500px; overflow:scroll;")
       h4 En ligne
       ul.media-list#members-list
         block user_box
+
+
+
 
 
 block content
