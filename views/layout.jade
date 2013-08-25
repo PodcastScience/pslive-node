@@ -7,11 +7,17 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(src='http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js')
     script(src='/bootstrap/js/bootstrap.min.js')
+    script(src='/socket.io/socket.io.js')
+    != js('testjq')
+
+
   body
     div.container.well
       block top
+        div.topbar
+          div.hero-unit
+            img(src="/images/PodcastScience.png")
+            p La Science sans prise de tête
       block content
       block footer
-
-block footer
-  div.footer
+        div.footer
