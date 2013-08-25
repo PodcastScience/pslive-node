@@ -33,6 +33,10 @@ app.get('/', routes.index);
 app.get('/admin', routes.admin);
 app.get('/users', user.list);
 
+# connect_url = "http://protected-cove-4063.herokuapp.com/"
+# connect_url = "http://localhost:3000"
+
+connect_url = process.env.PSLIVE_URL
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
