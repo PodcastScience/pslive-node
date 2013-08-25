@@ -6,8 +6,11 @@ jQuery ->
   last_msg_id = false
 
   socket = io.connect(connect_url)
-  msg_template = $('#message-box').html();
+  msg_template = $('#message-box').html()
   $('#message-box').remove();
+
+  user_box_template = $('#user_box').html()
+  $('#user_box').remove();
 
 #  socket.emit('test')
 
@@ -25,10 +28,11 @@ jQuery ->
   # gestion des utilisateurs
   socket.on 'newuser', (user) ->
     html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
-    $('#members-list').append(html_to_append)
+    $('#members-list').append(Mustache.render(user_box_template,user))
 
   socket.on 'logged', ->
     $('#login').fadeOut()
+    $('#message-form').fadeIn()
     $('#message-to-send').focus()
 
   socket.on 'disuser', (user) ->
