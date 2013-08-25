@@ -1,6 +1,8 @@
 jQuery = $(document).ready 
 
 jQuery ->
+  connect_url = "http://protected-cove-4063.herokuapp.com/"
+  # connect_url = "http://localhost:3000"
 
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html();
