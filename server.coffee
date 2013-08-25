@@ -79,7 +79,7 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'disconnect', ->
     return false if(!me)
     delete users[me.id]
-    io.sockets.emit('disuser',me)
+    socket.broadcast.emit('disuser',me)
 
 
   # gestion des mesages
