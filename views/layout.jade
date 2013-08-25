@@ -13,12 +13,29 @@ html
 
 
   body
-    div.container.well
+    div.container
       block top
-        div.topbar
-          div.hero-unit
-            img(src="/images/PodcastScience.png")
-            p La Science sans prise de tête
+        div.navbar
+          div.navbar-inner
+            a(href="http://podcastscience.fm").brand
+              img(src="/images/PodcastScience.png")
+            ul.nav
+              li 
+                a(href="http://podcastscience.fm") Home
+              li 
+                a(href="http://www.podcastscience.fm/liste-episodes-podcast-science/") Episodes
+              li 
+                a(href="http://www.podcastscience.fm/about/") Qui sommes nous?
+              li 
+                a(href="http://www.podcastscience.fm/contactez-nous/") Contact
+              li 
+                a(href="http://www.podcastscience.fm/blogroll-de-nos-podcasts-preferes/") Nos Podcasts favoris
+              li 
+                a(href="http://www.podcastscience.fm/livres/") Nos lectures
+              li 
+                a(href="http://www.podcastscience.fm/boutique/") Boutique
+
+
       block content
       block footer
         div.footer

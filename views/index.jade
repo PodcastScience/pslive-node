@@ -2,8 +2,8 @@ extends layout
 
 
 block login-form
-  div#login.well
-    form.form-inline#loginform      
+  div#login
+    form.form-inline#loginform(style="position:relative;padding-top='-100px';")      
       p Connectez-vous pour participer à la discussion!
       input(type="text" name="login" placeholder="Nom d'utilisateur")#username 
       input(type="text" name="mail" placeholder="E-mail")#mail 
@@ -16,7 +16,7 @@ block message
         a.pull-left
           img(src="{{user.avatar}}")
         div.media-body
-          h4.media-heading {{user.username}}
+          h5.media-heading {{user.username}}
           p {{message}}
 
 block user_box
@@ -27,9 +27,14 @@ block user_box
       div.media-body
         p {{username}}
 
+block message-form
+  form.form-inline#message-form(style="display:none;")
+    input(type="text-area")#message-to-send
+    button(type="submit").btn#send-message Envoyer
+
 block chatroom
   div.row-fluid
-    div.span6.well
+    div.span6.well(style="height:500px;")
       div.well#live-draw-frame le iframe sera la
       div.well#twitterShare(name="twitterShare" style="margin-right:20px; margin-top: 10px; font-family: Hero; color: rgb(131,131,131); font-size: 18px;") Partager
           a.pull-right(href="https://twitter.com/intent/tweet?button_hashtag=psLive&text=Rejoignez+nous+sur+la+chatroom+et+suivez+@@podcastscience+en+direct.&url=http://live.podcastscience.fm" target="_blank" style="margin-left: 5px;")
@@ -39,23 +44,23 @@ block chatroom
           a.pull-right(href="https://plus.google.com/share?url=http://live.podcastscience.fm" target="_blank" style="margin-left: 5px;")
             img(src="/images/gplus-nt.png")
         
-    div.span4.well
+    div.span4.well(style="height:500px;")
       div#onChat
-        div#main("height:100%;")
+        div#main(style="height:440px; overflow:scroll;")
           div#messages.row-fluid
             block message
-          form.form-inline#message-form(style="display:none;")
-            input(type="text-area")#message-to-send
-            button(type="submit").btn#send-message Envoyer
-          block login-form
-    div.span2.well
-      div En ligne : 
+        block message-form
+
+        
+    div.span2.well(style="height:500px;")
+      h4 En ligne
       ul.media-list#members-list
         block user_box
 
 
 block content
   div.content
+    block login-form
     block chatroom
 
 
