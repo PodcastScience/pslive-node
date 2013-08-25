@@ -42,7 +42,7 @@ io = require('socket.io').listen(httpServer)
 
 users = new Object()
 messages = []
-history = 2
+history = 10
  
 
 io.sockets.on 'connection', (socket) ->

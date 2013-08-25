@@ -12,9 +12,13 @@ block login-form
 
 block message
   div.span12.well#message-box(style="display: none;")
-    h3 {{user.username}}
-    p {{message}}
-    p {{h}}:{{minutes}}
+    div.row-fluid
+      div.span2
+        img(src="{{user.avatar}}")
+      div.span10
+        h3 {{user.username}}
+        p {{message}}
+        p {{h}}:{{minutes}}
 
 block content
   div.content

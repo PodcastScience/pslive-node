@@ -44,3 +44,4 @@ jQuery ->
 
   socket.on 'nwmsg', (message) ->
     $('#messages').append(Mustache.render(msg_template,message))
+    $('#messages').animate({scrollTop: $('#messages').prop('scrollHeight')},5000)
