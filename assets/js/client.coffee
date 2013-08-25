@@ -1,9 +1,7 @@
 jQuery = $(document).ready 
 
-port = process.env.PORT
-
 jQuery ->
-  connect_url = "http://protected-cove-4063.herokuapp.com:#{port}"
+  connect_url = "http://protected-cove-4063.herokuapp.com/"
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html();
   $('#message-box').remove();
