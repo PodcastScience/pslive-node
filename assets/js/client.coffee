@@ -2,6 +2,8 @@ jQuery = $(document).ready
 
 jQuery ->
   connect_url = "http://protected-cove-4063.herokuapp.com/"
+  connect_url = "http://localhost:3000"
+
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html();
   $('#message-box').remove();
@@ -45,3 +47,18 @@ jQuery ->
   socket.on 'nwmsg', (message) ->
     $('#messages').append(Mustache.render(msg_template,message))
     $('#messages').animate({scrollTop: $('#messages').prop('scrollHeight')},5000)
+
+
+  # envoi d'un iframe
+  $('#iframe-form').submit( (e) -> 
+    e.preventDefault()
+    socket.emit('new-iframe', {
+      password: $('#iframe-password').val(),
+      iframe: $('#iframe-value').val()
+      })
+    )
+
+  socket.on 'new-drawings', (livedraw_iframe) ->
+    $('#live-draw-frame').html(livedraw_iframe)
+
+ 

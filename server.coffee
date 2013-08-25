@@ -48,7 +48,8 @@ io.configure ->
 users = new Object()
 messages = []
 history = 10
- 
+admin_password = process.env.PSLIVE_ADMIN_PASSWORD
+livedraw_iframe = "Pas de dessins ce soir :("
 
 io.sockets.on 'connection', (socket) ->
 
@@ -61,6 +62,8 @@ io.sockets.on 'connection', (socket) ->
 
   for message in messages
     socket.emit('nwmsg',message)
+
+  socket.emit('new-drawings',livedraw_iframe)
 
   socket.on 'login', (user) ->
     me = user
@@ -90,6 +93,11 @@ io.sockets.on 'connection', (socket) ->
 
     io.sockets.emit('nwmsg',message)
 
+  # Changement d'iframe
+  socket.on 'new-iframe', (message) ->
+    if message.password == admin_password
+      livedraw_iframe = message.iframe
+      io.sockets.emit('new-drawings',livedraw_iframe)
 
   # test
 
