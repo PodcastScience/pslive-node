@@ -1,6 +1,14 @@
 extends layout
 
 
+block login-form
+  div#login.well
+    form.form-inline#loginform      
+      h1 Bienvenue
+      p Ceci est un test de chatroom
+      input(type="text" name="login" placeholder="Nom d'utilisateur")#username 
+      input(type="text" name="mail" placeholder="E-mail")#mail 
+      input.btn(type="submit") Envoyer
 
 block message
   div.span12.well
@@ -9,6 +17,7 @@ block message
 
 block content
   div.content
+    block login-form
     div.row-fluid
       div.span6.well
         div.well le iframe sera la
@@ -32,14 +41,10 @@ block content
               button(type="submit").btn Envoyer
 
       div.span2.well
-        div
-          span#test En ligne : 
-      div#members-list
+        div En ligne : 
+        div#members-list
 
 
-
-
-      
 
 
  
