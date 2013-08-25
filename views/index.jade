@@ -1,0 +1,53 @@
+extends layout
+
+block top
+  div.topbar
+    div.hero-unit
+      img(src="/images/PodcastScience.png")
+      p La Science sans prise de tête
+
+
+block message
+  div.span12.well
+    h3 Titre du message
+    p corps du message
+
+block content
+  div.content
+    div.row-fluid
+      div.span6.well
+        div.well le iframe sera la
+        div.well#twitterShare(name="twitterShare" style="margin-right:20px; margin-top: 10px; font-family: Hero; color: rgb(131,131,131); font-size: 18px;") Partager
+            a.pull-right(href="https://twitter.com/intent/tweet?button_hashtag=psLive&text=Rejoignez+nous+sur+la+chatroom+et+suivez+@@podcastscience+en+direct.&url=http://live.podcastscience.fm" target="_blank" style="margin-left: 5px;")
+              img(src="/images/twtr-nt.png")
+            a.pull-right(href="http://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flive.podcastscience.fm&p[summary]=Rejoignez+nous+sur+la+chatroom+et+suivez+le+live+podcastscience+en+direct" target="_blank" style="margin-left: 5px;")
+              img(src="/images/fb-nt.png")
+            a.pull-right(href="https://plus.google.com/share?url=http://live.podcastscience.fm" target="_blank" style="margin-left: 5px;")
+              img(src="/images/gplus-nt.png")
+        
+      div.span4.well
+        div#onChat
+          div#main("height:100%;")
+            div#messages.row-fluid
+              block message
+              block message
+              block message
+            form.form-inline
+              input(type="text-area")
+              button(type="submit").btn Envoyer
+
+      div.span2.well
+        div
+          span En ligne : 
+      div#members-list
+
+
+
+
+      
+
+
+ 
+
+
+
