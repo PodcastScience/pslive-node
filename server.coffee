@@ -40,6 +40,11 @@ httpServer = http.createServer(app).listen(app.get('port'), ->
 
 io = require('socket.io').listen(httpServer)
 
+io.configure ->
+  io.set("transports", ["xhr-polling"])
+  io.set("polling duration", 10)
+
+
 users = new Object()
 messages = []
 history = 10
