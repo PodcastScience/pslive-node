@@ -11,14 +11,16 @@ block login-form
       input.btn(type="submit") Envoyer
 
 block message
-  div.span12.well#message-box(style="display: none;")
-    div.row-fluid
-      div.span2
+  ul.media-list#message-box(style="display: none;")
+    li.media
+      a.pull-left
         img(src="{{user.avatar}}")
-      div.span10
-        h3 {{user.username}}
+      div.media-body
+        h4.media-heading {{user.username}}
         p {{message}}
-        p {{h}}:{{minutes}}
+        p {{message2}}
+
+
 
 block content
   div.content
