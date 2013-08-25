@@ -11,9 +11,10 @@ block login-form
       input.btn(type="submit") Envoyer
 
 block message
-  div.span12.well
-    h3 Titre du message
-    p corps du message
+  div.span12.well#message-box(style="display: none;")
+    h3 {{user.username}}
+    p {{message}}
+    p {{h}}:{{minutes}}
 
 block content
   div.content
@@ -34,11 +35,9 @@ block content
           div#main("height:100%;")
             div#messages.row-fluid
               block message
-              block message
-              block message
-            form.form-inline
-              input(type="text-area")
-              button(type="submit").btn Envoyer
+            form.form-inline#message-form
+              input(type="text-area")#message-to-send
+              button(type="submit").btn#send-message Envoyer
 
       div.span2.well
         div En ligne : 
