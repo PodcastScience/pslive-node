@@ -88,8 +88,8 @@ io.sockets.on 'connection', (socket) ->
 
   # test
 
-  socket.on 'test', ->
-  	console.log(users)
+  # socket.on 'test', ->
+  # 	console.log(users)
 
 
 

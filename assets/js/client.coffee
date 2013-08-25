@@ -2,11 +2,11 @@ jQuery = $(document).ready
 
 
 jQuery ->
-  socket = io.connect('http://localhost:3000')
+  socket = io.connect('http://protected-cove-4063.herokuapp.com')
   msg_template = $('#message-box').html();
   $('#message-box').remove();
 
-  socket.emit('test')
+#  socket.emit('test')
 
 
   # log des users
