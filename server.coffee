@@ -13,6 +13,12 @@ sanitize = require('validator').sanitize
 
 app = express()
 
+# functions
+replaceURLWithHTMLLinks = (text) ->
+  exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig
+  return text.replace(exp,"<a href='$1'>$1</a>")
+
+
 
 #all environments
 app.use require('connect-assets')()
@@ -103,6 +109,9 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'nwmsg', (message) ->
     message.user = me
     date = new Date()
+
+    message.message = replaceURLWithHTMLLinks(sanitize(message.message).escape())
+
     message.h = date.getHours()
     message.m = date.getMinutes()
     messages.push message
