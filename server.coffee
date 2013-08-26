@@ -8,6 +8,8 @@ http = require('http')
 path = require('path')
 md5 = require('MD5')
 mu = require('mu2')
+check = require('validator').check
+sanitize = require('validator').sanitize
 
 app = express()
 
@@ -66,14 +68,29 @@ io.sockets.on 'connection', (socket) ->
   socket.emit('new-drawings',livedraw_iframe)
 
   socket.on 'login', (user) ->
-    me = user
-    me.id = user.mail.replace('@','-').replace(/\./gi, "-")
-    me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=50'
-    socket.emit('logged')
-    users[me.id] = me
-    users_name = (user.id for user in users)	
 
-    io.sockets.emit('newuser',me)
+    try 
+      check(user.mail).isEmail()
+    catch
+      socket.emit('error',"Email invalide")
+
+    try
+      check(user.username).len(3,30)
+    catch
+      socket.emit('error',"Le nom d'utilisateur doit être compris entre 3 et 30 lettres")
+
+    try 
+      check(user.mail).isEmail()
+      check(user.username).len(3,30)
+
+      me = user
+      me.id = user.mail.replace('@','-').replace(/\./gi, "-")
+      me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=50'
+      socket.emit('logged')
+      users[me.id] = me
+      users_name = (user.id for user in users)	
+
+      io.sockets.emit('newuser',me)
 
 
   socket.on 'disconnect', ->

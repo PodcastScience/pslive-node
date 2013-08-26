@@ -3,6 +3,7 @@ extends layout
 
 block login-form
   div#login
+    div.alert.alert-error(style="display:none;")#wrong-mail
     form.form-inline#loginform(style="position:relative;padding-top='-100px';")      
       p Connectez-vous pour participer à la discussion!
       input(type="text" name="login" placeholder="Nom d'utilisateur")#username 

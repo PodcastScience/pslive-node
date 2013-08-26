@@ -1,8 +1,8 @@
 jQuery = $(document).ready 
 
 jQuery ->
-  connect_url = "http://protected-cove-4063.herokuapp.com/"
-  # connect_url = "http://localhost:3000"
+  #connect_url = "http://protected-cove-4063.herokuapp.com/"
+  connect_url = "http://localhost:3000"
   last_msg_id = false
 
   socket = io.connect(connect_url)
@@ -15,6 +15,8 @@ jQuery ->
 #  socket.emit('test')
 
 
+
+
   # log des users
   $('#loginform').submit( (e) -> 
   	e.preventDefault()
@@ -23,6 +25,9 @@ jQuery ->
   		mail: $('#mail').val()
   		})
   	)
+
+  socket.on 'error', (message) ->
+    $('#wrong-mail').html(message).fadeIn()
 
 
   # gestion des utilisateurs
