@@ -14,7 +14,8 @@ jQuery ->
 
 #  socket.emit('test')
 
-
+  socket.on 'update_compteur', (connected) ->
+    $('#nb-connected').html(connected+' utilisateurs connectés!')
 
 
   # log des users

@@ -54,13 +54,19 @@ io.configure ->
 
 
 users = new Object()
+nb_conex = 0
 messages = []
 history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 livedraw_iframe = "Pas de dessins ce soir :("
 
+io.set('close timeout', 3)
 io.sockets.on 'connection', (socket) ->
 
+
+  # mise a jour du conmpteur de connectes
+  nb_conex += 1
+  io.sockets.emit('update_compteur',nb_conex)
 
   # gestion des utilisateurs
   me = false  
@@ -100,9 +106,12 @@ io.sockets.on 'connection', (socket) ->
 
 
   socket.on 'disconnect', ->
+    nb_conex = nb_conex - 1    
+    socket.broadcast.emit('update_compteur',nb_conex)
     return false if(!me)
     delete users[me.id]
     socket.broadcast.emit('disuser',me)
+
 
 
   # gestion des mesages
