@@ -60,7 +60,7 @@ history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 livedraw_iframe = "Pas de dessins ce soir :("
 
-io.set('close timeout', 3)
+#io.set('close timeout', 3)
 io.sockets.on 'connection', (socket) ->
 
 
