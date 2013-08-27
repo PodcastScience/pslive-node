@@ -51,9 +51,9 @@ io = require('socket.io').listen(httpServer)
 io.configure ->
   io.set("transports", ["xhr-polling"])
   io.set("polling duration", 10)
-  io.set('close timeout', 5)
-  io.set('log colors',false)
-  io.set('log level',0)
+  io.set('close timeout', 20)
+  # io.set('log colors',false)
+  # io.set('log level',0)
 
 
 users = new Object()
@@ -114,7 +114,7 @@ io.sockets.on 'connection', (socket) ->
     io.sockets.emit('update_compteur',nb_conex)
     console.log("nombre d'utilisateurs : "+nb_conex)
     console.log('me : '+me)
-    if me
+    unless me == false
       delete users[me.id]
       io.sockets.emit('disuser',me)
 
