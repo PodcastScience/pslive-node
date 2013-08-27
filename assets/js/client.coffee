@@ -1,8 +1,11 @@
 jQuery = $(document).ready 
 
+
+
 jQuery ->
-  connect_url = "http://podcastscience.herokuapp.com/"
-  #connect_url = "http://localhost:3000"
+
+  #connect_url = "http://podcastscience.herokuapp.com/"
+  connect_url = "http://localhost:3000"
   last_msg_id = false
 
   socket = io.connect(connect_url)
@@ -13,6 +16,8 @@ jQuery ->
   $('#user_box').remove();
 
 #  socket.emit('test')
+  
+
 
   socket.on 'update_compteur', (connected) ->
     $('#nb-connected').html(connected+' utilisateurs connectés!')
@@ -77,4 +82,15 @@ jQuery ->
   socket.on 'new-drawings', (livedraw_iframe) ->
     $('#live-draw-frame').html(livedraw_iframe)
 
- 
+  socket.on 'disconnect', ->
+    $('#login').fadeIn()
+    $('#message-form').fadeOut()  
+    $('#wrong-mail').html("Damned! Vous avez été deconnecté!").fadeIn()
+
+  $(window).on 'beforeunload', ->
+    console.log("il s'est barré")
+    undefined if socket.emit 'triggered-beforeunload'
+
+
+
+

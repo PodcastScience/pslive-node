@@ -51,6 +51,9 @@ io = require('socket.io').listen(httpServer)
 io.configure ->
   io.set("transports", ["xhr-polling"])
   io.set("polling duration", 10)
+  io.set('close timeout', 5)
+  io.set('log colors',false)
+  io.set('log level',0)
 
 
 users = new Object()
@@ -60,9 +63,8 @@ history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 livedraw_iframe = "Pas de dessins ce soir :("
 
-#io.set('close timeout', 3)
 io.sockets.on 'connection', (socket) ->
-
+  console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"
 
   # mise a jour du conmpteur de connectes
   nb_conex += 1
@@ -76,6 +78,7 @@ io.sockets.on 'connection', (socket) ->
 
   for message in messages
     socket.emit('nwmsg',message)
+    console.log(socket.id)
 
   socket.emit('new-drawings',livedraw_iframe)
 
@@ -106,12 +109,14 @@ io.sockets.on 'connection', (socket) ->
 
 
   socket.on 'disconnect', ->
+    console.log(me.username+" s'est deconnecté...")
     nb_conex = nb_conex - 1    
-    socket.broadcast.emit('update_compteur',nb_conex)
-    return false if(!me)
-    delete users[me.id]
-    socket.broadcast.emit('disuser',me)
-
+    io.sockets.emit('update_compteur',nb_conex)
+    console.log("nombre d'utilisateurs : "+nb_conex)
+    console.log('me : '+me)
+    if me
+      delete users[me.id]
+      io.sockets.emit('disuser',me)
 
 
   # gestion des mesages
@@ -138,8 +143,6 @@ io.sockets.on 'connection', (socket) ->
 
   # socket.on 'test', ->
   # 	console.log(users)
-
-
 
 
 
