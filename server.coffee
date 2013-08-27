@@ -99,7 +99,8 @@ io.sockets.on 'connection', (socket) ->
       check(user.username).len(3,30)
 
       me = user
-      me.id = user.mail.replace('@','-').replace(/\./gi, "-")
+#      me.id = user.mail.replace('@','-').replace(/\./gi, "-")
+      me.id = Date.now()
       me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=50'
       socket.emit('logged')
       users[me.id] = me
