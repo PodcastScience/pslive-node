@@ -1,5 +1,5 @@
 
-
+# requires
 require('coffee-script')
 express = require('express')
 routes = require('./routes')
@@ -11,6 +11,7 @@ mu = require('mu2')
 check = require('validator').check
 sanitize = require('validator').sanitize
 
+# configuration de la db
 mongoose = require('mongoose')
 mongoose.connect('mongodb://localhost/test')
 db = mongoose.connection
@@ -20,17 +21,21 @@ db.once 'open', ->
 
 messageSchema = mongoose.Schema
   body: String
-
 Message = mongoose.model('Message', messageSchema)
-bonjour = new Message
-  body: 'Ceci est mon premier message'
 
-bonjour.save (err, bonjour) ->
-  if (err) 
-    "ya comme un pb"
+# # Pour créer un nouveau message
+# bonjour = new Message
+#   body: 'Ceci est mon premier message'
 
-Message.find (err, messages) ->
-  console.log(messages)
+# # Pour sauvegarder ce nouveau message
+# bonjour.save (err, bonjour) ->
+#   if (err) 
+#     "ya comme un pb"
+
+# # Pour retrouver tous les messages
+# Message.find (err, messages) ->
+#   console.log(message.body) for message in messages
+  
 
 
 app = express()
