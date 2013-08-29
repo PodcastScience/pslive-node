@@ -11,6 +11,28 @@ mu = require('mu2')
 check = require('validator').check
 sanitize = require('validator').sanitize
 
+mongoose = require('mongoose')
+mongoose.connect('mongodb://localhost/test')
+db = mongoose.connection
+db.on('error', console.error.bind(console, 'connection error:'))
+db.once 'open', ->
+  console.log "db oppened"
+
+messageSchema = mongoose.Schema
+  body: String
+
+Message = mongoose.model('Message', messageSchema)
+bonjour = new Message
+  body: 'Ceci est mon premier message'
+
+bonjour.save (err, bonjour) ->
+  if (err) 
+    "ya comme un pb"
+
+Message.find (err, messages) ->
+  console.log(messages)
+
+
 app = express()
 
 # functions
