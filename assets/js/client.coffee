@@ -65,7 +65,7 @@ jQuery ->
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
     else  
-      $("#messages div:last").append('<p>'+message.message+'</p>')
+      $("#messages div:last").append('<p style="font-size:small;">'+message.message+'</p>')
 
     $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 

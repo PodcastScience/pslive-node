@@ -59,7 +59,7 @@ io.configure ->
 users = new Object()
 nb_conex = 0
 messages = []
-history = 10
+history = 100
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 livedraw_iframe = "Pas de dessins ce soir :("
 
@@ -101,7 +101,7 @@ io.sockets.on 'connection', (socket) ->
       me = user
 #      me.id = user.mail.replace('@','-').replace(/\./gi, "-")
       me.id = Date.now()
-      me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=50'
+      me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
       socket.emit('logged')
       users[me.id] = me
       users_name = (user.id for user in users)	

@@ -21,8 +21,8 @@ block message
         a.pull-left
           img(src="{{user.avatar}}")
         div.media-body
-          h5.media-heading {{user.username}}
-          p {{message}}
+          h5(style="font-size:small;").media-heading {{user.username}}
+          p(style="font-size:small;") {{message}}
 
 block user_box
   div#user_box(style="display: none;")
