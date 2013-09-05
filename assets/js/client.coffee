@@ -4,7 +4,7 @@ jQuery = $(document).ready
 
 jQuery ->
 
-  connect_url = "http://podcastscience.herokuapp.com/"
+  connect_url = process.env.PSLIVE_URL
   #connect_url = "http://localhost:3000"
   last_msg_id = false
 
