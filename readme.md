@@ -9,8 +9,8 @@
 * mettre les variables d'environnement (pour la page admin) : 
 
 ```````
-heroku config:add PSLIVE_ADMIN_PASSWORD="Mon Super Password"
-heroku config:add PSLIVE_URL="http://mon_app_heroku.herokuapp.com/"
+heroku config:add PSLIVE_ADMIN_PASSWORD="Mon password"
+heroku config:add PSLIVE_URL="http://monapp.herokuapp.com/"
 
 ```````
 
@@ -28,3 +28,5 @@ git push heroku master
 [ ] @Azertoff n'arrive pas à venir sur le chat
 [ ] les " et les & ne passent pas
 [ ] certains liens ne passent pas (en fait on voit le code html)
+
+
