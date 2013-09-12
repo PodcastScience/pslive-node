@@ -8,7 +8,15 @@
   "dependencies": {
     "express": "3.3.5",
     "socket.io"   :  "~0.9.16",    
-    "jade": "*"
+    "jade": "*",
+    "coffee": "*",
+    "coffee-script": "*",
+    "connect-assets": "*",
+    "markdown": "*",
+    "MD5": "*",
+    "mongoose": "*",
+    "mu2": "*",
+    "validator": "*"
   },
   "engines": {
     "node": "0.8.x",
