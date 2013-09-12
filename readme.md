@@ -9,8 +9,8 @@
 * mettre les variables d'environnement (pour la page admin) : 
 
 ```````
-heroku config:add PSLIVE_ADMIN_PASSWORD="psm3HERdvd"
-heroku config:add PSLIVE_URL="http://podsource.herokuapp.com/"
+heroku config:add PSLIVE_ADMIN_PASSWORD="Mon password"
+heroku config:add PSLIVE_URL="http://monapp.herokuapp.com/"
 
 ```````
 
@@ -30,12 +30,3 @@ git push heroku master
 [ ] certains liens ne passent pas (en fait on voit le code html)
 
 
-
-$ heroku login
-
-Email: 6clicks@gmail.com
-Password: psm3HERdvd
-Could not find an existing public key.
-Would you like to generate one? [Yn] 
-Generating new SSH public key.
-Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
