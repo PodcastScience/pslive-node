@@ -10,9 +10,17 @@
 
 ```````
 heroku config:add PSLIVE_ADMIN_PASSWORD="Mon Super Password"
-heroku config:add PSLIVE_URL="http://mon_app_heroku.herokuapp.com/"
 
 ```````
+
+* Creer un fichier "config.coffee" dans assets.js de la forme : 
+
+```````
+connect_url = "http://monapp.herokuapp.com"
+
+```````
+
+
 
 * pusher le dépot : 
 
