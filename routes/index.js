@@ -4,7 +4,7 @@
  */
 
 exports.index = function(req, res){
-  res.render('index', { title: 'PodcastScience Live' });
+  res.render('index', { title: 'Podsource Live' });
 };
 
 exports.admin = function(req, res){
