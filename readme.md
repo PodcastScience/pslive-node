@@ -13,12 +13,7 @@ heroku config:add PSLIVE_ADMIN_PASSWORD="Mon Super Password"
 
 ```````
 
-* Creer un fichier "config.coffee" dans assets.js de la forme : 
-
-```````
-connect_url = "http://monapp.herokuapp.com"
-
-```````
+* Modifier config.coffee dans assets.js avec la bonne url heroku
 
 
 
