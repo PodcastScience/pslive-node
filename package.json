@@ -16,7 +16,10 @@
     "MD5": "*",
     "mongoose": "*",
     "mu2": "*",
-    "validator": "*"
+    "validator": "*",
+    "passport": "*",
+    "passport-twitter": "*",
+    "connect-ensure-login": "*"        
   },
   "engines": {
     "node": "0.8.x",

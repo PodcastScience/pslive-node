@@ -10,6 +10,15 @@ md5 = require('MD5')
 mu = require('mu2')
 check = require('validator').check
 sanitize = require('validator').sanitize
+passport = require 'passport'
+TwitterStrategy = require('passport-twitter').Strategy
+ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn
+
+
+
+
+
+
 
 app = express()
 
@@ -29,8 +38,39 @@ app.use(express.favicon("/images/fav.png"));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
-app.use(app.router);
+
 app.use(express.static(path.join(__dirname, 'public')));
+
+# for auth
+app.use(express.cookieParser())
+app.use express.session
+  secret: 'Hilbert hotels' 
+app.use(passport.initialize())
+app.use(passport.session())
+app.use(app.router);
+
+
+
+passport.serializeUser (user, done) ->
+  done null, user
+ 
+passport.deserializeUser (obj, done) ->
+  done null, obj
+
+
+TWITTER_CONSUMER_KEY = "qhk0WKpLTw7kfMgalXdlwg";
+TWITTER_CONSUMER_SECRET = "zBYuJvO8LfJS7V4vCtISwfk2QqZVaf7JG77EgXmYgg";
+
+passport.use new TwitterStrategy
+  consumerKey: TWITTER_CONSUMER_KEY,
+  consumerSecret: TWITTER_CONSUMER_SECRET,
+  callbackURL: "http://127.0.0.1:3000/auth/twitter/callback"
+  ,
+  (token, tokenSecret, profile, done) ->
+    # NOTE: You'll probably want to associate the Twitter profile with a
+    #       user record in your application's DB.
+    user = profile
+    return done(null, user)
 
 #development only
 if ('development' == app.get('env'))
@@ -40,6 +80,16 @@ if ('development' == app.get('env'))
 app.get('/', routes.index);
 app.get('/admin', routes.admin);
 app.get('/users', user.list);
+
+app.get '/account', ensureLoggedIn('/login'), (req,res) ->
+  res.send('Hello ' + req.user.username);
+
+app.get '/login', (req, res) -> 
+  res.send '<html><body><a href="/auth/twitter">Sign in with Twitter</a></body></html>'
+
+
+app.get('/auth/twitter', passport.authenticate('twitter'))
+app.get('/auth/twitter/callback', passport.authenticate('twitter', { successReturnToOrRedirect: '/', failureRedirect: '/login' }))
 
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
