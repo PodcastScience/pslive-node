@@ -75,6 +75,8 @@ io.sockets.on 'connection', (socket) ->
   # gestion des utilisateurs
   me = false  
 
+
+
   for key, value of users
     socket.emit('newuser',value)
 
@@ -100,15 +102,23 @@ io.sockets.on 'connection', (socket) ->
       check(user.mail).isEmail()
       check(user.username).len(3,30)
 
-      me = user
-#      me.id = user.mail.replace('@','-').replace(/\./gi, "-")
-      me.id = Date.now()
-      me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
-      socket.emit('logged')
-      users[me.id] = me
-      users_name = (user.id for user in users)	
+      # check if user already exist
+      for key, existing_user of users
+        if user.mail == existing_user.mail
+          me = existing_user 
+          console.log 'user already exist!'
 
-      io.sockets.emit('newuser',me)
+      unless me
+        me = user
+  #      me.id = user.mail.replace('@','-').replace(/\./gi, "-")
+        me.id = Date.now()
+        me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
+        users[me.id] = me
+        io.sockets.emit('newuser',me)
+
+      socket.emit('logged')
+
+
 
 
   socket.on 'disconnect', ->
