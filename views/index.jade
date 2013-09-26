@@ -22,7 +22,7 @@ block message
           img(src="{{user.avatar}}")
         div.media-body
           h5(style="font-size:small;").media-heading {{user.username}}
-          p(style="font-size:small;") {{message}}
+          p(style="font-size:small;") {{{message}}}
 
 block user_box
   div#user_box(style="display: none;")
