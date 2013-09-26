@@ -40,7 +40,8 @@ if ('development' == app.get('env'))
 app.get('/', routes.index);
 app.get('/admin', routes.admin);
 app.get('/users', user.list);
-
+app.get '/messages', (req, res) ->
+  res.send all_messages.map((message) -> "<b>#{message.user.username} :</b> #{message.message}").join("<br/>")
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
@@ -58,8 +59,9 @@ io.configure ->
 
 users = new Object()
 nb_conex = 0
-messages = []
-history = 100
+all_messages = []
+last_messages = []
+history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 livedraw_iframe = "Pas de dessins ce soir :("
 
@@ -76,7 +78,7 @@ io.sockets.on 'connection', (socket) ->
   for key, value of users
     socket.emit('newuser',value)
 
-  for message in messages
+  for message in last_messages
     socket.emit('nwmsg',message)
     console.log(socket.id)
 
@@ -129,8 +131,9 @@ io.sockets.on 'connection', (socket) ->
 
     message.h = date.getHours()
     message.m = date.getMinutes()
-    messages.push message
-    messages.shift() if (messages.length > history)
+    all_messages.push message
+    last_messages.push message
+    last_messages.shift() if (last_messages.length > history)
 
     io.sockets.emit('nwmsg',message)
 
