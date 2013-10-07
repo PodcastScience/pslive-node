@@ -13,19 +13,27 @@ html
     != js('client')
 
   body
-    block content
-      h1.page-header Ceci est la page admin
-      div.well
+    div.container
+      block top
+        div.navbar
+          div.navbar-inner
+            a(href="http://podcastscience.fm").brand
+              img(src="/images/PodcastScience.png")
+  
 
-        form#iframe-form
-          fieldset
-            label Admin password
-            input(type="password")#iframe-password
-            legend Options
-            label Live drawing iframe
-            input(type="text-area")#iframe-value
+      block content
+        h1.page-header Ceci est la page admin
+        div.well
 
-          button(type="submit").btn#send-iframe Envoyer
+          form#iframe-form
+            fieldset
+              label Admin password
+              input(type="password")#iframe-password
+              legend Options
+              label Live drawing iframe
+              input(type="text-area")#iframe-value
+
+            button(type="submit").btn#send-iframe Envoyer
       
 
 
