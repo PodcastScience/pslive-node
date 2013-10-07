@@ -1,18 +1,31 @@
-extends layout
+!!!
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.min.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    script(src='http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js')
+    script(src='/bootstrap/js/bootstrap.min.js')
+    script(src='/socket.io/socket.io.js')
+    script(src='/js/mustache.js')
+    != js('konami')
+    != js('client')
 
-block content
-  h1.page-header Ceci est la page admin
-  div.well
+  body
+    block content
+      h1.page-header Ceci est la page admin
+      div.well
 
-    form#iframe-form
-      fieldset
-        label Admin password
-        input(type="password")#iframe-password
-        legend Options
-        label Live drawing iframe
-        input(type="text-area")#iframe-value
+        form#iframe-form
+          fieldset
+            label Admin password
+            input(type="password")#iframe-password
+            legend Options
+            label Live drawing iframe
+            input(type="text-area")#iframe-value
 
-      button(type="submit").btn#send-iframe Envoyer
+          button(type="submit").btn#send-iframe Envoyer
       
 
 

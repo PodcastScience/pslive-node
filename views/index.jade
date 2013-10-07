@@ -1,8 +1,6 @@
 extends layout
 
 
-
-
 block login-form
   div#login
     div.alert.alert-error(style="display:none;")#wrong-mail
@@ -65,19 +63,10 @@ block chatroom
         block user_box
 
 
-block top
-  div.navbar
-    div.navbar-inner
-      a(href="http://podcastscience.fm").brand
-        img(src="/images/PodcastScience.png")
-      div.pull-right
-        iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html" height="100" width="400" scrolling="no" frameborder="0" allowtransparency="true")
 
 
 
 block content
-
-  block top
   div.content
     block login-form
     block chatroom
