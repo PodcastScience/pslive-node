@@ -31,3 +31,7 @@ git push heroku master
 [ ] @Azertoff n'arrive pas à venir sur le chat  
 [x] les " et les & ne passent pas  
 [x] certains liens ne passent pas (en fait on voit le code html)  
+
+## Améliorations
+[ ] Bouton en cours de live pour changer l'allure
+[ ]
