@@ -33,6 +33,9 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.locals.css = css
+app.locals.js = js
+
 #development only
 if ('development' == app.get('env'))
   app.use(express.errorHandler());
