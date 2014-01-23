@@ -22,6 +22,7 @@ replaceURLWithHTMLLinks = (text) ->
 
 #all environments
 app.use require('connect-assets')()
+console.log js('client')
 app.set('port', process.env.PORT || 3000)
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
