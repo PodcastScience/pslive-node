@@ -1,5 +1,6 @@
-jQuery(document).ready ->
-  alert "plop"
+alert $
+# $(document).ready ->
+
 #   # $(window).konami
 #   #     cheat: ->
 #   #       alert "C'est pas bien de diviser par zéro..."
