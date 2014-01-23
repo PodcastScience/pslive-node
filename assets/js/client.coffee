@@ -25,12 +25,12 @@ $(document).ready ->
 
   # log des users
   $('#loginform').submit( (e) -> 
-  	e.preventDefault()
-  	socket.emit('login', {
-  		username: $('#username').val(),
-  		mail: $('#mail').val()
-  		})
-  	)
+    e.preventDefault()
+    socket.emit('login', {
+      username: $('#username').val(),
+      mail: $('#mail').val()
+      })
+    )
 
   socket.on 'error', (message) ->
     $('#wrong-mail').html(message).fadeIn()
