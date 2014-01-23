@@ -1,4 +1,4 @@
-$(document).ready ->
+jQuery(document).ready ->
   alert "plop"
 #   # $(window).konami
 #   #     cheat: ->
