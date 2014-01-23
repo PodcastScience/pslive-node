@@ -8,8 +8,7 @@ http = require('http')
 path = require('path')
 md5 = require('MD5')
 mu = require('mu2')
-check = require('validator').check
-sanitize = require('validator').sanitize
+validator = require('validator')
 
 app = express()
 
@@ -93,18 +92,18 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'login', (user) ->
 
     try 
-      check(user.mail).isEmail()
+      validator.isEmail(user.mail)
     catch
       socket.emit('error',"Email invalide")
 
     try
-      check(user.username).len(3,30)
+      validator.isLength(user.username,3,30)
     catch
       socket.emit('error',"Le nom d'utilisateur doit être compris entre 3 et 30 lettres")
 
     try 
-      check(user.mail).isEmail()
-      check(user.username).len(3,30)
+      validator.isEmail(user.mail)
+      validator.isLength(user.username,3,30)
 
       # check if user already exist
       for key, existing_user of users
@@ -141,7 +140,7 @@ io.sockets.on 'connection', (socket) ->
     message.user = me
     date = new Date()
 
-    message.message = replaceURLWithHTMLLinks(sanitize(message.message).escape())
+    message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
 
     message.h = date.getHours()
     message.m = date.getMinutes()
