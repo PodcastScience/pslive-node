@@ -8,15 +8,15 @@
   "dependencies": {
     "express": "3.3.5",
     "socket.io"   :  "~0.9.16",    
-    "jade": "*",
-    "coffee": "*",
-    "coffee-script": "*",
-    "connect-assets": "*",
-    "markdown": "*",
-    "MD5": "*",
-    "mongoose": "*",
-    "mu2": "*",
-    "validator": "*"
+    "jade": "1.1.5",
+    "coffee": "0.0.1",
+    "coffee-script": "1.6.3",
+    "connect-assets": "2.5.3",
+    "markdown": "2.5.0",
+    "MD5": "1.2.0",
+    "mongoose": "3.8.4",
+    "mu2": "0.5.20",
+    "validator": "3.2.0"
   },
   "engines": {
     "node": "0.8.x",

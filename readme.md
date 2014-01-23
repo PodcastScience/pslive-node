@@ -27,7 +27,6 @@ git push heroku master
 
 
 ## Bugs identifiés  
-[x] Robin apparait 10 fois, a priori il se deconnecte souvent et donc ça buggue  
-[ ] @Azertoff n'arrive pas à venir sur le chat  
-[x] les " et les & ne passent pas  
-[x] certains liens ne passent pas (en fait on voit le code html)  
+
+[ ] scroll auto désactivable et désactivé quand on a scrollé
+[ ] bug sur le nombre de personnes en live
