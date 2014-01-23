@@ -1,8 +1,4 @@
-jQuery = $(document).ready 
-
-
-
-jQuery ->
+$(document).ready ->
 
   $(window).konami
       cheat: ->
