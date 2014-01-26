@@ -5,7 +5,7 @@ $(document).ready ->
   #       alert "C'est pas bien de diviser par zéro..."
 
   connect_url = "http://podcastscience.herokuapp.com"
-  # connect_url = "http://localhost:3000"
+  #connect_url = "http://localhost:3000"
   last_msg_id = false
 
   socket = io.connect(connect_url)
@@ -61,13 +61,14 @@ $(document).ready ->
     $('#message-to-send').focus()
 
   socket.on 'nwmsg', (message) ->
+    flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
     else  
       $("#messages div:last").append('<p style="font-size:small;">'+message.message+'</p>')
-
-    $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
+    if flag_scrollauto
+      $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
 
   # envoi d'un iframe
