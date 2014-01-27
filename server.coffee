@@ -5,10 +5,33 @@ express = require('express')
 routes = require('./routes')
 user = require('./routes/user')
 http = require('http')
+https = require('https')
+fs = require('fs')
 path = require('path')
 md5 = require('MD5')
 mu = require('mu2')
 validator = require('validator')
+
+# google api
+googleapis = require('googleapis')
+readline = require('readline')
+CLIENT_ID = process.env.GOOGLE_ID
+CLIENT_SECRET = process.env.GOOGLE_SECRET
+REDIRECT_URL = 'https://podcastscience.herokuapp.com/oauth2callback'
+SCOPE = 'https://www.googleapis.com/auth/drive.file'
+
+# https
+options =
+  key: fs.readFileSync('server.key').toString()
+  cert: fs.readFileSync('server.crt').toString()
+
+rl = readline.createInterface
+  input: process.stdin
+  output: process.stdout
+auth = new googleapis.OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+
+
+
 
 app = express()
 
@@ -21,7 +44,6 @@ replaceURLWithHTMLLinks = (text) ->
 
 #all environments
 app.use require('connect-assets')()
-console.log js('client')
 app.set('port', process.env.PORT || 3000)
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
@@ -32,6 +54,7 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 app.locals.css = css
 app.locals.js = js
 
@@ -40,7 +63,33 @@ if ('development' == app.get('env'))
   app.use(express.errorHandler());
 
 
+url = auth.generateAuthUrl({ scope: SCOPE })
+console.log('Visit the url: ', url);
+
+
+
+
+
+
+
 app.get('/', routes.index);
+
+app.get '/oauth2callback', (req, res) ->
+  code = req.query.code
+  console.log "code : #{code}"
+  auth.getToken code, (err, tokens) ->
+    if (err)
+      console.log('Error while trying to retrieve access token', err)
+      return
+    auth.credentials = tokens
+    googleapis.discover('drive', 'v2').execute (err, client) ->
+      client.drive.files
+      .list
+        maxResults: 10,
+        q: "160"
+      .withAuthClient(auth).execute(console.log)
+  res.send "<h1>DONE!</h1>"
+
 app.get('/admin', routes.admin);
 app.get('/users', user.list);
 app.get '/messages', (req, res) ->
@@ -48,6 +97,12 @@ app.get '/messages', (req, res) ->
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
+)
+
+https_port = 443 
+https_port = 7675
+httpsServer = https.createServer(options, app).listen(https_port, ->
+  console.log('Express server listening https on port ' + https_port)
 )
 
 io = require('socket.io').listen(httpServer)
@@ -160,6 +215,15 @@ io.sockets.on 'connection', (socket) ->
 
   # socket.on 'test', ->
   # 	console.log(users)
+
+
+
+
+
+
+
+
+
 
 
 

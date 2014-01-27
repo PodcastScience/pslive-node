@@ -16,7 +16,8 @@
     "MD5": "1.2.0",
     "mongoose": "3.8.4",
     "mu2": "0.5.20",
-    "validator": "3.2.0"
+    "validator": "3.2.0",
+    "googleapis": "0.6.1"
   },
   "engines": {
     "node": "0.8.x",
