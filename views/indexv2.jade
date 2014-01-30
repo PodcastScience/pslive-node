@@ -1,0 +1,138 @@
+extends layoutv2
+
+
+
+block bloc_header
+  header
+    .wrap.clearfix
+      a.logo(href='http://podcastscience.fm')
+        img(src='images/PodcastScience.png', width='210', height='25', alt='PodcastScience')
+      h1.title-episode
+        span.number Episode #152 - 
+        | Dans le cerveau
+      .rec Live
+
+
+
+block bloc_player
+  .player
+    //
+      <iframe src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html" height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true"></iframe>
+    audio(controls='controls')
+      source(src='http://bit.ly/PS-live96kM3U', type='audio/mpeg')
+
+
+block bloc_login
+  #login.login.clearfix
+    h2
+      | Connectez-vous
+      span.small pour participer à la discution!
+    p#wrong-mail
+    .info
+      p
+        | Pour avoir un joli avatar, créez le sur
+        a(href='http://fr.gravatar.com/') Gravatar
+        | .
+    form#loginform
+      input(type="text" name="login" placeholder="Nom d'utilisateur")#username
+      input(type="text" name="mail" placeholder="E-mail")#mail
+      input(type="submit" value="Envoyer")
+
+
+
+
+
+
+block bloc_sharypic
+  .sharypic
+    #live-draw-frame le iframe sera la
+  
+
+
+
+block bloc_reseauxsociaux
+  .share
+    | Passer le message sur
+    a.icon-googleplus(href='https://plus.google.com/share?url=http://live.podcastscience.fm')
+      span.caption Google plus
+    a.icon-twitter(href='https://twitter.com/intent/tweet?button_hashtag=psLive&text=Rejoignez+nous+sur+la+chatroom+et+suivez+@podcastscience+en+direct.&url=http://live.podcastscience.fm')
+      span.caption Twitter
+    a.icon-facebook(href='http://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flive.podcastscience.fm&p[summary]=Rejoignez+nous+sur+la+chatroom+et+suivez+le+live+podcastscience+en+direct')
+      span.caption Facebook
+
+
+
+
+
+
+block bloc_chatroom
+  div#onChat
+    div#main.chatroom
+      div#wrap_messages
+        div#messages
+          h2.clearfix.nb-connected
+          div#message-box
+            ul
+              li(id="{{id}}")
+                a
+                  img(src="{{user.avatar}}").avatar
+                .message
+                  .pseudo {{user.username}}
+                  p  {{{message}}}        
+  div.write
+      form#message-form(style="display:none;")    
+        input(type="text-area", placeholder='Poster un message')#message-to-send
+        input(type="submit", value='Envoyer')#send-message
+
+
+
+
+block user_box
+  div#user_box(style="display: none;")
+    li.media(id="{{id}}")
+      a
+        img(src="{{avatar}}")
+      div
+        p {{username}}
+
+
+
+
+
+block bloc_liste_poditeurs
+  .online
+    h2.nb-connected
+    ul#members-list
+      block user_box
+
+
+
+
+block block_msg_nolive
+  .offlive
+    h2
+      | Patience !
+      span Il est encore trop tôt pour le live.
+    p
+      | Rendez-vous
+      strong jeudi à 20h30
+      | (CET) et réagissez sur le chat !
+    p Et si Nico est là, illustrations en bonus :)
+
+
+
+
+
+
+
+block bloc_content
+  .wrap.content.clearfix
+    .onlive
+      .aside
+        block bloc_player
+        block bloc_login
+        block bloc_sharypic
+        block bloc_reseauxsociaux
+      block bloc_chatroom
+      block bloc_liste_poditeurs
+    block block_msg_nolive
