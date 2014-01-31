@@ -4,8 +4,8 @@ $(document).ready ->
   #     cheat: ->
   #       alert "C'est pas bien de diviser par zéro..."
 
-  #connect_url = "http://podcastscience.herokuapp.com"
-  connect_url = "http://localhost:3000"
+  connect_url = "http://podcastscience.herokuapp.com"
+  #connect_url = "http://localhost:3000"
   last_msg_id = false
 
   socket = io.connect(connect_url)
@@ -41,7 +41,7 @@ $(document).ready ->
 
   socket.on 'ajouter_episode', (episode) ->
     $('#members-list').append("<span class='number'> Episode #"+(episode.num)+" - </span> "+episode.titre)
-      
+
   # gestion des utilisateurs
   socket.on 'newuser', (user) ->
     html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
