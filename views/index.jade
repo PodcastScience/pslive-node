@@ -1,73 +1,136 @@
 extends layout
 
 
-block login-form
-  div#login
-    div.alert.alert-error(style="display:none;")#wrong-mail
-    form.form-inline#loginform(style="position:relative;padding-top='-100px';")      
-      p
-        | Connectez-vous pour participer à la discussion! (et pour avoir un joli avatar, créez le sur
-        |  <a href="http://fr.gravatar.com/" target="_blank">Gravatar</a>
-        |  )
 
+block bloc_header
+  header
+    .wrap.clearfix
+      a.logo(href='http://podcastscience.fm')
+        img(src='images/PodcastScience.png', width='210', height='25', alt='PodcastScience')
+      h1#title-episode Bienvenue sur le balado qui fait aimer la science!
+      .rec Live
+
+
+
+block bloc_player
+  .player
+    <iframe src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html" height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true"></iframe>
+    //
+      audio(controls='controls')
+      source(src='http://bit.ly/PS-live96kM3U', type='audio/mpeg')
+
+
+block bloc_login
+  #login.login.clearfix
+    h2
+      | Connectez-vous
+      span.small pour participer à la discution!
+    p#wrong-mail.ps_alert(style='display:none;')
+    .info
+      p
+        | Pour avoir un joli avatar, créez le sur
+        a(href='http://fr.gravatar.com/') Gravatar
+        | .
+    form#loginform
       input(type="text" name="login" placeholder="Nom d'utilisateur")#username
       input(type="text" name="mail" placeholder="E-mail")#mail
-      input.btn(type="submit" value="Envoyer")
+      input(type="submit" value="Envoyer")
 
-block message
-  div#message-box(style="display: none;")
-    ul.media-list
-      li.media
-        a.pull-left
-          img(src="{{user.avatar}}")
-        div.media-body
-          h5(style="font-size:small;").media-heading {{user.username}}
-          p(style="font-size:small;") {{{message}}}
+
+
+
+
+
+block bloc_sharypic
+  .sharypic
+    #live-draw-frame le iframe sera la
+  
+
+
+
+block bloc_reseauxsociaux
+  .share
+    | Passer le message sur
+    a.icon-googleplus(href='https://plus.google.com/share?url=http://live.podcastscience.fm')
+      span.caption Google plus
+    a.icon-twitter(href='https://twitter.com/intent/tweet?button_hashtag=psLive&text=Rejoignez+nous+sur+la+chatroom+et+suivez+@podcastscience+en+direct.&url=http://live.podcastscience.fm')
+      span.caption Twitter
+    a.icon-facebook(href='http://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flive.podcastscience.fm&p[summary]=Rejoignez+nous+sur+la+chatroom+et+suivez+le+live+podcastscience+en+direct')
+      span.caption Facebook
+
+
+
+
+
+
+block bloc_chatroom
+  div#onChat
+    div#main.chatroom
+      div#wrap_messages
+        div#messages
+          h2.clearfix.nb-connected
+          div#message-box
+            ul
+              li(id="{{id}}")
+                a
+                  img(src="{{user.avatar}}").avatar
+                .message
+                  .pseudo {{user.username}}
+                  p  {{{message}}}        
+  div.write
+      form#message-form(style="display:none;")    
+        input(type="text-area", placeholder='Poster un message')#message-to-send
+        input(type="submit", value='Envoyer')#send-message
+
+
+
 
 block user_box
   div#user_box(style="display: none;")
-    li.media(id="{{id}}")
-      a.pull-left
+    li(id="{{id}}")
+      a
         img(src="{{avatar}}")
-      div.media-body
+      div
         p {{username}}
 
-block message-form
-  form.form-inline#message-form(style="display:none;")
-    input(type="text-area")#message-to-send
-    button(type="submit").btn#send-message Envoyer
 
-block chatroom
-  div.row-fluid
-    div.span6.well(style="height:500px;")
-      div.well#live-draw-frame le iframe sera la
-      div.well#twitterShare(name="twitterShare" style="margin-right:20px; margin-top: 10px; font-family: Hero; color: rgb(131,131,131); font-size: 18px;") Partager
-          a.pull-right(href="https://twitter.com/intent/tweet?button_hashtag=psLive&text=Rejoignez+nous+sur+la+chatroom+et+suivez+@@podcastscience+en+direct.&url=http://live.podcastscience.fm" target="_blank" style="margin-left: 5px;")
-            img(src="/images/twtr-nt.png")
-          a.pull-right(href="http://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flive.podcastscience.fm&p[summary]=Rejoignez+nous+sur+la+chatroom+et+suivez+le+live+podcastscience+en+direct" target="_blank" style="margin-left: 5px;")
-            img(src="/images/fb-nt.png")
-          a.pull-right(href="https://plus.google.com/share?url=http://live.podcastscience.fm" target="_blank" style="margin-left: 5px;")
-            img(src="/images/gplus-nt.png")
-        
-    div.span4.well(style="height:500px;")
-      div#onChat
-        div#main(style="height:440px; overflow:scroll;")
-          div#messages.row-fluid
-            block message
-        block message-form
 
-        
-    div.span2.well(style="height:500px; overflow:scroll;")
-      h4 En ligne
-      ul.media-list#members-list
-        block user_box
+
+
+block bloc_liste_poditeurs
+  .online
+    h2.nb-connected
+    ul#members-list
+      block user_box
+
+
+
+
+block block_msg_nolive
+  .offlive
+    h2
+      | Patience !
+      span Il est encore trop tôt pour le live.
+    p
+      | Rendez-vous
+      strong jeudi à 20h30
+      | (CET) et réagissez sur le chat !
+    p Et si Nico est là, illustrations en bonus :)
 
 
 
 
 
-block content
-  div.content
-    block login-form
-    block chatroom
 
+
+block bloc_content
+  .wrap.content.clearfix
+    .onlive
+      .aside
+        block bloc_player
+        block bloc_login
+        block bloc_sharypic
+        block bloc_reseauxsociaux
+      block bloc_chatroom
+      block bloc_liste_poditeurs
+    block block_msg_nolive

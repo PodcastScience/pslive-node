@@ -35,7 +35,13 @@ $(document).ready ->
   socket.on 'error', (message) ->
     $('#wrong-mail').html(message).fadeIn()
 
+        
 
+
+
+  socket.on 'ajouter_episode', (episode) ->
+    $('#members-list').append("<span class='number'> Episode #"+(episode.num)+" - </span> "+episode.titre)
+      
   # gestion des utilisateurs
   socket.on 'newuser', (user) ->
     html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
