@@ -66,7 +66,7 @@ all_messages = []
 last_messages = []
 history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
-admin_password = ""
+#admin_password = ""
 livedraw_iframe = "Pas de dessins ce soir :("
 episode = 'Bienvenue sur le balado qui fait aimer la science!'
 io.sockets.on 'connection', (socket) ->

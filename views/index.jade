@@ -76,7 +76,7 @@ block bloc_chatroom
                   img(src="{{user.avatar}}").avatar
                 .message
                   .pseudo {{user.username}}
-                  p  {{{message}}}        
+                  p(style="font-size:small;") {{{message}}}
   div.write
       form#message-form(style="display:none;")    
         input(type="text-area", placeholder='Poster un message')#message-to-send
@@ -112,8 +112,8 @@ block block_msg_nolive
       | Patience !
       span Il est encore trop tôt pour le live.
     p
-      | Rendez-vous
-      strong jeudi à 20h30
+      | Rendez-vous tout les 
+      strong  Mercredi à 20h30
       | (CET) et réagissez sur le chat !
     p Et si Nico est là, illustrations en bonus :)
 

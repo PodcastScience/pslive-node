@@ -5,7 +5,7 @@ $(document).ready ->
   #       alert "C'est pas bien de diviser par zéro..."
 
   connect_url = "http://podcastscience.herokuapp.com"
-  # connect_url = "http://localhost:3000"
+  #connect_url = "http://localhost:3000"
   last_msg_id = false
 
   socket = io.connect(connect_url)
@@ -70,7 +70,7 @@ $(document).ready ->
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
     else  
-      $("#messages p:last").append('<p style="font-size:small;">'+message.message+'</p>')
+      $(".message:last").append('<p style="font-size:small;">'+message.message+'</p>')
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
