@@ -4,8 +4,8 @@ $(document).ready ->
   #     cheat: ->
   #       alert "C'est pas bien de diviser par zéro..."
 
-  connect_url = "http://podcastscience.herokuapp.com"
-  #connect_url = "http://localhost:3000"
+  # connect_url = "http://podcastscience.herokuapp.com"
+  connect_url = "http://localhost:3000"
   last_msg_id = false
 
   socket = io.connect(connect_url)
@@ -39,8 +39,6 @@ $(document).ready ->
 
 
 
-  socket.on 'ajouter_episode', (episode) ->
-    $('#members-list').append("<span class='number'> Episode #"+(episode.num)+" - </span> "+episode.titre)
 
   # gestion des utilisateurs
   socket.on 'newuser', (user) ->
@@ -77,17 +75,33 @@ $(document).ready ->
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
 
-  # envoi d'un iframe
-  $('#iframe-form').submit( (e) -> 
+  $('#admin-form').submit( (e) -> 
+    # envoi d'un iframe
     e.preventDefault()
     socket.emit('new-iframe', {
-      password: $('#iframe-password').val(),
+      password: $('#admin-password').val(),
       iframe: $('#iframe-value').val()
       })
+    #maj du titre
+    if $('#episode-number').val()!='' && $('#episode-title').val()!=''
+      socket.emit('change-title', {
+        password: $('#admin-password').val(),
+        number: $('#episode-number').val(),
+        title: $('#episode-title').val()
+        })
+    else
+      if $('#episode-number').val()
+        alert "Titre de l'épisode non renseigné"
+      else
+        if $('#episode-title').val()
+          alert "Numero de l'épisode non renseigné"
     )
-
   socket.on 'new-drawings', (livedraw_iframe) ->
     $('#live-draw-frame').html(livedraw_iframe)
+
+
+  socket.on 'new-title', (episode) ->
+    $('#title-episode').html(episode)
 
   socket.on 'disconnect', ->
     $('#login').fadeIn()
