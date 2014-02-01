@@ -5,7 +5,7 @@ $(document).ready ->
   #       alert "C'est pas bien de diviser par zéro..."
 
   connect_url = "http://podcastscience.herokuapp.com"
-  #connect_url = "http://localhost:3000"
+  # connect_url = "http://localhost:3000"
   last_msg_id = false
 
   socket = io.connect(connect_url)
