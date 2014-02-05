@@ -24,15 +24,19 @@ html
         h1.page-header Ceci est la page admin
         div.well
 
-          form#iframe-form
+          form#admin-form
             fieldset
               label Admin password
-              input(type="password")#iframe-password
+              input(type="password")#admin-password
               legend Options
               label Live drawing iframe
               input(type="text-area")#iframe-value
+              label Episode Number
+              input(type="text-area")#episode-number
+              label Episode Title
+              input(type="text-area")#episode-title
 
-            button(type="submit").btn#send-iframe Envoyer
+            button(type="submit").btn#send-admin Envoyer
       
 
 

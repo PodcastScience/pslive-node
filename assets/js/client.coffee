@@ -20,7 +20,7 @@ $(document).ready ->
 
 
   socket.on 'update_compteur', (connected) ->
-    $('#nb-connected').html(connected+' utilisateurs connectés!')
+    $('.nb-connected').html("<span>"+connected+"</span> auditeurs <br>en ligne</h2>")
 
 
   # log des users
@@ -34,6 +34,10 @@ $(document).ready ->
 
   socket.on 'error', (message) ->
     $('#wrong-mail').html(message).fadeIn()
+
+        
+
+
 
 
   # gestion des utilisateurs
@@ -66,22 +70,38 @@ $(document).ready ->
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
     else  
-      $("#messages div:last").append('<p style="font-size:small;">'+message.message+'</p>')
+      $(".message:last").append('<p style="font-size:small;">'+message.message+'</p>')
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
 
-  # envoi d'un iframe
-  $('#iframe-form').submit( (e) -> 
+  $('#admin-form').submit( (e) -> 
+    # envoi d'un iframe
     e.preventDefault()
     socket.emit('new-iframe', {
-      password: $('#iframe-password').val(),
+      password: $('#admin-password').val(),
       iframe: $('#iframe-value').val()
       })
+    #maj du titre
+    if $('#episode-number').val()!='' && $('#episode-title').val()!=''
+      socket.emit('change-title', {
+        password: $('#admin-password').val(),
+        number: $('#episode-number').val(),
+        title: $('#episode-title').val()
+        })
+    else
+      if $('#episode-number').val()
+        alert "Titre de l'épisode non renseigné"
+      else
+        if $('#episode-title').val()
+          alert "Numero de l'épisode non renseigné"
     )
-
   socket.on 'new-drawings', (livedraw_iframe) ->
     $('#live-draw-frame').html(livedraw_iframe)
+
+
+  socket.on 'new-title', (episode) ->
+    $('#title-episode').html(episode)
 
   socket.on 'disconnect', ->
     $('#login').fadeIn()

@@ -66,8 +66,9 @@ all_messages = []
 last_messages = []
 history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
+#admin_password = ""
 livedraw_iframe = "Pas de dessins ce soir :("
-
+episode = 'Bienvenue sur le balado qui fait aimer la science!'
 io.sockets.on 'connection', (socket) ->
   console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"
 
@@ -88,7 +89,7 @@ io.sockets.on 'connection', (socket) ->
     console.log(socket.id)
 
   socket.emit('new-drawings',livedraw_iframe)
-
+  socket.emit('new-title',episode)
   socket.on 'login', (user) ->
 
     try 
@@ -156,6 +157,12 @@ io.sockets.on 'connection', (socket) ->
       livedraw_iframe = message.iframe
       io.sockets.emit('new-drawings',livedraw_iframe)
 
+
+  # Changement du titre
+  socket.on 'change-title', (message) ->
+    if message.password == admin_password
+      episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
+      io.sockets.emit('new-title',episode)
   # test
 
   # socket.on 'test', ->
