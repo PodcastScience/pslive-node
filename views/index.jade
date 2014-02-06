@@ -73,13 +73,12 @@ block bloc_chatroom
         div#messages
           h2.clearfix.nb-connected
           div#message-box
-            ul
-              li(id="{{id}}")
-                a
-                  img(src="{{user.avatar}}").avatar
-                .message
-                  .pseudo {{user.username}}
-                  p(style="font-size:small;") {{{message}}}
+            div(id="{{id}}")
+              a
+                img(src="{{user.avatar}}").avatar
+              .message
+                .pseudo {{user.username}}
+                p(style="font-size:small;") {{{message}}}
   div.write
       form#message-form(style="display:none;")    
         input(type="text-area", placeholder='Poster un message')#message-to-send
