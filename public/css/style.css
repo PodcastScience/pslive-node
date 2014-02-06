@@ -361,22 +361,20 @@ h2 .small {
 	box-shadow: -1px 0 #e1e1e1, 1px 0 0 #E1E1E1;
 }
 
-#messages li,
+
 .user_box li {
 	display: block;
 }
 
 
-#messages li {
-	overflow: hidden;
-	margin-bottom: 1.5em;
-}
 #messages img {
 	float: left;
 	margin-right: 1em;
 }
 #messages .message {
 	overflow: hidden;
+	margin-bottom: 1.5em;
+
 }
 .message .pseudo {
 	font-weight: 700;

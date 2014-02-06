@@ -73,9 +73,9 @@ block bloc_chatroom
         div#messages
           h2.clearfix.nb-connected
           div#message-box
-            div(id="{{id}}")
+            div(id="{{id}}" class="message")
               a
-                img(src="{{user.avatar}}").avatar
+                img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar
               .message
                 .pseudo {{user.username}}
                 p(style="font-size:small;") {{{message}}}
@@ -91,7 +91,7 @@ block user_box
   div#user_box(style="display: none;")
     li(id="{{id}}")
       a
-        img(src="{{avatar}}")
+        img(src="{{avatar}}" alt="Avatar {{user.username}}")
       div
         p {{username}}
 
