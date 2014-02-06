@@ -45,6 +45,8 @@ app.get('/admin', routes.admin);
 app.get('/users', user.list);
 app.get '/messages', (req, res) ->
   res.send all_messages.map((message) -> "<b>#{message.user.username} :</b> #{message.message}").join("<br/>")
+app.get '/noshary', (req, res) ->
+  res.send "Pas de dessins ce soir :("
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
@@ -67,7 +69,7 @@ last_messages = []
 history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 #admin_password = ""
-livedraw_iframe = "Pas de dessins ce soir :("
+livedraw_iframe = "/noshary"
 episode = 'Bienvenue sur le balado qui fait aimer la science!'
 io.sockets.on 'connection', (socket) ->
   console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"

@@ -288,7 +288,7 @@ h2 .small {
 	margin-bottom: 1em;
 }
 
-.sharypic iframe {
+#live-draw-frame  iframe {
 	width: 100%;
 }
 

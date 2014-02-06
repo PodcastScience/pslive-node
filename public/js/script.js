@@ -98,7 +98,7 @@ $(document).ready(function() {
 		
 		// height sharypic
 		h_sharypic = w_aside*3/4;
-		$('.sharypic > iframe').css('height', h_sharypic);
+		$('#live-draw-frame  > iframe').css('height', h_sharypic);
 	
 	}
 	
