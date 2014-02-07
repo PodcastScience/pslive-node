@@ -25,7 +25,7 @@ block bloc_login
     h2
       | Connectez-vous
       span.small pour participer à la discution!
-    p#wrong-mail.ps_alert(style='display:none;')
+    p#wrong-mail.ps_alert
     .info
       p
         | Pour avoir un joli avatar, créez le sur
@@ -76,15 +76,14 @@ block bloc_chatroom
       div#wrap_messages
         div#messages
           h2.clearfix.nb-connected
-          div#message-box
-            div(id="{{id}}" class="message")
-              a
-                img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar
+          ul#message-box
+            li(id="{{id}}" )
+              img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar
               .message
                 .pseudo {{user.username}}
-                p(style="font-size:small;") {{{message}}}
+                p {{{message}}}
   div.write
-      form#message-form(style="display:none;")    
+      form#message-form  
         input(type="text-area", placeholder='Poster un message')#message-to-send
         input(type="submit", value='Envoyer')#send-message
 
@@ -92,7 +91,7 @@ block bloc_chatroom
 
 
 block user_box
-  div#user_box(style="display: none;")
+  div#user_box
     li(id="{{id}}")
       a
         img(src="{{avatar}}" alt="Avatar {{user.username}}")

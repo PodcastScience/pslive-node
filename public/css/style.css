@@ -130,7 +130,8 @@ a:visited {
     zoom:1;
 }
 
-.hidden {
+.hidden #user_box, 
+#message-form, .ps_alert{
 	display: none;
 }
 
@@ -290,6 +291,7 @@ h2 .small {
 
 #live-draw-frame  iframe {
 	width: 100%;
+
 }
 
 .share {
@@ -371,13 +373,21 @@ h2 .small {
 	float: left;
 	margin-right: 1em;
 }
-#messages .message {
+
+#messages li {
+	display: block;
 	overflow: hidden;
 	margin-bottom: 1.5em;
 
 }
-.message .pseudo {
+.message{
+	overflow: hidden;
+}
+.pseudo {
 	font-weight: 700;
+}
+.message p{
+	font-size: small;
 }
 
 .write {
