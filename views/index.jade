@@ -14,11 +14,12 @@ block bloc_header
 
 block bloc_player
   .player
-    <iframe src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html" height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true"></iframe>
-    //
-      audio(controls='controls')
-      source(src='http://bit.ly/PS-live96kM3U', type='audio/mpeg')
-
+    //<iframe src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html" height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true"></iframe>
+    .audioplayer
+      audio#player(controls)
+        source(src='http://mp3.live.tv-radio.com/franceinfo/all/franceinfo.mp3' type="audio/mpeg")
+        //iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html" height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true")
+        // source(src='http://bit.ly/PS-live96kM3U', type='audio/mpeg')
 
 block bloc_login
   #login.login.clearfix
@@ -28,13 +29,13 @@ block bloc_login
     p#wrong-mail.ps_alert
     .info
       p
-        | Pour avoir un joli avatar, créez le sur
+        | Pour avoir un joli avatar, créez le sur 
         a(href='http://fr.gravatar.com/') Gravatar
         | .
     form#loginform
       input(type="text" name="login" placeholder="Nom d'utilisateur")#username
       input(type="text" name="mail" placeholder="E-mail")#mail
-      input(type="submit" value="Envoyer")
+      input(type="submit" value="Discuter")
 
 
 
@@ -95,8 +96,8 @@ block user_box
     li(id="{{id}}")
       a
         img(src="{{avatar}}" alt="Avatar {{user.username}}")
-      div
-        p {{username}}
+      span.pseudo
+        | {{username}}
 
 
 
@@ -118,7 +119,7 @@ block block_msg_nolive
       span Il est encore trop tôt pour le live.
     p
       | Rendez-vous tout les 
-      strong  Mercredi à 20h30
+      strong  Mercredi à 20h30 
       | (CET) et réagissez sur le chat !
     p Et si Nico est là, illustrations en bonus :)
 
