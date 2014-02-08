@@ -41,6 +41,7 @@ if ('development' == app.get('env'))
 
 
 app.get('/', routes.index);
+app.get('/h5', routes.indexh5);
 app.get('/admin', routes.admin);
 app.get('/users', user.list);
 app.get '/messages', (req, res) ->
