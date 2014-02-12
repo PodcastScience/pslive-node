@@ -9,7 +9,7 @@ $(document).ready ->
 
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html()
-  $('#message-box').remove();
+  $('#message-box li').remove();
 
   user_box_template = $('#user_box').html()
   $('#user_box').remove();
