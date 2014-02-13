@@ -53,7 +53,7 @@ httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
 )
 
-io = require('socket.io').listen(httpServer)
+io = require('socket.io').listen(httpServer,{ log: false })
 
 io.configure ->
   io.set("transports", ["xhr-polling"])
@@ -61,6 +61,10 @@ io.configure ->
   io.set('close timeout', 20)
   # io.set('log colors',false)
   # io.set('log level',0)
+
+
+
+
 
 
 users = new Object()
@@ -84,6 +88,8 @@ io.sockets.on 'connection', (socket) ->
 
 
 
+
+
   for key, value of users
     socket.emit('newuser',value)
 
@@ -95,64 +101,89 @@ io.sockets.on 'connection', (socket) ->
   socket.emit('new-title',episode)
   socket.on 'login', (user) ->
 
-    try 
-      validator.isEmail(user.mail)
-    catch
+
+    unless  validator.isEmail(user.mail)
       socket.emit('error',"Email invalide")
+      return -1
 
-    try
-      validator.isLength(user.username,3,30)
-    catch
+    unless validator.isLength(user.username,3,30)
       socket.emit('error',"Le nom d'utilisateur doit être compris entre 3 et 30 lettres")
+      return -1
 
     try 
-      validator.isEmail(user.mail)
-      validator.isLength(user.username,3,30)
 
       # check if user already exist
+
       for key, existing_user of users
-        if user.mail == existing_user.mail
+        console.log 'Verif '+existing_user.mail+'/'+existing_user.username
+        if (user.mail == existing_user.mail) && (user.mail!='')
           me = existing_user 
-          console.log 'user already exist!'
+          console.log '\tuser already exist!'
+          me.cpt += 1;
+          console.log '\tcpt '+me.mail+':'+me.cpt
 
       unless me
         me = user
   #      me.id = user.mail.replace('@','-').replace(/\./gi, "-")
         me.id = Date.now()
+        me.cpt=1;
+        console.log 'cpt '+me.mail+':'+me.cpt
         me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
         users[me.id] = me
         io.sockets.emit('newuser',me)
 
       socket.emit('logged')
 
+  
+  verif_user=()->
+    console.log("Verif si l'user existe")
+    for key, existing_user of users
+      if (user.id == existing_user.id)
+        return true
+    console.log("Un utilisateur inconnu s'est connecté. son nom:"+user.name)
+    socket.emit('deconnexion',"Utilisateur inconnu")
+    return false
 
-
-
-  socket.on 'disconnect', ->
+  deconnexion=() -> 
     console.log(me.username+" s'est deconnecté...")
     nb_conex = nb_conex - 1    
     io.sockets.emit('update_compteur',nb_conex)
     console.log("nombre d'utilisateurs : "+nb_conex)
-    console.log('me : '+me)
+    console.log('me : '+me.mail)
     unless me == false
-      delete users[me.id]
-      io.sockets.emit('disuser',me)
+      delog()
 
+  
+  delog=() -> 
+      me.cpt -= 1;
+      console.log 'cpt '+me.mail+':'+me.cpt
+      unless(me.cpt > 0)
+        delete users[me.id]
+        socket.emit('deconnexion',"Deco")
+        io.sockets.emit('disuser',me)
+
+
+
+
+  socket.on 'deconnexion', ->
+    if verif_user()
+      deconnexion()
 
   # gestion des mesages
   socket.on 'nwmsg', (message) ->
-    message.user = me
-    date = new Date()
+    if verif_user()
+      message.user = me
+      date = new Date()
 
-    message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
+      message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
 
-    message.h = date.getHours()
-    message.m = date.getMinutes()
-    all_messages.push message
-    last_messages.push message
-    last_messages.shift() if (last_messages.length > history)
+      message.h = date.getHours()
+      message.m = date.getMinutes()
+      all_messages.push message
+      last_messages.push message
+      last_messages.shift() if (last_messages.length > history)
 
-    io.sockets.emit('nwmsg',message)
+      io.sockets.emit('nwmsg',message)
 
   # Changement d'iframe
   socket.on 'new-iframe', (message) ->

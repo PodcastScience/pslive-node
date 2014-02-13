@@ -41,8 +41,10 @@ $(document).ready ->
 
   # gestion des utilisateurs
   socket.on 'newuser', (user) ->
-    html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
-    $('#members-list').append(Mustache.render(user_box_template,user))
+    id_to_find = "\##{user.id}"
+    if($('#members-list').find(id_to_find).length == 0)
+      #html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
+      $('#members-list').append(Mustache.render(user_box_template,user))
 
   socket.on 'logged', ->
     $('#login').fadeOut()
@@ -102,12 +104,14 @@ $(document).ready ->
   socket.on 'new-title', (episode) ->
     $('#title-episode').html(episode)
 
-  socket.on 'disconnect', ->
+  socket.on 'deconnexion', ->
     $('#login').fadeIn()
     $('#message-form').fadeOut()  
     $('#wrong-mail').html("Damned! Vous avez été deconnecté!").fadeIn()
+    $('#user_box').remove();
 
   $(window).on 'beforeunload', ->
+    socket.emit('deconnexion')
     console.log("il s'est barré")
     undefined if socket.emit 'triggered-beforeunload'
 

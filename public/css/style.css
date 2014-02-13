@@ -558,7 +558,7 @@
 	.message{
 		overflow: hidden;
 	}
-	.pseudo {
+	#messages .pseudo {
 		font-weight: 700;
 	}
 	.message p{
