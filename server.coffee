@@ -23,27 +23,27 @@ replaceURLWithHTMLLinks = (text) ->
 app.use require('connect-assets')()
 console.log js('client')
 app.set('port', process.env.PORT || 3000)
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
-app.use(express.favicon("/images/fav.png"));
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', __dirname + '/views')
+app.set('view engine', 'jade')
+app.use(express.favicon("/images/fav.png"))
+app.use(express.logger('dev'))
+app.use(express.bodyParser())
+app.use(express.methodOverride())
+app.use(app.router)
+app.use(express.static(path.join(__dirname, 'public')))
 
 app.locals.css = css
 app.locals.js = js
 
 #development only
 if ('development' == app.get('env'))
-  app.use(express.errorHandler());
+  app.use(express.errorHandler())
 
 
-app.get('/', routes.index);
-app.get('/h5', routes.indexh5);
-app.get('/admin', routes.admin);
-app.get('/users', user.list);
+app.get('/', routes.index)
+app.get('/h5', routes.indexh5)
+app.get('/admin', routes.admin)
+app.get('/users', user.list)
 app.get '/messages', (req, res) ->
   res.send all_messages.map((message) -> "<b>#{message.user.username} :</b> #{message.message}").join("<br/>")
 app.get '/noshary', (req, res) ->
@@ -53,12 +53,14 @@ httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
 )
 
-io = require('socket.io').listen(httpServer,{ log: false })
+#io = require('socket.io').listen(httpServer,{ log: false })
+io = require('socket.io').listen(httpServer)
 
 io.configure ->
-  io.set("transports", ["xhr-polling"])
-  io.set("polling duration", 10)
-  io.set('close timeout', 20)
+  io.set("transports", ['websocket','flashsocket','htmlfile','xhr-polling','jsonp-polling'])
+  #io.set("polling duration", 100)
+  #io.set('close timeout', 200)
+  io.set('heartbeat timeout', 200)
   # io.set('log colors',false)
   # io.set('log level',0)
 
@@ -86,7 +88,7 @@ io.sockets.on 'connection', (socket) ->
 
 
   # gestion des utilisateurs
-  me = false  
+  me = false
 
 
 
@@ -109,23 +111,23 @@ io.sockets.on 'connection', (socket) ->
       socket.emit('error',"Le nom d'utilisateur doit être compris entre 3 et 30 lettres")
       return -1
 
-    try 
+    try
 
       # check if user already exist
 
       for key, existing_user of users
         console.log 'Verif '+existing_user.mail+'/'+existing_user.username
         if (user.mail == existing_user.mail) && (user.mail!='')
-          me = existing_user 
+          me = existing_user
           console.log '\tuser already exist!'
-          me.cpt += 1;
+          me.cpt += 1
           console.log '\tcpt '+me.mail+':'+me.cpt
 
       unless me
         me = user
   #      me.id = user.mail.replace('@','-').replace(/\./gi, "-")
         me.id = Date.now()
-        me.cpt=1;
+        me.cpt=1
         console.log 'cpt '+me.mail+':'+me.cpt
         me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
         users[me.id] = me
@@ -156,7 +158,7 @@ io.sockets.on 'connection', (socket) ->
     socket.emit('deconnexion',"Utilisateur inconnu")
     return false
 
-  deconnexion=(id_connexion) -> 
+  deconnexion=(id_connexion) ->
     console.log('Suppression de la connexion '+id_connexion)
     delete liste_connex[id_connexion]
     io.sockets.emit('update_compteur',compte(liste_connex))
@@ -166,8 +168,8 @@ io.sockets.on 'connection', (socket) ->
       logout()
 
   
-  logout=() -> 
-    me.cpt -= 1;
+  logout=() ->
+    me.cpt -= 1
     console.log 'cpt '+me.mail+':'+me.cpt
     unless(me.cpt > 0)
       delete users[me.id]
