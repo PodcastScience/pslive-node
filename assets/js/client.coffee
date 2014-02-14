@@ -5,6 +5,7 @@ $(document).ready ->
   #       alert "C'est pas bien de diviser par zéro..."
 
   connect_url = "/"
+  id_connexion= ""
   last_msg_id = false
 
   socket = io.connect(connect_url)
@@ -14,20 +15,22 @@ $(document).ready ->
   user_box_template = $('#user_box').html()
   $('#user_box').remove();
 
-#  socket.emit('test')
-  
+  unless window.location.pathname=='/admin'
+    socket.emit('Hello')
 
+  socket.on 'Olleh', (id) ->
+    id_connexion=id
 
   socket.on 'update_compteur', (connected) ->
     $('.nb-connected').html("<span>"+connected+"</span> auditeurs <br>en ligne</h2>")
-
 
   # log des users
   $('#loginform').submit( (e) -> 
     e.preventDefault()
     socket.emit('login', {
       username: $('#username').val(),
-      mail: $('#mail').val()
+      mail: $('#mail').val(),
+      id_connexion
       })
     )
 
@@ -60,7 +63,8 @@ $(document).ready ->
   $('#message-form').submit (e) ->
     e.preventDefault()
     socket.emit 'nwmsg', {
-      message: $('#message-to-send').val()
+      message: $('#message-to-send').val(),
+      id_connexion
     }
     $('#message-to-send').val("")
     $('#message-to-send').focus()
@@ -107,11 +111,14 @@ $(document).ready ->
   socket.on 'deconnexion', ->
     $('#login').fadeIn()
     $('#message-form').fadeOut()  
+    console.log("il s'est fait jeté")
     $('#wrong-mail').html("Damned! Vous avez été deconnecté!").fadeIn()
-    $('#user_box').remove();
+    $('#members-list').remove();
+    socket.emit('Hello')
+    
 
   $(window).on 'beforeunload', ->
-    socket.emit('deconnexion')
+    socket.emit('deconnexion',id_connexion)
     console.log("il s'est barré")
     undefined if socket.emit 'triggered-beforeunload'
 

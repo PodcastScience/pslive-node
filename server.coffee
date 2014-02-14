@@ -66,22 +66,24 @@ io.configure ->
 
 
 
+compte = (tab)->
+  cpt=0
+  for key,elt of tab
+    cpt=cpt+1
+  return cpt
+
 
 users = new Object()
-nb_conex = 0
+liste_connex = []
 all_messages = []
 last_messages = []
 history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
-#admin_password = ""
 livedraw_iframe = "/noshary"
 episode = 'Bienvenue sur le balado qui fait aimer la science!'
 io.sockets.on 'connection', (socket) ->
   console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"
 
-  # mise a jour du conmpteur de connectes
-  nb_conex += 1
-  io.sockets.emit('update_compteur',nb_conex)
 
   # gestion des utilisateurs
   me = false  
@@ -89,9 +91,6 @@ io.sockets.on 'connection', (socket) ->
 
 
 
-
-  for key, value of users
-    socket.emit('newuser',value)
 
   for message in last_messages
     socket.emit('nwmsg',message)
@@ -136,40 +135,56 @@ io.sockets.on 'connection', (socket) ->
 
   
   verif_user=()->
-    console.log("Verif si l'user existe")
+    console.log("Verif si l'user "+me.name+" existe")
     for key, existing_user of users
-      if (user.id == existing_user.id)
+      console.log(existing_user.name)
+      if (me.id == existing_user.id)
         return true
-    console.log("Un utilisateur inconnu s'est connecté. son nom:"+user.name)
+    console.log("Un utilisateur inconnu s'est connecté. son nom:"+me.name)
     socket.emit('deconnexion',"Utilisateur inconnu")
     return false
 
-  deconnexion=() -> 
-    console.log(me.username+" s'est deconnecté...")
-    nb_conex = nb_conex - 1    
-    io.sockets.emit('update_compteur',nb_conex)
-    console.log("nombre d'utilisateurs : "+nb_conex)
-    console.log('me : '+me.mail)
+
+
+  verif_connexion=(id_connexion)->
+    console.log("Verif si la connexion "+id_connexion+" existe")
+    for key, val of liste_connex
+      console.log(key)
+      if (key == id_connexion)
+        return true
+    console.log("Une connexion inconnu a été repérée")
+    socket.emit('deconnexion',"Utilisateur inconnu")
+    return false
+
+  deconnexion=(id_connexion) -> 
+    console.log('Suppression de la connexion '+id_connexion)
+    delete liste_connex[id_connexion]
+    io.sockets.emit('update_compteur',compte(liste_connex))
+    console.log("Nombre d'utilisateurs : "+compte(liste_connex))
+    #console.log('me : '+me.mail)
     unless me == false
-      delog()
+      logout()
 
   
-  delog=() -> 
-      me.cpt -= 1;
-      console.log 'cpt '+me.mail+':'+me.cpt
-      unless(me.cpt > 0)
-        delete users[me.id]
-        socket.emit('deconnexion',"Deco")
-        io.sockets.emit('disuser',me)
+  logout=() -> 
+    me.cpt -= 1;
+    console.log 'cpt '+me.mail+':'+me.cpt
+    unless(me.cpt > 0)
+      delete users[me.id]
+      socket.emit('deconnexion',"Deco")
+      io.sockets.emit('disuser',me)
 
 
 
 
-  socket.on 'deconnexion', ->
-    if verif_user()
-      deconnexion()
+  socket.on 'deconnexion',(id_connexion) ->
+    console.log 'demande de deconnexion de '+me.name
+    if verif_connexion(id_connexion)
+      deconnexion(id_connexion)
 
-  # gestion des mesages
+
+
+  # gestion des messages
   socket.on 'nwmsg', (message) ->
     if verif_user()
       message.user = me
@@ -184,6 +199,16 @@ io.sockets.on 'connection', (socket) ->
       last_messages.shift() if (last_messages.length > history)
 
       io.sockets.emit('nwmsg',message)
+
+  # gestion de la connexion au site
+  socket.on 'Hello', ->
+    id_connexion = md5(Date.now())
+    liste_connex[id_connexion]=''
+    socket.emit('Olleh',id_connexion)
+    io.sockets.emit('update_compteur',compte(liste_connex))
+    console.log('Ouverture de la connexion '+id_connexion+'. '+compte(liste_connex)+' connexions ouvertes')
+    for key, value of users
+      socket.emit('newuser',value)
 
   # Changement d'iframe
   socket.on 'new-iframe', (message) ->
