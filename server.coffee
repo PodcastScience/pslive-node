@@ -41,7 +41,6 @@ if ('development' == app.get('env'))
 
 
 app.get('/', routes.index)
-app.get('/h5', routes.indexh5)
 app.get('/admin', routes.admin)
 app.get('/users', user.list)
 app.get '/messages', (req, res) ->
@@ -80,6 +79,7 @@ liste_connex = []
 all_messages = []
 last_messages = []
 history = 10
+console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion(s)'  )
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 livedraw_iframe = "/noshary"
 episode = 'Bienvenue sur le balado qui fait aimer la science!'
@@ -89,7 +89,7 @@ io.sockets.on 'connection', (socket) ->
 
   # gestion des utilisateurs
   me = false
-
+  id_connexion= false
 
 
 
@@ -148,7 +148,7 @@ io.sockets.on 'connection', (socket) ->
 
 
 
-  verif_connexion=(id_connexion)->
+  verif_connexion=()->
     console.log("Verif si la connexion "+id_connexion+" existe")
     for key, val of liste_connex
       console.log(key)
@@ -158,7 +158,7 @@ io.sockets.on 'connection', (socket) ->
     socket.emit('deconnexion',"Utilisateur inconnu")
     return false
 
-  deconnexion=(id_connexion) ->
+  deconnexion=() ->
     console.log('Suppression de la connexion '+id_connexion)
     delete liste_connex[id_connexion]
     io.sockets.emit('update_compteur',compte(liste_connex))
@@ -173,14 +173,14 @@ io.sockets.on 'connection', (socket) ->
     console.log 'cpt '+me.mail+':'+me.cpt
     unless(me.cpt > 0)
       delete users[me.id]
-      socket.emit('deconnexion',"Deco")
+      # socket.emit('deconnexion',"Deco")
       io.sockets.emit('disuser',me)
 
 
 
 
-  socket.on 'deconnexion',(id_connexion) ->
-    console.log 'demande de deconnexion de '+me.name
+  socket.on 'disconnect', ->
+    console.log 'Deconnexion de '+me.name
     if verif_connexion(id_connexion)
       deconnexion(id_connexion)
 
@@ -206,6 +206,7 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'Hello', ->
     id_connexion = md5(Date.now())
     liste_connex[id_connexion]=''
+    console.log('Hello recu. Envoi du Olleh')
     socket.emit('Olleh',id_connexion)
     io.sockets.emit('update_compteur',compte(liste_connex))
     console.log('Ouverture de la connexion '+id_connexion+'. '+compte(liste_connex)+' connexions ouvertes')

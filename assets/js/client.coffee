@@ -10,22 +10,24 @@ $(document).ready ->
 
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html()
-  $('#message-box li').remove();
+  $('#message-box li').remove()
 
   user_box_template = $('#user_box').html()
-  $('#user_box').remove();
+  $('#user_box').remove()
 
   unless window.location.pathname=='/admin'
+    console.log('Envoi du Hello initial')
     socket.emit('Hello')
 
   socket.on 'Olleh', (id) ->
+    console.log('Olleh recu')
     id_connexion=id
 
   socket.on 'update_compteur', (connected) ->
     $('.nb-connected').html("<span>"+connected+"</span> auditeurs <br>en ligne</h2>")
 
   # log des users
-  $('#loginform').submit( (e) -> 
+  $('#loginform').submit( (e) ->
     e.preventDefault()
     socket.emit('login', {
       username: $('#username').val(),
@@ -74,13 +76,13 @@ $(document).ready ->
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
-    else  
+    else
       $(".message:last").append('<p>'+message.message+'</p>')
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
 
-  $('#admin-form').submit( (e) -> 
+  $('#admin-form').submit( (e) ->
     # envoi d'un iframe
     e.preventDefault()
     socket.emit('new-iframe', {
@@ -108,17 +110,28 @@ $(document).ready ->
   socket.on 'new-title', (episode) ->
     $('#title-episode').html(episode)
 
-  socket.on 'deconnexion', ->
+#  socket.on 'deconnexion', ->
+#    $('#login').fadeIn()
+#    $('#message-form').fadeOut()
+#    console.log("il s'est fait jeté")
+#    $('#wrong-mail').html("Damned! Vous avez été deconnecté!").fadeIn()
+#    $('#members-list').remove();
+#    socket.emit('Hello')
+    
+    
+  socket.on 'disconnect',
     $('#login').fadeIn()
-    $('#message-form').fadeOut()  
-    console.log("il s'est fait jeté")
-    $('#wrong-mail').html("Damned! Vous avez été deconnecté!").fadeIn()
-    $('#members-list').remove();
+    $('#message-form').fadeOut()
+    console.log("La connexion est tombée a "+Date.now())
+    msg="Damned! Vous avez été deconnecté !"+
+    $('#wrong-mail').html(msg).fadeIn()
+    $('#members-list').remove()
+    $('#user_box').remove()
     socket.emit('Hello')
     
 
   $(window).on 'beforeunload', ->
-    socket.emit('deconnexion',id_connexion)
+#    socket.emit('deconnexion',id_connexion)
     console.log("il s'est barré")
     undefined if socket.emit 'triggered-beforeunload'
 
