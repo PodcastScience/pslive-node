@@ -16,9 +16,9 @@ $(document).ready ->
   $('#user_box').remove()
 
   unless window.location.pathname=='/admin'
-    console.log('Envoi du Hello initial')
+    #console.log('Envoi du Hello initial') 
     socket.emit('Hello')
-
+    
   socket.on 'Olleh', (id) ->
     console.log('Olleh recu')
     id_connexion=id
@@ -37,7 +37,7 @@ $(document).ready ->
     )
 
   socket.on 'erreur', (message) ->
-    console.log('Erreur recu')
+    #console.log('Erreur recu')
     $('#wrong-mail').html(message).fadeIn()
 
         
@@ -107,37 +107,33 @@ $(document).ready ->
 
 
   socket.on 'new-drawings', (livedraw_iframe) ->
-    console.log("nouvel iframe images")
+    #console.log("nouvel iframe images")
     $('#live-draw-frame iframe').attr('src',livedraw_iframe)
 
 
   socket.on 'new-title', (episode) ->
-    console.log("Nouveau Titre")
+    #console.log("Nouveau Titre")
     $('#title-episode').html(episode)
 
 
     
     
   socket.on 'disconnect',() ->
-    console.log("evt disconnect recu")
+    #console.log("evt disconnect recu")
     if id_connexion
-        $('#login').fadeIn()
-        $('#message-form').fadeOut()
-        console.log("La connexion est tombée a "+Date.now())
-        msg="Damned! Vous avez été deconnecté !"+Date.now()
-        $('#wrong-mail').html(msg).fadeIn()
-        $('#members-list').remove()
-        $('#user_box').remove()
-        $('.nb-connected').html("")
-        id_connexion=false
-        console.log("Envoi d'un Hello")
-        socket.emit('Hello')
-        
-        
-      
+      $('#login').fadeIn()
+      $('#message-form').fadeOut()
+      console.log("Il s'est fait jeté")
+      msg="Damned! Vous avez été deconnecté !"
+      $('#wrong-mail').html(msg).fadeIn()
+      $('#members-list li').remove()
+      $('.nb-connected').html("")
+      id_connexion=false
+      socket.emit('Hello')
+
+
 
   $(window).on 'beforeunload', ->
-#    socket.emit('deconnexion',id_connexion)
     console.log("il s'est barré")
     undefined if socket.emit 'triggered-beforeunload'
 
