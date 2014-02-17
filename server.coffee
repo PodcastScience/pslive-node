@@ -36,7 +36,7 @@ app.locals.css = css
 app.locals.js = js
 
 #development only
-if ('development' == app.get('env'))
+if ('development' == app.get('env') or true)
   app.use(express.errorHandler())
 
 
@@ -87,6 +87,7 @@ io.sockets.on 'connection', (socket) ->
   console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"
 
 
+
   # gestion des utilisateurs
   me = false
   id_connexion= false
@@ -102,15 +103,18 @@ io.sockets.on 'connection', (socket) ->
   socket.emit('new-title',episode)
   socket.on 'login', (user) ->
 
-
+    
+    verif_connexion()
+        
     unless  validator.isEmail(user.mail)
-      socket.emit('error',"Email invalide")
+      socket.emit('erreur',"Email invalide")
       return -1
 
     unless validator.isLength(user.username,3,30)
-      socket.emit('error',"Le nom d'utilisateur doit être compris entre 3 et 30 lettres")
+      socket.emit('erreur',"Le nom d'utilisateur doit être compris entre 3 et 30 lettres")
       return -1
 
+    
     try
 
       # check if user already exist
@@ -136,14 +140,14 @@ io.sockets.on 'connection', (socket) ->
       socket.emit('logged')
 
   
-  verif_user=()->
+  verif_connexion=()->
     console.log("Verif si l'user "+me.name+" existe")
     for key, existing_user of users
       console.log(existing_user.name)
       if (me.id == existing_user.id)
         return true
     console.log("Un utilisateur inconnu s'est connecté. son nom:"+me.name)
-    socket.emit('deconnexion',"Utilisateur inconnu")
+    socket.emit('disconnect',"Utilisateur inconnu")
     return false
 
 
@@ -155,7 +159,7 @@ io.sockets.on 'connection', (socket) ->
       if (key == id_connexion)
         return true
     console.log("Une connexion inconnu a été repérée")
-    socket.emit('deconnexion',"Utilisateur inconnu")
+    socket.emit('disconnect',"Utilisateur inconnu")
     return false
 
   deconnexion=() ->
@@ -166,6 +170,7 @@ io.sockets.on 'connection', (socket) ->
     #console.log('me : '+me.mail)
     unless me == false
       logout()
+    
 
   
   logout=() ->
@@ -188,7 +193,7 @@ io.sockets.on 'connection', (socket) ->
 
   # gestion des messages
   socket.on 'nwmsg', (message) ->
-    if verif_user()
+    if verif_connexion()
       message.user = me
       date = new Date()
 
@@ -211,6 +216,7 @@ io.sockets.on 'connection', (socket) ->
     io.sockets.emit('update_compteur',compte(liste_connex))
     console.log('Ouverture de la connexion '+id_connexion+'. '+compte(liste_connex)+' connexions ouvertes')
     for key, value of users
+      console.log('Ajout du user '+value.mail)
       socket.emit('newuser',value)
 
   # Changement d'iframe

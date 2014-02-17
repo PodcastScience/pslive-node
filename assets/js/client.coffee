@@ -5,7 +5,7 @@ $(document).ready ->
   #       alert "C'est pas bien de diviser par zéro..."
 
   connect_url = "/"
-  id_connexion= ""
+  id_connexion= false
   last_msg_id = false
 
   socket = io.connect(connect_url)
@@ -36,7 +36,8 @@ $(document).ready ->
       })
     )
 
-  socket.on 'error', (message) ->
+  socket.on 'erreur', (message) ->
+    console.log('Erreur recu')
     $('#wrong-mail').html(message).fadeIn()
 
         
@@ -103,32 +104,37 @@ $(document).ready ->
         if $('#episode-title').val()
           alert "Numero de l'épisode non renseigné"
     )
+
+
   socket.on 'new-drawings', (livedraw_iframe) ->
+    console.log("nouvel iframe images")
     $('#live-draw-frame iframe').attr('src',livedraw_iframe)
 
 
   socket.on 'new-title', (episode) ->
+    console.log("Nouveau Titre")
     $('#title-episode').html(episode)
 
-#  socket.on 'deconnexion', ->
-#    $('#login').fadeIn()
-#    $('#message-form').fadeOut()
-#    console.log("il s'est fait jeté")
-#    $('#wrong-mail').html("Damned! Vous avez été deconnecté!").fadeIn()
-#    $('#members-list').remove();
-#    socket.emit('Hello')
+
     
     
-  socket.on 'disconnect',
-    $('#login').fadeIn()
-    $('#message-form').fadeOut()
-    console.log("La connexion est tombée a "+Date.now())
-    msg="Damned! Vous avez été deconnecté !"+
-    $('#wrong-mail').html(msg).fadeIn()
-    $('#members-list').remove()
-    $('#user_box').remove()
-    socket.emit('Hello')
-    
+  socket.on 'disconnect',() ->
+    console.log("evt disconnect recu")
+    if id_connexion
+        $('#login').fadeIn()
+        $('#message-form').fadeOut()
+        console.log("La connexion est tombée a "+Date.now())
+        msg="Damned! Vous avez été deconnecté !"+Date.now()
+        $('#wrong-mail').html(msg).fadeIn()
+        $('#members-list').remove()
+        $('#user_box').remove()
+        $('.nb-connected').html("")
+        id_connexion=false
+        console.log("Envoi d'un Hello")
+        socket.emit('Hello')
+        
+        
+      
 
   $(window).on 'beforeunload', ->
 #    socket.emit('deconnexion',id_connexion)
