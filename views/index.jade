@@ -41,7 +41,7 @@ block bloc_login
 
 block bloc_sharypic
   .sharypic
-    #live-draw-frame 
+    #live-draw-frame
       iframe(scrolling='no', frameborder='0' src='/noshary')
             
 
@@ -91,8 +91,7 @@ block bloc_chatroom
 block user_box
   div#user_box
     li(id="{{id}}")
-      a
-        img(src="{{avatar}}" alt="Avatar {{user.username}}")
+      img(src="{{avatar}}" alt="Avatar {{user.username}}")
       span.pseudo
         | {{username}}
 

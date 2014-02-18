@@ -30,4 +30,3 @@ git push heroku master
 
 [X] scroll auto désactivable et désactivé quand on a scrollé
 [ ] bug sur le nombre de personnes en live
-     [ ] en cas de deco/reco du serveur, la userlist reste vide.
