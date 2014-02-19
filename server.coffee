@@ -155,16 +155,17 @@ io.sockets.on 'connection', (socket) ->
     io.sockets.emit('nwmsg',message)
 
   # Changement d'iframe
-  socket.on 'new-iframe', (message) ->
-    if message.password == admin_password
-      livedraw_iframe = message.iframe
-      io.sockets.emit('new-drawings',livedraw_iframe)
+  #socket.on 'new-iframe', (message) ->
+#    if message.password == admin_password
+#      livedraw_iframe = message.iframe
+#      io.sockets.emit('new-drawings',livedraw_iframe)
 
 
   # Changement du titre
   socket.on 'change-title', (message) ->
     if message.password == admin_password
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
+      io.sockets.emit('new-drawings','http://www.sharypic.com/events/ps'+(message.number)+'/widget')
       io.sockets.emit('new-title',episode)
   # test
 
