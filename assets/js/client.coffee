@@ -75,12 +75,7 @@ $(document).ready ->
 
 
   $('#admin-form').submit( (e) -> 
-    # envoi d'un iframe
     e.preventDefault()
-    #socket.emit('new-iframe', {
-    #  password: $('#admin-password').val(),
-    #  iframe: $('#iframe-value').val()
-    #  })
     #maj du titre
     if $('#episode-number').val()!='' && $('#episode-title').val()!=''
       socket.emit('change-title', {

@@ -154,12 +154,6 @@ io.sockets.on 'connection', (socket) ->
 
     io.sockets.emit('nwmsg',message)
 
-  # Changement d'iframe
-  #socket.on 'new-iframe', (message) ->
-#    if message.password == admin_password
-#      livedraw_iframe = message.iframe
-#      io.sockets.emit('new-drawings',livedraw_iframe)
-
 
   # Changement du titre
   socket.on 'change-title', (message) ->
