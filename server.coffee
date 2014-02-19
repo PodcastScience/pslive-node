@@ -260,8 +260,9 @@ io.sockets.on 'connection', (socket) ->
   # Changement du titre
   socket.on 'change-title', (message) ->
     if message.password == admin_password
+      livedraw_iframe='http://www.sharypic.com/events/ps'+(message.number)+'/widget'
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
-      io.sockets.emit('new-drawings','http://www.sharypic.com/events/ps'+(message.number)+'/widget')
+      io.sockets.emit('new-drawings',livedraw_iframe)
       io.sockets.emit('new-title',episode)
         
         
