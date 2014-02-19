@@ -4,13 +4,12 @@ $(document).ready ->
   #     cheat: ->
   #       alert "C'est pas bien de diviser par zéro..."
 
-  connect_url = "http://podcastscience.herokuapp.com"
-  #connect_url = "http://localhost:3000"
+  connect_url = "/"
   last_msg_id = false
 
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html()
-  $('#message-box').remove();
+  $('#message-box li').remove();
 
   user_box_template = $('#user_box').html()
   $('#user_box').remove();
@@ -70,18 +69,13 @@ $(document).ready ->
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
     else  
-      $(".message:last").append('<p style="font-size:small;">'+message.message+'</p>')
+      $(".message:last").append('<p>'+message.message+'</p>')
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
 
   $('#admin-form').submit( (e) -> 
-    # envoi d'un iframe
     e.preventDefault()
-    socket.emit('new-iframe', {
-      password: $('#admin-password').val(),
-      iframe: $('#iframe-value').val()
-      })
     #maj du titre
     if $('#episode-number').val()!='' && $('#episode-title').val()!=''
       socket.emit('change-title', {
@@ -97,7 +91,7 @@ $(document).ready ->
           alert "Numero de l'épisode non renseigné"
     )
   socket.on 'new-drawings', (livedraw_iframe) ->
-    $('#live-draw-frame').html(livedraw_iframe)
+    $('#live-draw-frame iframe').attr('src',livedraw_iframe)
 
 
   socket.on 'new-title', (episode) ->

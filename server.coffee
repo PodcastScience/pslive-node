@@ -41,10 +41,13 @@ if ('development' == app.get('env'))
 
 
 app.get('/', routes.index);
+app.get('/h5', routes.indexh5);
 app.get('/admin', routes.admin);
 app.get('/users', user.list);
 app.get '/messages', (req, res) ->
   res.send all_messages.map((message) -> "<b>#{message.user.username} :</b> #{message.message}").join("<br/>")
+app.get '/noshary', (req, res) ->
+  res.send "Pas de dessins ce soir :("
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
@@ -67,7 +70,7 @@ last_messages = []
 history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 #admin_password = ""
-livedraw_iframe = "Pas de dessins ce soir :("
+livedraw_iframe = "/noshary"
 episode = 'Bienvenue sur le balado qui fait aimer la science!'
 io.sockets.on 'connection', (socket) ->
   console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"
@@ -151,17 +154,12 @@ io.sockets.on 'connection', (socket) ->
 
     io.sockets.emit('nwmsg',message)
 
-  # Changement d'iframe
-  socket.on 'new-iframe', (message) ->
-    if message.password == admin_password
-      livedraw_iframe = message.iframe
-      io.sockets.emit('new-drawings',livedraw_iframe)
-
 
   # Changement du titre
   socket.on 'change-title', (message) ->
     if message.password == admin_password
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
+      io.sockets.emit('new-drawings','http://www.sharypic.com/events/ps'+(message.number)+'/widget')
       io.sockets.emit('new-title',episode)
   # test
 
