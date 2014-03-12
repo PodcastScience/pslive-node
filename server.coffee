@@ -17,6 +17,12 @@ replaceURLWithHTMLLinks = (text) ->
   exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig
   return text.replace(exp,"<a href='$1' target='_blank'>$1</a>")
 
+replaceSalaud = (text) ->
+  exp=/salaud/ig
+  retval=text.replace(exp,"salop\*")
+  if (text!=retval)
+        retval=retval+"<br><span style='font-weight:lighter;font-size:x-small;'>*Correction apportée selon la volonté du DictaTupe.</span>"
+  return retval
 
 
 #all environments
@@ -131,6 +137,7 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'disconnect', ->
     console.log(me.username+" s'est deconnecté...")
     nb_conex = nb_conex - 1    
+    
     io.sockets.emit('update_compteur',nb_conex)
     console.log("nombre d'utilisateurs : "+nb_conex)
     console.log('me : '+me)
@@ -145,7 +152,7 @@ io.sockets.on 'connection', (socket) ->
     date = new Date()
 
     message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
-
+    message.message = replaceSalaud(message.message)
     message.h = date.getHours()
     message.m = date.getMinutes()
     all_messages.push message
