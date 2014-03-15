@@ -24,6 +24,8 @@ replaceSalaud = (text) ->
         retval=retval+"<br><span style='font-weight:lighter;font-size:x-small;'>*Correction apportée selon la volonté du DictaTupe.</span>"
   return retval
 
+rigolons=false
+pseudoCotCot=''
 
 #all environments
 app.use require('connect-assets')()
@@ -145,7 +147,8 @@ io.sockets.on 'connection', (socket) ->
       delete users[me.id]
       io.sockets.emit('disuser',me)
 
-
+  
+        
   # gestion des mesages
   socket.on 'nwmsg', (message) ->
     message.user = me
@@ -153,6 +156,8 @@ io.sockets.on 'connection', (socket) ->
 
     message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
     message.message = replaceSalaud(message.message)
+    if(me.username==pseudoCotCot && rigolons)
+      message.message='Cot Cot ! '+message.message
     message.h = date.getHours()
     message.m = date.getMinutes()
     all_messages.push message
@@ -161,6 +166,12 @@ io.sockets.on 'connection', (socket) ->
 
     io.sockets.emit('nwmsg',message)
 
+
+    
+  socket.on 'rigolons', (valeur) ->
+    rigolons=valeur
+  socket.on 'pseudoCotCot', (valeur) ->
+    pseudoCotCot=valeur
 
   # Changement du titre
   socket.on 'change-title', (message) ->

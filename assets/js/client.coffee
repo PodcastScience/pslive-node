@@ -93,6 +93,15 @@ $(document).ready ->
   socket.on 'new-drawings', (livedraw_iframe) ->
     $('#live-draw-frame iframe').attr('src',livedraw_iframe)
 
+    
+  $('#cbRigoler').change( (e) ->
+    socket.emit('rigolons',($('#cbRigoler:checked' ).val()=='on') )
+  )
+    
+  $('#pseudoCotCot').change( (e) ->
+    socket.emit('pseudoCotCot',$('#pseudoCotCot' ).val() )
+  )
+    
 
   socket.on 'new-title', (episode) ->
     $('#title-episode').html(episode)
