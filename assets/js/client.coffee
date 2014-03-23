@@ -91,6 +91,7 @@ $(document).ready ->
           alert "Numero de l'épisode non renseigné"
     )
   socket.on 'new-drawings', (livedraw_iframe) ->
+    $('#live-draw-frame').innerhtml(livedraw_iframe)
     $('#live-draw-frame iframe').attr('src',livedraw_iframe)
 
 

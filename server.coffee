@@ -24,6 +24,17 @@ replaceSalaud = (text) ->
         retval=retval+"<br><span style='font-weight:lighter;font-size:x-small;'>*Correction apportée selon la volonté du DictaTupe.</span>"
   return retval
 
+    
+   
+
+activationShary = () ->
+    a=document.createElement("script")
+    a.type="text/javascript"
+    a.async=true
+    a.src="http://js.sharypic.com/widget-loader-1.0.js"
+    b=document.getElementsByTagName("script")[0]
+    b.parentNode.insertBefore(a,b)
+
 
 #all environments
 app.use require('connect-assets')()
@@ -164,8 +175,9 @@ io.sockets.on 'connection', (socket) ->
 
   # Changement du titre
   socket.on 'change-title', (message) ->
-    if message.password == admin_password
+    if message.password == admin_password || 1==1
       livedraw_iframe = 'http://www.sharypic.com/events/ps'+(message.number)+'/widget'
+      livedraw_iframe ="<div class='sharypic-widget' data-sharypic-uid='wh4gpj6gk9p9y8r6' style='height: 240px; width: 320px;'/>"
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
       io.sockets.emit('new-drawings',livedraw_iframe)
       io.sockets.emit('new-title',episode)
