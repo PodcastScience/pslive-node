@@ -11,16 +11,10 @@ block bloc_header
       .rec Live
 
 
-//scrolling="no" frameborder="0" allowtransparency="true"
 block bloc_player
   .player
     iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html"  height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true" )
-   //audio#player(controls autoplay)
-    //  source(src='http://bit.ly/PS-live96kMP3' type="audio/mpeg")
-    //  source(src='http://bit.ly/PS-live96kM3U' type="audio/mpeg")
-    //  iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html" height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true")
-
-
+ 
 
 block bloc_login
   #login.login.clearfix
@@ -46,6 +40,11 @@ block bloc_login
 block bloc_sharypic
   .sharypic
     #live-draw
+        .sharypic-widget( style='height: 480px; width: 640px;')
+            | <script language='javascript'>
+            |  (function(){var a=document.createElement("script");a.type="text/javascript";a.async=true;a.src="http://js.sharypic.com/widget-loader-1.0.js";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})()
+            |</script>
+
             
 
 block liens_sans_flash

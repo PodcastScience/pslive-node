@@ -92,6 +92,8 @@ $(document).ready ->
     )
   socket.on 'new-drawings', (livedraw) ->
     $('#live-draw').html(livedraw)
+  socket.on 'new-drawings-delay', (delay) ->
+    $('.sharypic-widget').attr('data-sharypic-timing',delay)
 
 
   socket.on 'new-title', (episode) ->

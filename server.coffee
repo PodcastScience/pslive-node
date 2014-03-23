@@ -28,6 +28,7 @@ replaceSalaud = (text) ->
    
 
 
+
 #all environments
 app.use require('connect-assets')()
 console.log js('client')
@@ -79,7 +80,7 @@ last_messages = []
 history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 #admin_password = ""
-livedraw_iframe = "/noshary"
+livedraw = ""
 episode = 'Bienvenue sur le balado qui fait aimer la science!'
 io.sockets.on 'connection', (socket) ->
   console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"
@@ -99,8 +100,9 @@ io.sockets.on 'connection', (socket) ->
   for message in last_messages
     socket.emit('nwmsg',message)
     console.log(socket.id)
-
-  socket.emit('new-drawings',livedraw_iframe)
+    
+  socket.emit('new-drawings-delay',10000)
+  #socket.emit('new-drawings',livedraw)
   socket.emit('new-title',episode)
   socket.on 'login', (user) ->
 
@@ -168,7 +170,6 @@ io.sockets.on 'connection', (socket) ->
   # Changement du titre
   socket.on 'change-title', (message) ->
     if message.password == admin_password || 1==1
-      livedraw ="<div class='sharypic-widget' data-sharypic-uid='wh4gpj6gk9p9y8r6' style='height: 480px; width: 640px;'/>"
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
       io.sockets.emit('new-drawings',livedraw)
       io.sockets.emit('new-title',episode)
