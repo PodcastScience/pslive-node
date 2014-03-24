@@ -81,7 +81,7 @@ $(document).ready ->
       socket.emit('change-title', {
         password: $('#admin-password').val(),
         number: $('#episode-number').val(),
-        createEvent: $('#createEvent:checked').val()=='on',
+        createEvent: $('#create-event:checked').val()=='on',
         title: $('#episode-title').val()
         })
     else

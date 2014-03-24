@@ -10,11 +10,9 @@
 
 ```````
 heroku config:add PSLIVE_ADMIN_PASSWORD="Mon Super Password"
+heroku config:add PSLIVE_SHARYPIC_APIKEY="Mon APIKEY Sharypic"
 
 ```````
-
-* Modifier config.coffee dans assets.js avec la bonne url heroku
-
 
 
 * pusher le dépot : 
@@ -28,5 +26,5 @@ git push heroku master
 
 ## Bugs identifiés  
 
-[ ] scroll auto désactivable et désactivé quand on a scrollé
+[X] scroll auto désactivable et désactivé quand on a scrollé
 [ ] bug sur le nombre de personnes en live

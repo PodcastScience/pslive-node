@@ -13,7 +13,7 @@ validator = require('validator')
 
 app = express()
 
-livedraw_iframe = "/noshary"
+livedraw_iframe = ""
 
 # functions
 replaceURLWithHTMLLinks = (text) ->
@@ -27,44 +27,6 @@ replaceSalaud = (text) ->
     retval=retval+"<br><span style='font-weight:lighter;font-size:x-small;'>*Correction apportée selon la volonté du DictaTupe.</span>"
   return retval
 
-createSharypicEvent = (name) ->
-  console.log("Creation de l'event SharyPic : " + name)
-  param=JSON.stringify({
-    name: name,
-    description: "Podcast Science Episode xxx",
-    public: true,
-    hashtag: "#"+name
-  })
-
-  headers = {
-    'Content-Type': 'application/json',
-    'Content-Length': param.length
-  }
-
-  options = {
-    host: 'api.sharypic.com',
-    port: 443,
-    path: '/v1/user/events.json?api_key=78cff7f6be9e3a803dae7b0e',
-    method: 'POST',
-    form: param,
-    headers:headers
-  }
-
-  req = https.request(options,(res) ->
-    data=''
-    res.on('data', (chunk) ->
-        data += chunk
-    )
-    res.on('end',() ->
-        console.log("Event SharyPic cree : " +  data)
-        jsonData = JSON.parse data
-        livedraw_iframe = '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+jsonData.uid+'/widget?collection=all&theme=dark&autoplay=true&share=true&scoped_to=all&timing=10000"><a href="https://www.sharypic.com/'+jsonData.uid+'/all" title="'+jsonData.name+' - Les photos et vidéos collectés avec sharypic" >'+jsonData.name+' - Les photos et vidéos collectés avec sharypic</a></iframe>'
-        io.sockets.emit('new-drawings',livedraw_iframe)
-    )
-  ).on('error', (e) ->  console.log("Got error: " + e.message))
-  req.write(param);
-  req.end();
-    
         
   
 
@@ -119,9 +81,66 @@ nb_conex = 0
 all_messages = []
 last_messages = []
 history = 10
+sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
+#sharypicAPIKey = ''
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 #admin_password = ""
 episode = 'Bienvenue sur le balado qui fait aimer la science!'
+
+
+#Fonction pour la gestion de SharyPic
+getIframeStr = (jsonData) -> 
+  return '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+jsonData.uid+'/widget?collection=all&theme=dark&autoplay=true&share=true&scoped_to=all&timing=10000"><a href="https://www.sharypic.com/'+jsonData.uid+'/all" title="'+jsonData.description+'" >'+jsonData.description+'</a></iframe>'
+  
+
+    
+createSharypicEvent = (name,libelle) ->
+  console.log("Creation de l'event SharyPic : " + name)
+  param=JSON.stringify({
+    name: name,
+    description: name+" - "+libelle,
+    public: true,
+    hashtag: "#"+name
+  })
+
+  headers = {
+    'Content-Type': 'application/json',
+    'Content-Length': param.length
+  }
+
+  options = {
+    host: 'api.sharypic.com',
+    port: 443,
+    path: '/v1/user/events.json?api_key='+sharypicAPIKey,
+    method: 'POST',
+    form: param,
+    headers:headers
+  }
+
+  req = https.request(options,(res) ->
+    data=''
+    res.on('data', (chunk) ->
+        data += chunk
+    )
+    res.on('end',() ->
+        console.log("Event SharyPic cree : " +  data)
+        jsonData = JSON.parse data
+        livedraw_iframe = getIframeStr(jsonData)
+        io.sockets.emit('new-drawings',livedraw_iframe)
+    )
+  ).on('error', (e) ->  console.log("Got error: " + e.message))
+  req.write(param);
+  req.end();
+#Fin des Fonctions pour la gestion de SharyPic
+
+
+
+
+
+
+
+
+
 io.sockets.on 'connection', (socket) ->
   console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"
 
@@ -144,7 +163,7 @@ io.sockets.on 'connection', (socket) ->
   socket.emit('new-drawings',livedraw_iframe)
   socket.emit('new-title',episode)
   socket.on 'login', (user) ->
-
+        
     try 
       validator.isEmail(user.mail)
     catch
@@ -206,30 +225,37 @@ io.sockets.on 'connection', (socket) ->
     io.sockets.emit('nwmsg',message)
 
 
-  # Changement du titre
+  # Changement du titre et chargement de l'iframe
   socket.on 'change-title', (message) ->
-    nomEvent='testpm3'
-    if message.password == admin_password || 1==1
+    nomEvent='ps'+message.number
+    if message.password == admin_password 
       options = {
         host: 'api.sharypic.com',
         port: 443,
-        path: '/v1/user/events.json?api_key=78cff7f6be9e3a803dae7b0e'
+        path: '/v1/user/events.json?api_key='+sharypicAPIKey
       }
-      req = https.get(options,(res) ->  res.on('data',getSharyEvents)).on('error', (e) ->  console.log("Got error: " + e.message))
+      data=''
+      req = https.get(options,(res) ->
+        res.on('data',(d)->data+=d)
+        res.on('end',getSharyEvents)
+      ).on('error', (e) ->  console.log("Got error: " + e.message))
 
-      getSharyEvents = (data) ->
+      getSharyEvents = () ->
         console.log("Sharypic : "+data)
+        dateref=0
         jsonData = JSON.parse data
-        #jsonData=data
         bTrouve=false
         for key, value of jsonData
           console.log(value.name+'/'+nomEvent);
-          if value.name==nomEvent
-            livedraw_iframe = '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+value.uid+'/widget?collection=all&theme=dark&autoplay=true&share=true&scoped_to=all&timing=10000"><a href="https://www.sharypic.com/'+value.uid+'/all" title="'+value.name+' - Les photos et vidéos collectés avec sharypic" >'+value.name+' - Les photos et vidéos collectés avec sharypic</a></iframe>'
+          if value.name==nomEvent & value.created_at>dateref
+            livedraw_iframe = getIframeStr(value)
             io.sockets.emit('new-drawings',livedraw_iframe)
             bTrouve=true
-        if !bTrouve 
-          createSharypicEvent(nomEvent)
+            dateref=value.created_at
+        if !bTrouve && message.createEvent
+          createSharypicEvent(nomEvent,message.title)
+        else
+          io.sockets.emit('new-drawings',livedraw_iframe)
         
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
       io.sockets.emit('new-title',episode)
