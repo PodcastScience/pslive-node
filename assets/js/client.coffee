@@ -81,6 +81,7 @@ $(document).ready ->
       socket.emit('change-title', {
         password: $('#admin-password').val(),
         number: $('#episode-number').val(),
+        createEvent: $('#create-event:checked').val()=='on',
         title: $('#episode-title').val()
         })
     else
@@ -91,7 +92,7 @@ $(document).ready ->
           alert "Numero de l'épisode non renseigné"
     )
   socket.on 'new-drawings', (livedraw_iframe) ->
-    $('#live-draw-frame iframe').attr('src',livedraw_iframe)
+    $('#live-draw-frame').html(livedraw_iframe)
 
 
   socket.on 'new-title', (episode) ->
