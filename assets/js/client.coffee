@@ -81,6 +81,7 @@ $(document).ready ->
       socket.emit('change-title', {
         password: $('#admin-password').val(),
         number: $('#episode-number').val(),
+        createEvent: $('#createEvent:checked').val()=='on',
         title: $('#episode-title').val()
         })
     else
@@ -90,10 +91,8 @@ $(document).ready ->
         if $('#episode-title').val()
           alert "Numero de l'épisode non renseigné"
     )
-  socket.on 'new-drawings', (livedraw) ->
-    $('#live-draw').html(livedraw)
-  socket.on 'new-drawings-delay', (delay) ->
-    $('.sharypic-widget').attr('data-sharypic-timing',delay)
+  socket.on 'new-drawings', (livedraw_iframe) ->
+    $('#live-draw-frame').html(livedraw_iframe)
 
 
   socket.on 'new-title', (episode) ->

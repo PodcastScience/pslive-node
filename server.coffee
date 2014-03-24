@@ -5,12 +5,15 @@ express = require('express')
 routes = require('./routes')
 user = require('./routes/user')
 http = require('http')
+https = require('https')
 path = require('path')
 md5 = require('MD5')
 mu = require('mu2')
 validator = require('validator')
 
 app = express()
+
+livedraw_iframe = "/noshary"
 
 # functions
 replaceURLWithHTMLLinks = (text) ->
@@ -21,13 +24,51 @@ replaceSalaud = (text) ->
   exp=/salaud/ig
   retval=text.replace(exp,"salop\*")
   if (text!=retval)
-        retval=retval+"<br><span style='font-weight:lighter;font-size:x-small;'>*Correction apportée selon la volonté du DictaTupe.</span>"
+    retval=retval+"<br><span style='font-weight:lighter;font-size:x-small;'>*Correction apportée selon la volonté du DictaTupe.</span>"
   return retval
 
+createSharypicEvent = (name) ->
+  console.log("Creation de l'event SharyPic : " + name)
+  param=JSON.stringify({
+    name: name,
+    description: "Podcast Science Episode xxx",
+    public: true,
+    hashtag: "#"+name
+  })
+
+  headers = {
+    'Content-Type': 'application/json',
+    'Content-Length': param.length
+  }
+
+  options = {
+    host: 'api.sharypic.com',
+    port: 443,
+    path: '/v1/user/events.json?api_key=78cff7f6be9e3a803dae7b0e',
+    method: 'POST',
+    form: param,
+    headers:headers
+  }
+
+  req = https.request(options,(res) ->
+    data=''
+    res.on('data', (chunk) ->
+        data += chunk
+    )
+    res.on('end',() ->
+        console.log("Event SharyPic cree : " +  data)
+        jsonData = JSON.parse data
+        livedraw_iframe = '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+jsonData.uid+'/widget?collection=all&theme=dark&autoplay=true&share=true&scoped_to=all&timing=10000"><a href="https://www.sharypic.com/'+jsonData.uid+'/all" title="'+jsonData.name+' - Les photos et vidéos collectés avec sharypic" >'+jsonData.name+' - Les photos et vidéos collectés avec sharypic</a></iframe>'
+        io.sockets.emit('new-drawings',livedraw_iframe)
+    )
+  ).on('error', (e) ->  console.log("Got error: " + e.message))
+  req.write(param);
+  req.end();
     
-   
+        
+  
 
-
+  
 
 #all environments
 app.use require('connect-assets')()
@@ -80,7 +121,6 @@ last_messages = []
 history = 10
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 #admin_password = ""
-livedraw = ""
 episode = 'Bienvenue sur le balado qui fait aimer la science!'
 io.sockets.on 'connection', (socket) ->
   console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"
@@ -100,9 +140,8 @@ io.sockets.on 'connection', (socket) ->
   for message in last_messages
     socket.emit('nwmsg',message)
     console.log(socket.id)
-    
-  socket.emit('new-drawings-delay',10000)
-  #socket.emit('new-drawings',livedraw)
+
+  socket.emit('new-drawings',livedraw_iframe)
   socket.emit('new-title',episode)
   socket.on 'login', (user) ->
 
@@ -169,9 +208,30 @@ io.sockets.on 'connection', (socket) ->
 
   # Changement du titre
   socket.on 'change-title', (message) ->
+    nomEvent='testpm3'
     if message.password == admin_password || 1==1
+      options = {
+        host: 'api.sharypic.com',
+        port: 443,
+        path: '/v1/user/events.json?api_key=78cff7f6be9e3a803dae7b0e'
+      }
+      req = https.get(options,(res) ->  res.on('data',getSharyEvents)).on('error', (e) ->  console.log("Got error: " + e.message))
+
+      getSharyEvents = (data) ->
+        console.log("Sharypic : "+data)
+        jsonData = JSON.parse data
+        #jsonData=data
+        bTrouve=false
+        for key, value of jsonData
+          console.log(value.name+'/'+nomEvent);
+          if value.name==nomEvent
+            livedraw_iframe = '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+value.uid+'/widget?collection=all&theme=dark&autoplay=true&share=true&scoped_to=all&timing=10000"><a href="https://www.sharypic.com/'+value.uid+'/all" title="'+value.name+' - Les photos et vidéos collectés avec sharypic" >'+value.name+' - Les photos et vidéos collectés avec sharypic</a></iframe>'
+            io.sockets.emit('new-drawings',livedraw_iframe)
+            bTrouve=true
+        if !bTrouve 
+          createSharypicEvent(nomEvent)
+        
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
-      io.sockets.emit('new-drawings',livedraw)
       io.sockets.emit('new-title',episode)
   # test
 
