@@ -206,14 +206,6 @@ io.sockets.on 'connection', (socket) ->
     
   #Login : l'utilisateurs se connecte a la Chatroom
   socket.on 'login', (user) ->
-<<<<<<< HEAD
-        
-    try 
-      validator.isEmail(user.mail)
-    catch
-      socket.emit('error',"Email invalide")
-
-=======
     #Verification si le client est connu. dans le cas contraire, on le deconnecte
     verif_connexion(user.id_connexion)
         
@@ -225,8 +217,6 @@ io.sockets.on 'connection', (socket) ->
       socket.emit('erreur',"Le nom d'utilisateur doit être compris entre 3 et 30 lettres")
       return -1
 
-    
->>>>>>> gestion_connexion
     try
 
       # Verification de l'existance de l'utilisateur
