@@ -32,7 +32,7 @@ $(document).ready ->
     socket.emit('login', {
       username: $('#username').val(),
       mail: $('#mail').val(),
-      id_connexion
+      id_connexion: id_connexion
       })
     )
 
@@ -67,7 +67,7 @@ $(document).ready ->
     e.preventDefault()
     socket.emit 'nwmsg', {
       message: $('#message-to-send').val(),
-      id_connexion
+      id_connexion: id_connexion
     }
     $('#message-to-send').val("")
     $('#message-to-send').focus()
