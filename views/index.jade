@@ -15,10 +15,7 @@ block bloc_header
 block bloc_player
   .player
     iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html"  height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true" )
-   //audio#player(controls autoplay)
-    //  source(src='http://bit.ly/PS-live96kMP3' type="audio/mpeg")
-    //  source(src='http://bit.ly/PS-live96kM3U' type="audio/mpeg")
-    //  iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html" height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true")
+  
 
 
 
@@ -45,7 +42,7 @@ block bloc_login
 
 block bloc_sharypic
   .sharypic
-    #live-draw-frame 
+    #live-draw-frame
       iframe(scrolling='no', frameborder='0' src='/noshary')
             
 
@@ -95,8 +92,7 @@ block bloc_chatroom
 block user_box
   div#user_box
     li(id="{{id}}")
-      a
-        img(src="{{avatar}}" alt="Avatar {{user.username}}")
+      img(src="{{avatar}}" alt="Avatar {{user.username}}")
       span.pseudo
         | {{username}}
 
