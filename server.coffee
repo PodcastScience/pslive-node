@@ -101,7 +101,7 @@ admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 
 liste_connex    = []
 console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion(s)')
-livedraw_iframe = "/noshary"
+livedraw_iframe = '<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
 episode = 'Bienvenue sur le balado qui fait aimer la science!'
 
 
