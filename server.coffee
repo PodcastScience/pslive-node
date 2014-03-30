@@ -133,7 +133,7 @@ io.sockets.on 'connection', (socket) ->
   #Login : l'utilisateurs se connecte a la Chatroom
   socket.on 'login', (user) ->
     #Verification si le client est connu. dans le cas contraire, on le deconnecte
-    verif_connexion()
+    verif_connexion(id_connexion_loc)
         
     #Verification de la validité de l'identification
     unless  validator.isEmail(user.mail)
@@ -187,11 +187,11 @@ io.sockets.on 'connection', (socket) ->
 
 
   #Verification de la connection
-  verif_connexion=()->
-    console.log("Verif si la connexion "+id_connexion+" existe")
+  verif_connexion=(id_connexion_loc)->
+    console.log("Verif si la connexion "+id_connexion_loc+" existe")
     for key, val of liste_connex
       console.log(key)
-      if (key == id_connexion)
+      if (key == id_connexion_loc)
         return true
     #Si ce n'est pas le cas, on le deconnecte.
     #Sa reaction sera normalement de se reconnecter proprement immediatement
@@ -231,14 +231,14 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'disconnect', ->
     #gestion de la coupure de connexion du client
     console.log 'Deconnexion de '+me.name
-    if verif_connexion(id_connexion)
-      deconnexion(id_connexion)
+    if verif_connexion(id_connexion_loc)
+      deconnexion()
 
 
 
   # gestion des messages
   socket.on 'nwmsg', (message) ->
-    if verif_connexion()
+    if verif_connexion(id_connexion_loc)
       message.user = me
       date = new Date()
       message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
