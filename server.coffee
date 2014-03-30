@@ -133,7 +133,7 @@ io.sockets.on 'connection', (socket) ->
   #Login : l'utilisateurs se connecte a la Chatroom
   socket.on 'login', (user) ->
     #Verification si le client est connu. dans le cas contraire, on le deconnecte
-    verif_connexion(id_connexion_loc)
+    verif_connexion(id_connexion)
         
     #Verification de la validité de l'identification
     unless  validator.isEmail(user.mail)
@@ -231,14 +231,14 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'disconnect', ->
     #gestion de la coupure de connexion du client
     console.log 'Deconnexion de '+me.name
-    if verif_connexion(id_connexion_loc)
+    if verif_connexion(id_connexion)
       deconnexion()
 
 
 
   # gestion des messages
   socket.on 'nwmsg', (message) ->
-    if verif_connexion(id_connexion_loc)
+    if verif_connexion(id_connexion)
       message.user = me
       date = new Date()
       message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
