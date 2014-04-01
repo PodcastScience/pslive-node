@@ -24,7 +24,18 @@ $(document).ready ->
     id_connexion=id
 
   socket.on 'update_compteur', (connected) ->
-    $('.nb-connected').html("<span>"+connected+"</span> auditeurs <br>en ligne</h2>")
+    str=""
+    if (connected.connecte==0)
+      str+="<span class='connectes'>"+connected.connecte+"</span> auditeur connecté"
+    if (connected.connecte==1)
+      str+="<span class='connectes'>"+connected.connecte+"</span> auditeur connecté"
+    if (connected.connecte>1)
+      str+="<span class='connectes'>"+connected.connecte+"</span> auditeurs connectés"
+    if (connected.cache==1)
+        str+="<br>(plus <span class='caches'>"+connected.cache+"</span> qui se cache)"
+    if (connected.cache>1)
+        str+="<br>(plus <span class='caches'>"+connected.cache+"</span> qui se cachent)"
+    $('.nb-connected').html(str)
 
   # log des users
   $('#loginform').submit( (e) ->
@@ -40,10 +51,8 @@ $(document).ready ->
     #console.log('Erreur recu')
     $('#wrong-mail').html(message).fadeIn()
 
-        
 
-
-
+    
 
   # gestion des utilisateurs
   socket.on 'newuser', (user) ->

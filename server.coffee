@@ -29,7 +29,11 @@ replaceSalaud = (text) ->
 
         
   
-
+pad2 = (val) ->
+  if (val<10)
+    return  '0'+val
+  else
+    return val
   
 
 #all environments
@@ -57,8 +61,10 @@ app.get('/', routes.index)
 app.get('/admin', routes.admin)
 app.get('/users', user.list)
 app.get '/messages', (req, res) ->
-  res.send all_messages.map((message) -> "<b>#{message.user.username} :</b> #{message.message}").join("<br/>")
+  res.send all_messages.map((message) -> "<b>#{message.user.username}:</b> #{message.message}").join("<br/>")
 app.get '/noshary', (req, res) ->
+app.get '/timestamp', (req, res) ->
+  res.send all_messages.map((message) -> "<b>#{message.user.username}</b> [#{message.h}:#{message.m}:#{message.s}]: #{message.message}").join("<br/>")
   res.send "Pas de dessins ce soir :("
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
@@ -194,7 +200,10 @@ io.sockets.on 'connection', (socket) ->
     socket.emit('Olleh',id_connexion)
     
     #mise a jour du compteur et de la userlist pour tous les connectés
-    io.sockets.emit('update_compteur',compte(liste_connex))
+    io.sockets.emit('update_compteur',{
+      connecte:compte(users),
+      cache:compte(liste_connex)-compte(users)
+    })
     console.log('Ouverture de la connexion '+id_connexion+'. '+compte(liste_connex)+' connexions ouvertes')
     for key, value of users
       console.log('Ajout du user '+value.mail)
@@ -241,6 +250,10 @@ io.sockets.on 'connection', (socket) ->
         #on informe tout le monde qu'un nouvel utilisateur s'est connecté
         io.sockets.emit('newuser',me)
         
+        io.sockets.emit('update_compteur',{
+          connecte:compte(users),
+          cache:compte(liste_connex)-compte(users)
+        })
       #on informe l'utilisateur qu'il est bien cnnecté
       socket.emit('logged')
 
@@ -280,7 +293,10 @@ io.sockets.on 'connection', (socket) ->
     console.log('Suppression de la connexion '+id_connexion)
     delete liste_connex[id_connexion]
     #on met a jour le compteur des autres users
-    io.sockets.emit('update_compteur',compte(liste_connex))
+    io.sockets.emit('update_compteur',{
+      connecte:compte(users),
+      cache:compte(liste_connex)-compte(users)
+    })
     console.log("Nombre d'utilisateurs : "+compte(liste_connex))
     #si le une connexion a la chatroom existe, on le delg
     unless me == false
@@ -297,6 +313,10 @@ io.sockets.on 'connection', (socket) ->
       #et on en informe les autres clients
       delete users[me.id]
       io.sockets.emit('disuser',me)
+      io.sockets.emit('update_compteur',{
+        connecte:compte(users),
+        cache:compte(liste_connex)-compte(users)
+      })
 
 
 
@@ -316,8 +336,9 @@ io.sockets.on 'connection', (socket) ->
       date = new Date()
       message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
       message.message = replaceSalaud(message.message)
-      message.h = date.getHours()
-      message.m = date.getMinutes()
+      message.h = pad2(date.getHours())
+      message.m = pad2(date.getMinutes())
+      message.s = pad2(date.getSeconds())
       all_messages.push message
       last_messages.push message
       last_messages.shift() if (last_messages.length > history)

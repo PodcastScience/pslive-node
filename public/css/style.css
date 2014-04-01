@@ -588,7 +588,7 @@
 		line-height: 1em;
 	}
 	.chatroom h2 span,
-	.online h2 span {
+	.online h2 span.connectes {
 		float: left;
 		position: relative;
 		top: .15em;
@@ -596,6 +596,10 @@
 		font-weight: 300;
 		font-size: 2.14285714285714rem;
 		color: #e41d3d;
+	}
+	.online h2 span.caches {
+		color: #e41d3d;
+		font-weight: 500;
 	}
 	.chatroom h2 span {
 		position: static;
@@ -861,3 +865,8 @@
 		list-style-type: none; 
 	}
 
+    .timestamp{
+        color: #AAA;
+        font-size: small;
+        font-weight: 100;
+    }
