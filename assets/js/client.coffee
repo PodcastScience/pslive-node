@@ -85,7 +85,7 @@ $(document).ready ->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
     d=new Date();
     decalage=d.getTimezoneOffset()/60
-    message.h=parseInt(message.h)+decalage;
+    message.h=parseInt(message.h)-decalage;
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
