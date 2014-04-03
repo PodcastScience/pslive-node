@@ -6,6 +6,8 @@ $(document).ready ->
 
   connect_url = "/"
   id_connexion= false
+  username=""
+  email=""
   last_msg_id = false
 
   socket = io.connect(connect_url)
@@ -22,6 +24,8 @@ $(document).ready ->
   socket.on 'Olleh', (id) ->
     console.log('Olleh recu')
     id_connexion=id
+    if( username != "" && email != "")
+      send_login()
 
   socket.on 'update_compteur', (connected) ->
     str=""
@@ -40,11 +44,9 @@ $(document).ready ->
   # log des users
   $('#loginform').submit( (e) ->
     e.preventDefault()
-    socket.emit('login', {
-      username: $('#username').val(),
-      mail: $('#mail').val(),
-      id_connexion: id_connexion
-      })
+    username = $('#username').val()
+    email = $('#mail').val()
+    send_login()
     )
 
   socket.on 'erreur', (message) ->
@@ -144,6 +146,11 @@ $(document).ready ->
     console.log("il s'est barré")
     undefined if socket.emit 'triggered-beforeunload'
 
-
+  send_login = () ->
+    socket.emit('login', {
+      username: username,
+      mail: email,
+      id_connexion: id_connexion
+      })
 
 
