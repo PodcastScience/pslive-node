@@ -65,6 +65,8 @@ $(document).ready ->
 
   socket.on 'logged', ->
     $('#login').fadeOut()
+    $('#send-message').removeAttr('disabled')
+    $('#send-message').css('opacity',1)
     $('#message-form').fadeIn()
     $('#message-to-send').focus()
 
@@ -130,11 +132,11 @@ $(document).ready ->
   socket.on 'disconnect',() ->
     #console.log("evt disconnect recu")
     if id_connexion
-      $('#login').fadeIn()
-      $('#message-form').fadeOut()
+      id_connexion= false
+      setTimeout(display_loginform,15000)
+      $('#send-message').attr('disabled', 'disabled')
+      $('#send-message').css('opacity',0.5)
       console.log("Il s'est fait jeté")
-      msg = "Damned! Vous avez été deconnecté !"
-      $('#wrong-mail').html(msg).fadeIn()
       $('#members-list li').remove()
       $('.nb-connected').html("")
       id_connexion=false
@@ -153,4 +155,9 @@ $(document).ready ->
       id_connexion: id_connexion
       })
 
-
+  display_loginform = () ->
+    if(!id_connexion)
+      $('#login').fadeIn()
+      $('#message-form').fadeOut()
+      msg = "Damned! Vous avez été deconnecté !"
+      $('#wrong-mail').html(msg).fadeIn()
