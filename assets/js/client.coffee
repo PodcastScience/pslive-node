@@ -84,8 +84,8 @@ $(document).ready ->
   socket.on 'nwmsg', (message) ->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
     d=new Date();
-    decalage=0-d.getTimezoneOffset()/60
-    message.h+=decalage;
+    decalage=d.getTimezoneOffset()/60
+    message.h=message.h.parseInt()+decalage;
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
