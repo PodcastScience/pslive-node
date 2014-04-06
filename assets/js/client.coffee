@@ -19,7 +19,7 @@ $(document).ready ->
 
   unless window.location.pathname=='/admin'
     #console.log('Envoi du Hello initial') 
-    socket.emit('Hello')
+    socket.emit('Hello','')
     
   socket.on 'Olleh', (id) ->
     console.log('Olleh recu')
@@ -89,6 +89,7 @@ $(document).ready ->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
     d=new Date();
     decalage=d.getTimezoneOffset()/60
+    console.log("Reception d'un message ")
     message.h=parseInt(message.h)-decalage;
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
@@ -126,21 +127,24 @@ $(document).ready ->
     #console.log("Nouveau Titre")
     $('#title-episode').html(episode)
 
-
+  
+  socket.on 'del_msglist', () ->
+    # Message ne marchent plus apres le vidage mais remarche si on redemarre le serveur 
+    console.log("Vidage de la liste des messages")
+    last_msg_id=""
+    $('#messages li').remove()
     
     
   socket.on 'disconnect',() ->
     #console.log("evt disconnect recu")
     if id_connexion
-      id_connexion= false
       setTimeout(display_loginform,15000)
       $('#send-message').attr('disabled', 'disabled')
       $('#send-message').css('opacity',0.5)
       console.log("Il s'est fait jeté")
       $('#members-list li').remove()
       $('.nb-connected').html("")
-      id_connexion=false
-      socket.emit('Hello')
+      socket.emit('Hello',id_connexion)
 
 
 
@@ -161,3 +165,8 @@ $(document).ready ->
       $('#message-form').fadeOut()
       msg = "Damned! Vous avez été deconnecté !"
       $('#wrong-mail').html(msg).fadeIn()
+
+  $('#reinitChatroom').on 'click',  (e) ->
+      console.log("Reinitiailisation de la chatroom")
+      socket.emit('reinit_chatroom',$('#admin-password2').val())
+  

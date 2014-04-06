@@ -80,7 +80,7 @@ block bloc_chatroom
               img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar
               .message
                 span.pseudo {{user.username}}
-                span.timestamp &nbsp[{{h}}:{{m}}:{{s}}]
+                span.timestamp &nbsp[{{ts}}]
                 p {{{message}}}
   div.write
       form#message-form  

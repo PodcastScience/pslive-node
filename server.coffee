@@ -1,19 +1,24 @@
 
 
 require('coffee-script')
-express = require('express')
-routes = require('./routes')
-user = require('./routes/user')
-http = require('http')
-https = require('https')
-path = require('path')
-md5 = require('MD5')
-mu = require('mu2')
-validator = require('validator')
+express     = require('express')
+routes      = require('./routes')
+user        = require('./routes/user')
+http        = require('http')
+https       = require('https')
+path        = require('path')
+md5         = require('MD5')
+mu          = require('mu2')
+validator   = require('validator')
 
-app = express()
 
-livedraw_iframe = ""
+
+app         = express()
+redis       = require("redis").createClient()
+
+
+
+
 
 # functions
 replaceURLWithHTMLLinks = (text) ->
@@ -61,11 +66,16 @@ app.get('/', routes.index)
 app.get('/admin', routes.admin)
 app.get('/users', user.list)
 app.get '/messages', (req, res) ->
-  res.send all_messages.map((message) -> "<b>#{message.user.username}:</b> #{message.message}").join("<br/>")
+  redis.lrange('all_messages', 0, -1, (error, items) ->
+    res.send items.map((message) -> "<b>#{JSON.parse(message).user.username}:</b> #{JSON.parse(message).message}").join("<br/>")
+  )
 app.get '/noshary', (req, res) ->
   res.send "Pas de dessins ce soir :("
 app.get '/timestamp', (req, res) ->
-  res.send all_messages.map((message) -> "<b>#{message.user.username}</b> [#{message.h}:#{message.m}:#{message.s}]: #{message.message}").join("<br/>")
+  redis.lrange('all_messages', 0, -1, (error, items) ->
+    res.send items.map((message) -> 
+      "<b>#{JSON.parse(message).user.username}</b> [#{JSON.parse(message).ts}]: #{JSON.parse(message).message}").join("<br/>")
+  )
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
@@ -80,8 +90,7 @@ io.configure ->
   #io.set('close timeout', 200)
   io.set('heartbeat timeout', 200)
   # io.set('log colors',false)
-  # io.set('log level',0)
-
+  io.set('log level',0)
 
 
 
@@ -93,23 +102,59 @@ compte = (tab)->
   return cpt
 
 
+suppressionListeMessages = () ->
+  redis.llen('all_messages',(error,count)->
+    if(count>0)
+      redis.lpop('all_messages')
+      suppressionListeMessages()
+  )
+  
+
+suppressionConnexions = () ->
+  redis.scard('liste_connex',(error,count)->
+    if(count>0)
+      redis.spop('liste_connex')
+      suppressionListeMessages()
+  )
+  
+suppressionConnexions()
 #Initialisation des variables
 users = new Object()
 
-nb_conex = 0
-all_messages = []
-last_messages = []
-history = 10
-sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
-#sharypicAPIKey = ''
-admin_password = process.env.PSLIVE_ADMIN_PASSWORD
-#admin_password = ""
+sharypicAPIKey  = process.env.PSLIVE_SHARYPIC_APIKEY
+sharypicAPIKey  = 'ad8ca32f31fabe8643d29308'
+admin_password  = process.env.PSLIVE_ADMIN_PASSWORD
+admin_password  = ""
 
 liste_connex    = []
-console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion(s)')
-livedraw_iframe = '<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
-episode = 'Bienvenue sur le balado qui fait aimer la science!'
+redis.scard('liste_connex',(error, count) ->
+  console.log('Init de la liste des connexions: '+count+' connexion(s)') 
+)
 
+
+
+
+livedraw_iframe = '<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
+episode         = 'Bienvenue sur le balado qui fait aimer la science!'
+
+redis.get("livedraw_iframe",(err, replies)->
+    console.log('iframe:'+replies)
+    livedraw_iframe=replies
+)
+redis.get("episode",(err, replies)->
+    console.log('episode:'+replies)
+    episode=replies
+)
+
+
+
+update_compteur = () ->
+  redis.scard('liste_connex',(error, count_cnx) ->
+      io.sockets.emit('update_compteur',{
+        connecte:compte(users),
+        cache:count_cnx-compte(users)
+      })
+    )
 
 #Fonction pour la gestion de SharyPic
 getIframeStr = (jsonData) -> 
@@ -149,14 +194,13 @@ createSharypicEvent = (name,libelle) ->
         console.log("Event SharyPic cree : " +  data)
         jsonData = JSON.parse data
         livedraw_iframe = getIframeStr(jsonData)
+        redis.set("livedraw_iframe",livedraw_iframe)
         io.sockets.emit('new-drawings',livedraw_iframe)
     )
   ).on('error', (e) ->  console.log("Got error: " + e.message))
   req.write(param);
   req.end();
 #Fin des Fonctions pour la gestion de SharyPic
-
-
 
 
 
@@ -174,40 +218,45 @@ io.sockets.on 'connection', (socket) ->
   me = false
   id_connexion= false
 
+  
+  init_connexion = (socket) ->
+    id_connexion = md5(Date.now())
+    redis.sadd('liste_connex',id_connexion)
+    #Envoi des messages récents au client
+    redis.llen('all_messages',  (error, nombre) ->
+      debut = Math.max(nombre-10,0)
+      console.log("debut:"+debut+'/'+nombre)
+      redis.lrange('all_messages', debut, -1, (error2, items) ->
+        items.map((message) -> socket.emit('nwmsg',JSON.parse(message)))
+      )
+    )
+    #Envoi des parametres du live
+    socket.emit('new-drawings',livedraw_iframe)
+    socket.emit('new-title',episode)
+    for key, value of users
+      console.log('Ajout du user '+value.mail)
+      socket.emit('newuser',value)
 
-
-  #Envoi des messages récents au client
-  for message in last_messages
-    socket.emit('nwmsg',message)
-
-  #Envoi des parametres du live
-  socket.emit('new-drawings',livedraw_iframe)
-  socket.emit('new-title',episode)
-    
     
     
     
   # gestion de la connexion au live. Le client evoi un Hello au serveur
   # qui lui reponf Olleh avec un id qui permettra de au serveur de s'assurer
   # que le client est connu (notamment compté)
-  socket.on 'Hello', ->
-    #calcul de l'id
-    id_connexion = md5(Date.now())
-    liste_connex[id_connexion]=''
+  socket.on 'Hello', (id_demande) ->
+    #verification si l'id est connu
+    redis.sismember("liste_connex",id_demande,(err, res) ->
+      if !res
+        init_connexion(socket)
+      else
+        id_connexion=id_demande
+      #envoi de Olleh
+      console.log('Hello recu. Envoi du Olleh')
+      socket.emit('Olleh',id_connexion)
+      #mise a jour du compteur
+      update_compteur()
+    )
     
-    #envoi de Olleh
-    console.log('Hello recu. Envoi du Olleh')
-    socket.emit('Olleh',id_connexion)
-    
-    #mise a jour du compteur et de la userlist pour tous les connectés
-    io.sockets.emit('update_compteur',{
-      connecte:compte(users),
-      cache:compte(liste_connex)-compte(users)
-    })
-    console.log('Ouverture de la connexion '+id_connexion+'. '+compte(liste_connex)+' connexions ouvertes')
-    for key, value of users
-      console.log('Ajout du user '+value.mail)
-      socket.emit('newuser',value)
     
     
     
@@ -216,7 +265,7 @@ io.sockets.on 'connection', (socket) ->
   #Login : l'utilisateurs se connecte a la Chatroom
   socket.on 'login', (user) ->
     #Verification si le client est connu. dans le cas contraire, on le deconnecte
-    verif_connexion(user.id_connexion)
+    verif_connexion(user.id_connexion,()->)
         
     #Verification de la validité de l'identification
     unless  validator.isEmail(user.mail)
@@ -250,40 +299,25 @@ io.sockets.on 'connection', (socket) ->
         #on informe tout le monde qu'un nouvel utilisateur s'est connecté
         io.sockets.emit('newuser',me)
         
-        io.sockets.emit('update_compteur',{
-          connecte:compte(users),
-          cache:compte(liste_connex)-compte(users)
-        })
+        update_compteur()
       #on informe l'utilisateur qu'il est bien cnnecté
       socket.emit('logged')
 
   
         
-        
-#verif_connexion=()->
-#    console.log("Verif si l'user "+me.name+" existe")
-#    for key, existing_user of users
-#      console.log(existing_user.name)
-#      if (me.id == existing_user.id)
-#        return true
-#    console.log("Un utilisateur inconnu s'est connecté. son nom:"+me.name)
-#    socket.emit('disconnect',"Utilisateur inconnu")
-#    return false
+   
 
 
-
-  #Verification de la connection
-  verif_connexion=(id_connexion_loc)->
+  #Verification de la connexion
+  verif_connexion=(id_connexion_loc,callback)->
     console.log("Verif si la connexion "+id_connexion_loc+" existe")
-    for key, val of liste_connex
-      console.log(key)
-      if (key == id_connexion_loc)
-        return true
-    #Si ce n'est pas le cas, on le deconnecte.
-    #Sa reaction sera normalement de se reconnecter proprement immediatement
-    console.log("Une connexion inconnu a été repérée")
-    socket.emit('disconnect',"Utilisateur inconnu")
-    return false
+    redis.sismember("liste_connex",id_connexion_loc,(err, res) ->
+      if res
+        callback()
+      else
+        console.log("Une connexion inconnu a été repérée")
+        socket.emit('disconnect',"Utilisateur inconnu")
+    )
 
 
 
@@ -291,13 +325,9 @@ io.sockets.on 'connection', (socket) ->
   deconnexion=() ->
     #On supprime la connexion de la liste
     console.log('Suppression de la connexion '+id_connexion)
-    delete liste_connex[id_connexion]
+    redis.srem("liste_connex",id_connexion)
     #on met a jour le compteur des autres users
-    io.sockets.emit('update_compteur',{
-      connecte:compte(users),
-      cache:compte(liste_connex)-compte(users)
-    })
-    console.log("Nombre d'utilisateurs : "+compte(liste_connex))
+    update_compteur()
     #si le une connexion a la chatroom existe, on le delg
     unless me == false
       logout()
@@ -313,10 +343,7 @@ io.sockets.on 'connection', (socket) ->
       #et on en informe les autres clients
       delete users[me.id]
       io.sockets.emit('disuser',me)
-      io.sockets.emit('update_compteur',{
-        connecte:compte(users),
-        cache:compte(liste_connex)-compte(users)
-      })
+      update_compteur()
 
 
 
@@ -324,25 +351,26 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'disconnect', ->
     #gestion de la coupure de connexion du client
     console.log 'Deconnexion de '+me.name
-    if verif_connexion(id_connexion)
-      deconnexion()
+    verif_connexion(id_connexion,deconnexion)
 
 
 
   # gestion des messages
   socket.on 'nwmsg', (message) ->
-    if verif_connexion(message.id_connexion)
+    verif_connexion(message.id_connexion,()->
       message.user = me
       date = new Date()
       message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
       message.message = replaceSalaud(message.message)
-      message.h = pad2(date.getHours())
-      message.m = pad2(date.getMinutes())
-      message.s = pad2(date.getSeconds())
-      all_messages.push message
-      last_messages.push message
-      last_messages.shift() if (last_messages.length > history)
+      h = pad2(date.getHours())
+      m = pad2(date.getMinutes())
+      s = pad2(date.getSeconds())
+      message.ts = h+":"+m+":"+s
+      message_JSON=JSON.stringify(message)
+      console.log('JSON:'+message_JSON)
+      redis.rpush('all_messages',message_JSON)   
       io.sockets.emit('nwmsg',message)
+    )
             
 
   #GESTION DE L'admin (qui n'envoi pas de HELLO)
@@ -373,8 +401,9 @@ io.sockets.on 'connection', (socket) ->
           console.log(value.name+'/'+nomEvent);
           if value.name==nomEvent & value.created_at>dateref
             livedraw_iframe = getIframeStr(value)
-            io.sockets.emit('new-drawings',livedraw_iframe)
-            bTrouve=true
+            redis.set("livedraw_iframe",livedraw_iframe)
+            #io.sockets.emit('new-drawings',livedraw_iframe)
+            bTrouve=true    
             dateref=value.created_at
         if !bTrouve && message.createEvent
           createSharypicEvent(nomEvent,message.title)
@@ -382,16 +411,21 @@ io.sockets.on 'connection', (socket) ->
           io.sockets.emit('new-drawings',livedraw_iframe)
         
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
+      redis.set("episode",episode)
       io.sockets.emit('new-drawings',livedraw_iframe)
       io.sockets.emit('new-title',episode)
         
+  # Reitinialisation de la chatroom
+  socket.on 'reinit_chatroom', (password) ->
+    if password == admin_password
+      console.log("Reinitiailisation de la chatroom")
+      suppressionListeMessages()
+      livedraw_iframe='<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
+      episode='Bienvenue sur le balado qui fait aimer la science!'
+      redis.set("livedraw_iframe",livedraw_iframe)
+      redis.set("episode",episode)
+      io.sockets.emit('del_msglist')
+      io.sockets.emit('new-drawings',livedraw_iframe)
+      io.sockets.emit('new-title',episode)
+ 
         
-        
-  # test
-
-  # socket.on 'test', ->
-  # 	console.log(users)
-
-
-
-
