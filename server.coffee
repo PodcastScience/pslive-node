@@ -134,7 +134,7 @@ users = new Object()
 nb_conex = 0
 history = 10
 last_messages = []
-for(var i=Math.min(0,all_messages.length-history);i<all_messages.length;i++) 
+for(i=Math.min(0,all_messages.length-history);i<all_messages.length;i++) 
   last_messages.push(all_messages[i])
 
 sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
