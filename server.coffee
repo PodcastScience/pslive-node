@@ -375,7 +375,7 @@ io.sockets.on 'connection', (socket) ->
       s3.client.putObject({
         Bucket: 'podcastsciencepm',
         Key: 'messagesPodcastScience.JSON',
-        Body: all_messages
+        Body: JSON.stringify(all_messages)
       },  (res) ->
             console.log(res)
         )
@@ -415,6 +415,7 @@ io.sockets.on 'connection', (socket) ->
           createSharypicEvent(nomEvent,message.title)
         else
           io.sockets.emit('new-drawings',livedraw_iframe)
+          maj_S3episode()
         
         
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
