@@ -130,9 +130,9 @@ nb_conex = 0
 last_messages = []
 history = 10
 sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
-sharypicAPIKey = 'ad8ca32f31fabe8643d29308'
+#sharypicAPIKey = ''
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
-admin_password = ""
+#admin_password = ""
 
 liste_connex    = []
 console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion(s)')
