@@ -15,35 +15,7 @@ AWS.config.update({region: 'eu-west-1'});
 s3 = new AWS.S3()
 
 
-
-livedraw_iframe = '<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
-episode = 'Bienvenue sur le balado qui fait aimer la science!'
-
-
 app = express()
-s3.client.getObject({
-  Bucket: 'podcastsciencepm',
-  Key: 'episodePodcastScience.JSON'
-},  (error,res) ->
-  if(!error)
-    console.log("chargement episode ok")
-    livedraw_iframe=JSON.parse(res.Body).iframe
-    episode=JSON.parse(res.Body).titre
-  else
-    console.log("erreur chargement episode")
-  
- )
-
-
-all_messages = []
-s3.client.getObject({
-  Bucket: 'podcastsciencepm',
-  Key: 'messagesPodcastScience.JSON'
-}, (error,res) ->
-  if(!error)
-    all_messages=JSON.parse(res.Body)
-  console.log(JSON.stringify(all_messages))
-)
 
 # functions
 replaceURLWithHTMLLinks = (text) ->
@@ -123,12 +95,48 @@ compte = (tab)->
   return cpt
 
 
+
+## Chargement de la chatroom dans Amazon S3
+livedraw_iframe = '<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
+episode = 'Bienvenue sur le balado qui fait aimer la science!'
+
+
+s3.client.getObject({
+  Bucket: 'podcastsciencepm',
+  Key: 'episodePodcastScience.JSON'
+},  (error,res) ->
+  if(!error)
+    console.log("chargement episode ok")
+    livedraw_iframe=JSON.parse(res.Body).iframe
+    episode=JSON.parse(res.Body).titre
+  else
+    console.log("erreur chargement episode")
+  
+ )
+
+
+all_messages = []
+s3.client.getObject({
+  Bucket: 'podcastsciencepm',
+  Key: 'messagesPodcastScience.JSON'
+}, (error,res) ->
+  if(!error)
+    all_messages=JSON.parse(res.Body)
+  console.log(JSON.stringify(all_messages))
+)
+
 #Initialisation des variables
 users = new Object()
 
+
+
+
 nb_conex = 0
-last_messages = []
 history = 10
+last_messages = []
+for(var i=Math.min(0,all_messages.length-history);i<all_messages.length;i++) 
+  last_messages.push(all_messages[i])
+
 sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
 #sharypicAPIKey = ''
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
@@ -347,7 +355,7 @@ io.sockets.on 'connection', (socket) ->
       'iframe':livedraw_iframe
       })
     },  (res) ->
-      console.log("Erreur S3"+res)
+      console.log("S3 : "+res)
     )
 
   socket.on 'disconnect', ->
