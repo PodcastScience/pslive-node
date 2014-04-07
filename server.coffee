@@ -133,9 +133,7 @@ users = new Object()
 
 nb_conex = 0
 history = 10
-last_messages = []
-for(i=Math.min(0,all_messages.length-history);i<all_messages.length;i++) 
-  last_messages.push(all_messages[i])
+last_messages = (msg for msg in all_messages)
 
 sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
 #sharypicAPIKey = ''
