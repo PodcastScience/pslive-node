@@ -135,7 +135,7 @@ nb_conex = 0
 history = 10
 for msg in all_messages
   last_messages.push msg
-  last_messages.shift() if (last_messages.length > history)
+  #last_messages.shift() if (last_messages.length > history)
 
 sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
 #sharypicAPIKey = ''
