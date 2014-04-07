@@ -129,7 +129,7 @@ s3.client.getObject({
 users = new Object()
 
 
-
+last_messages = []
 
 nb_conex = 0
 history = 10
