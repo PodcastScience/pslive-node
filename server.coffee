@@ -1,5 +1,4 @@
 
-
 require('coffee-script')
 express = require('express')
 routes = require('./routes')
@@ -10,10 +9,41 @@ path = require('path')
 md5 = require('MD5')
 mu = require('mu2')
 validator = require('validator')
+AWS = require('aws-sdk')
+#AWS.config.loadFromPath('./configAWS.json');
+AWS.config.update({region: 'eu-west-1'});
+s3 = new AWS.S3()
+
+
+
+livedraw_iframe = '<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
+episode = 'Bienvenue sur le balado qui fait aimer la science!'
+
 
 app = express()
+s3.client.getObject({
+  Bucket: 'podcastsciencepm',
+  Key: 'episodePodcastScience.JSON'
+},  (error,res) ->
+  if(!error)
+    console.log("chargement episode ok")
+    livedraw_iframe=JSON.parse(res.Body).iframe
+    episode=JSON.parse(res.Body).titre
+  else
+    console.log("erreur chargement episode")
+  
+ )
 
-livedraw_iframe = ""
+
+all_messages = []
+s3.client.getObject({
+  Bucket: 'podcastsciencepm',
+  Key: 'messagesPodcastScience.JSON'
+}, (error,res) ->
+  if(!error)
+    all_messages=JSON.parse(res.Body)
+  console.log(JSON.stringify(all_messages))
+)
 
 # functions
 replaceURLWithHTMLLinks = (text) ->
@@ -97,18 +127,16 @@ compte = (tab)->
 users = new Object()
 
 nb_conex = 0
-all_messages = []
 last_messages = []
 history = 10
 sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
-#sharypicAPIKey = ''
+sharypicAPIKey = 'ad8ca32f31fabe8643d29308'
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
-#admin_password = ""
+admin_password = ""
 
 liste_connex    = []
 console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion(s)')
-livedraw_iframe = '<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
-episode = 'Bienvenue sur le balado qui fait aimer la science!'
+
 
 
 #Fonction pour la gestion de SharyPic
@@ -259,17 +287,7 @@ io.sockets.on 'connection', (socket) ->
 
   
         
-        
-#verif_connexion=()->
-#    console.log("Verif si l'user "+me.name+" existe")
-#    for key, existing_user of users
-#      console.log(existing_user.name)
-#      if (me.id == existing_user.id)
-#        return true
-#    console.log("Un utilisateur inconnu s'est connecté. son nom:"+me.name)
-#    socket.emit('disconnect',"Utilisateur inconnu")
-#    return false
-
+      
 
 
   #Verification de la connection
@@ -319,7 +337,17 @@ io.sockets.on 'connection', (socket) ->
       })
 
 
-
+  maj_S3episode = () ->
+    s3.client.putObject({
+    Bucket: 'podcastsciencepm',
+    Key: 'episodePodcastScience.JSON',
+    Body: JSON.stringify({
+      'titre':episode,
+      'iframe':livedraw_iframe
+      })
+    },  (res) ->
+      console.log("Erreur S3"+res)
+    )
 
   socket.on 'disconnect', ->
     #gestion de la coupure de connexion du client
@@ -343,6 +371,13 @@ io.sockets.on 'connection', (socket) ->
       last_messages.push message
       last_messages.shift() if (last_messages.length > history)
       io.sockets.emit('nwmsg',message)
+      s3.client.putObject({
+        Bucket: 'podcastsciencepm',
+        Key: 'messagesPodcastScience.JSON',
+        Body: all_messages
+      },  (res) ->
+            console.log(res)
+        )
             
 
   #GESTION DE L'admin (qui n'envoi pas de HELLO)
@@ -373,7 +408,6 @@ io.sockets.on 'connection', (socket) ->
           console.log(value.name+'/'+nomEvent);
           if value.name==nomEvent & value.created_at>dateref
             livedraw_iframe = getIframeStr(value)
-            io.sockets.emit('new-drawings',livedraw_iframe)
             bTrouve=true
             dateref=value.created_at
         if !bTrouve && message.createEvent
@@ -381,17 +415,12 @@ io.sockets.on 'connection', (socket) ->
         else
           io.sockets.emit('new-drawings',livedraw_iframe)
         
+        
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
-      io.sockets.emit('new-drawings',livedraw_iframe)
       io.sockets.emit('new-title',episode)
+      maj_S3episode()
         
         
-        
-  # test
-
-  # socket.on 'test', ->
-  # 	console.log(users)
-
 
 
 
