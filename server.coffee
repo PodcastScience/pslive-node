@@ -211,6 +211,7 @@ io.sockets.on 'connection', (socket) ->
 
 
   envoieInitialChatroom = () ->
+    console.log("envoie de l'historique")
   #Envoi des messages récents au client
     for message in last_messages
       socket.emit('nwmsg',message)
@@ -227,6 +228,7 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'Hello', (id_demandee) ->
     #calcul de l'id
     if(id_demandee=='')
+      console.log("generation de l'id")
       id_connexion = md5(Date.now())
     liste_connex[id_connexion]=''
     
