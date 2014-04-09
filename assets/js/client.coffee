@@ -130,7 +130,7 @@ $(document).ready ->
     
     
   socket.on 'disconnect',() ->
-    #console.log("evt disconnect recu")
+    console.log("evt disconnect recu")
     if id_connexion
       setTimeout(display_loginform,15000)
       $('#send-message').attr('disabled', 'disabled')
