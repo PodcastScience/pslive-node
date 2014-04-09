@@ -67,7 +67,7 @@ app.get '/messages', (req, res) ->
 app.get '/noshary', (req, res) ->
   res.send "Pas de dessins ce soir :("
 app.get '/timestamp', (req, res) ->
-  res.send all_messages.map((message) -> "<b>#{message.user.username}</b> [#{message.h}:#{message.m}:#{message.s}]: #{message.message}").join("<br/>")
+  res.send all_messages.map((message) -> "<b>#{message.user.username}</b> [#{(message.h+2)%24}:#{message.m}:#{message.s}]: #{message.message}").join("<br/>")
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
