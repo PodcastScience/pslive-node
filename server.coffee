@@ -1,5 +1,4 @@
 
-
 require('coffee-script')
 express     = require('express')
 routes      = require('./routes')
@@ -122,9 +121,9 @@ suppressionConnexions()
 users = new Object()
 
 sharypicAPIKey  = process.env.PSLIVE_SHARYPIC_APIKEY
-sharypicAPIKey  = 'ad8ca32f31fabe8643d29308'
+#sharypicAPIKey  = ''
 admin_password  = process.env.PSLIVE_ADMIN_PASSWORD
-admin_password  = ""
+#admin_password  = ""
 
 liste_connex    = []
 redis.scard('liste_connex',(error, count) ->
