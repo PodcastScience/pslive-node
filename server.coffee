@@ -129,11 +129,12 @@ s3.client.getObject({
 users = new Object()
 
 
-last_messages = []
+last_messages = []  
 
 nb_conex = 0
 history = 10
 for msg in all_messages
+  console.log("chargement derniers messages:"+msh.message)
   last_messages.push msg
   #last_messages.shift() if (last_messages.length > history)
 
