@@ -226,7 +226,7 @@ io.sockets.on 'connection', (socket) ->
   # que le client est connu (notamment compté)
   socket.on 'Hello', (id_demande) ->
     #calcul de l'id
-    if(id_demande='')
+    if(id_demande=='')
       console.log("generation de l'id")
       id_connexion = md5(Date.now())
     else
