@@ -114,36 +114,34 @@ s3.client.getObject({
   
  )
 
-
+#Initialisation des variables
+users = new Object()
+last_messages = []  
 all_messages = []
+nb_conex = 0
+history = 10
+sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
+#sharypicAPIKey = ''
+admin_password = process.env.PSLIVE_ADMIN_PASSWORD
+#admin_password = ""
+
+
+#Chargement de l'historique des messages
+liste_connex    = []
 s3.client.getObject({
   Bucket: 'podcastsciencepm',
   Key: 'messagesPodcastScience.JSON'
 }, (error,res) ->
   if(!error)
     all_messages=JSON.parse(res.Body)
+    for msg in all_messages
+      console.log("chargement derniers messages:"+msh.message)
+      last_messages.shift() if (last_messages.length > history)
+      #last_messages.push msg
   console.log(JSON.stringify(all_messages))
 )
 
-#Initialisation des variables
-users = new Object()
 
-
-last_messages = []  
-
-nb_conex = 0
-history = 10
-for msg in all_messages
-  console.log("chargement derniers messages:"+msh.message)
-  last_messages.push msg
-  #last_messages.shift() if (last_messages.length > history)
-
-sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
-#sharypicAPIKey = ''
-admin_password = process.env.PSLIVE_ADMIN_PASSWORD
-#admin_password = ""
-
-liste_connex    = []
 console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion(s)')
 
 
