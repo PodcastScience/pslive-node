@@ -230,6 +230,8 @@ io.sockets.on 'connection', (socket) ->
     if(id_demandee=='')
       console.log("generation de l'id")
       id_connexion = md5(Date.now())
+    else
+      id_connexion = id_demandee
     liste_connex[id_connexion]=''
     
     #envoi de Olleh
