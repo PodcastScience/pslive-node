@@ -82,7 +82,7 @@ io.configure ->
   #io.set('close timeout', 200)
   io.set('heartbeat timeout', 200)
   # io.set('log colors',false)
-  # io.set('log level',0)
+  io.set('log level',0)
 
 
 
