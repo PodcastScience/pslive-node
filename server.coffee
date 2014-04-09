@@ -135,7 +135,7 @@ s3.client.getObject({
   if(!error)
     all_messages=JSON.parse(res.Body)
     for msg in all_messages
-      console.log("chargement derniers messages:"+msh.message)
+      console.log("chargement derniers messages:"+msg.message)
       last_messages.shift() if (last_messages.length > history)
       #last_messages.push msg
   console.log(JSON.stringify(all_messages))
