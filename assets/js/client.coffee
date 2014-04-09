@@ -19,7 +19,7 @@ $(document).ready ->
 
   unless window.location.pathname=='/admin'
     #console.log('Envoi du Hello initial') 
-    socket.emit('Hello')
+    socket.emit('Hello','')
     
   socket.on 'Olleh', (id) ->
     console.log('Olleh recu')
@@ -132,15 +132,13 @@ $(document).ready ->
   socket.on 'disconnect',() ->
     #console.log("evt disconnect recu")
     if id_connexion
-      id_connexion= false
       setTimeout(display_loginform,15000)
       $('#send-message').attr('disabled', 'disabled')
       $('#send-message').css('opacity',0.5)
       console.log("Il s'est fait jeté")
       $('#members-list li').remove()
       $('.nb-connected').html("")
-      id_connexion=false
-      socket.emit('Hello')
+      socket.emit('Hello',id_connexion)
 
 
 

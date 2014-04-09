@@ -210,14 +210,13 @@ io.sockets.on 'connection', (socket) ->
   id_connexion= false
 
 
-
+  envoieInitialChatroom = () ->
   #Envoi des messages récents au client
-  for message in last_messages
-    socket.emit('nwmsg',message)
-
-  #Envoi des parametres du live
-  socket.emit('new-drawings',livedraw_iframe)
-  socket.emit('new-title',episode)
+    for message in last_messages
+      socket.emit('nwmsg',message)
+    #Envoi des parametres du live
+    socket.emit('new-drawings',livedraw_iframe)
+    socket.emit('new-title',episode)
     
     
     
@@ -225,15 +224,17 @@ io.sockets.on 'connection', (socket) ->
   # gestion de la connexion au live. Le client evoi un Hello au serveur
   # qui lui reponf Olleh avec un id qui permettra de au serveur de s'assurer
   # que le client est connu (notamment compté)
-  socket.on 'Hello', ->
+  socket.on 'Hello', (id_demandee) ->
     #calcul de l'id
-    id_connexion = md5(Date.now())
+    if(id_demandee=='')
+      id_connexion = md5(Date.now())
     liste_connex[id_connexion]=''
     
     #envoi de Olleh
     console.log('Hello recu. Envoi du Olleh')
     socket.emit('Olleh',id_connexion)
-    
+    if(id_demandee=='')
+      envoieInitialChatroom()
     #mise a jour du compteur et de la userlist pour tous les connectés
     io.sockets.emit('update_compteur',{
       connecte:compte(users),
