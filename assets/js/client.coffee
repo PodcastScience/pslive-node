@@ -22,7 +22,7 @@ $(document).ready ->
     socket.emit('Hello','')
     
   socket.on 'Olleh', (id) ->
-    console.log('Olleh recu')
+    console.log('Olleh recu *'+id+'*')
     id_connexion=id
     if( username != "" && email != "")
       send_login()
@@ -130,8 +130,8 @@ $(document).ready ->
     
     
   socket.on 'disconnect',() ->
-    console.log("evt disconnect recu "+id_connexion)
-    if id_connexion
+    console.log("evt disconnect recu *"+id_connexion+"*")
+    if !id_connexion
       setTimeout(display_loginform,15000)
       $('#send-message').attr('disabled', 'disabled')
       $('#send-message').css('opacity',0.5)
