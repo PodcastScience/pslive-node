@@ -130,7 +130,7 @@ $(document).ready ->
     
     
   socket.on 'disconnect',() ->
-    console.log("evt disconnect recu")
+    console.log("evt disconnect recu "+id_connexion)
     if id_connexion
       setTimeout(display_loginform,15000)
       $('#send-message').attr('disabled', 'disabled')
@@ -138,6 +138,7 @@ $(document).ready ->
       console.log("Il s'est fait jeté")
       $('#members-list li').remove()
       $('.nb-connected').html("")
+      
       socket.emit('Hello',id_connexion)
 
 
