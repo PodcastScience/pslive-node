@@ -131,7 +131,7 @@ $(document).ready ->
     
   socket.on 'disconnect',() ->
     console.log("evt disconnect recu *"+id_connexion+"*")
-    if !id_connexion
+    if id_connexion
       setTimeout(display_loginform,15000)
       $('#send-message').attr('disabled', 'disabled')
       $('#send-message').css('opacity',0.5)
