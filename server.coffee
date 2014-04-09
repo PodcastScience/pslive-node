@@ -234,7 +234,7 @@ io.sockets.on 'connection', (socket) ->
     liste_connex[id_connexion]=''
     
     #envoi de Olleh
-    console.log('Hello recu. Envoi du Olleh')
+    console.log('Hello recu. Envoi du Olleh : '+id_connexion)
     socket.emit('Olleh',id_connexion)
     if(id_demande=='')
       envoieInitialChatroom()
