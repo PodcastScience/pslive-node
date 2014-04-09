@@ -225,19 +225,21 @@ io.sockets.on 'connection', (socket) ->
   # gestion de la connexion au live. Le client evoi un Hello au serveur
   # qui lui reponf Olleh avec un id qui permettra de au serveur de s'assurer
   # que le client est connu (notamment compté)
-  socket.on 'Hello', (id_demandee) ->
+  socket.on 'Hello', (id_demande) ->
     #calcul de l'id
-    if(id_demandee=='')
+    if(id_demandee='')
       console.log("generation de l'id")
       id_connexion = md5(Date.now())
     else
-      id_connexion = id_demandee
+      id_connexion = id_demande
     liste_connex[id_connexion]=''
     
     #envoi de Olleh
     console.log('Hello recu. Envoi du Olleh')
     socket.emit('Olleh',id_connexion)
-    if(id_demandee=='')
+    if(id_demande=='')
+      envoieInitialChatroom()
+    else
       envoieInitialChatroom()
     #mise a jour du compteur et de la userlist pour tous les connectés
     io.sockets.emit('update_compteur',{
