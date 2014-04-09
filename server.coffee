@@ -238,8 +238,6 @@ io.sockets.on 'connection', (socket) ->
     socket.emit('Olleh',id_connexion)
     if(id_demande=='')
       envoieInitialChatroom()
-    else
-      envoieInitialChatroom()
     #mise a jour du compteur et de la userlist pour tous les connectés
     io.sockets.emit('update_compteur',{
       connecte:compte(users),
