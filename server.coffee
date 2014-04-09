@@ -118,7 +118,6 @@ s3.client.getObject({
 users = new Object()
 last_messages = []  
 all_messages = []
-nb_conex = 0
 history = 10
 sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
 #sharypicAPIKey = ''
@@ -136,7 +135,7 @@ s3.client.getObject({
     all_messages=JSON.parse(res.Body)
     for msg in all_messages
       console.log("chargement derniers messages:"+msg.message)
-      #last_messages.push msg
+      last_messages.push msg
       last_messages.shift() if (last_messages.length > history)
   console.log(JSON.stringify(all_messages))
 )
@@ -211,7 +210,7 @@ io.sockets.on 'connection', (socket) ->
 
 
   envoieInitialChatroom = () ->
-    console.log("envoie de l'historique")
+    console.log("envoi de l'historique")
   #Envoi des messages récents au client
     for message in last_messages
       socket.emit('nwmsg',message)
