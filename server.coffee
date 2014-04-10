@@ -10,7 +10,7 @@ md5 = require('MD5')
 mu = require('mu2')
 validator = require('validator')
 AWS = require('aws-sdk')
-AWS.config.loadFromPath('./configAWS.json');
+#AWS.config.loadFromPath('./configAWS.json');
 AWS.config.update({region: 'eu-west-1'});
 s3 = new AWS.S3()
 
