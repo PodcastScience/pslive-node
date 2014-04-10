@@ -10,7 +10,7 @@ md5 = require('MD5')
 mu = require('mu2')
 validator = require('validator')
 AWS = require('aws-sdk')
-#AWS.config.loadFromPath('./configAWS.json');
+AWS.config.loadFromPath('./configAWS.json');
 AWS.config.update({region: 'eu-west-1'});
 s3 = new AWS.S3()
 
@@ -67,7 +67,19 @@ app.get '/messages', (req, res) ->
 app.get '/noshary', (req, res) ->
   res.send "Pas de dessins ce soir :("
 app.get '/timestamp', (req, res) ->
-  res.send all_messages.map((message) -> "<b>#{message.user.username}</b> [#{(message.h+2)%24}:#{message.m}:#{message.s}]: #{message.message}").join("<br/>")
+  res.send all_messages.map((message) -> 
+    "<b>#{message.user.username}</b> [#{(message.h+2)%24}:#{message.m}:#{message.s}]: <span id='[#{(message.h+2)%24}:#{message.m}:#{message.s}]'>#{message.message}</span>"
+  ).join("<br/>")
+app.get '/questions', (req, res) ->
+  res.send all_messages.filter( (msg,idx) -> 
+    console.log(msg.message+'/'+idx)
+    if typeof(msg)!='undefined' && typeof(msg.message)!='undefined'
+      msg.message.indexOf("@ps")>-1 || msg.message.indexOf("@PS")>-1
+    else
+      false
+  ).map((message) -> 
+    "<b>#{message.user.username}</b><a href='/timestamp#[#{(message.h+2)%24}:#{message.m}:#{message.s}]'>[#{(message.h+2)%24}:#{message.m}:#{message.s}]</a>: #{message.message}"
+  ).join("<br/>");
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
