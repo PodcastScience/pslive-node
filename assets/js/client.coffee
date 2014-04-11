@@ -160,3 +160,13 @@ $(document).ready ->
       $('#message-form').fadeOut()
       msg = "Damned! Vous avez été deconnecté !"
       $('#wrong-mail').html(msg).fadeIn()
+
+  $('#reinitChatroom').on 'click',  (e) ->
+      console.log("Reinitiailisation de la chatroom")
+      socket.emit('reinit_chatroom',$('#admin-password2').val())
+            
+  socket.on 'del_msglist', () ->
+    # Message ne marchent plus apres le vidage mais remarche si on redemarre le serveur 
+    console.log("Vidage de la liste des messages")
+    last_msg_id=""
+    $('#messages li').remove()

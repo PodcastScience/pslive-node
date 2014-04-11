@@ -114,7 +114,7 @@ episode = 'Bienvenue sur le balado qui fait aimer la science!'
 
 
 s3.client.getObject({
-  Bucket: 'podcastsciencepm',
+  Bucket: 'chatroomPodcastScience',
   Key: 'episodePodcastScience.JSON'
 },  (error,res) ->
   if(!error)
@@ -140,7 +140,7 @@ admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 #Chargement de l'historique des messages
 liste_connex    = []
 s3.client.getObject({
-  Bucket: 'podcastsciencepm',
+  Bucket: 'chatroomPodcastScience',
   Key: 'messagesPodcastScience.JSON'
 }, (error,res) ->
   if(!error)
@@ -159,7 +159,7 @@ console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion
 
 #Fonction pour la gestion de SharyPic
 getIframeStr = (jsonData) -> 
-  return '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+jsonData.uid+'/widget?collection=all&theme=dark&autoplay=true&share=true&scoped_to=all&timing=20000"><a href="https://www.sharypic.com/'+jsonData.uid+'/all" title="'+jsonData.description+'" >'+jsonData.description+'</a></iframe>'
+  '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+jsonData.uid+'/widget?collection=all&theme=dark&autoplay=true&share=true&scoped_to=all&timing=20000"><a href="https://www.sharypic.com/'+jsonData.uid+'/all" title="'+jsonData.description+'" >'+jsonData.description+'</a></iframe>'
   
 
     
@@ -167,6 +167,7 @@ createSharypicEvent = (name,libelle) ->
   console.log("Creation de l'event SharyPic : " + name)
   param=JSON.stringify({
     name: name,
+    pname: name,
     description: name+" - "+libelle,
     public: true,
     hashtag: "#"+name
@@ -363,15 +364,13 @@ io.sockets.on 'connection', (socket) ->
   maj_S3episode = () ->
     console.log("MAJ de l'episode")
     s3.client.putObject({
-    Bucket: 'podcastsciencepm',
+    Bucket: 'chatroomPodcastScience',
     Key: 'episodePodcastScience.JSON',
     Body: JSON.stringify({
       'titre':episode,
       'iframe':livedraw_iframe
       })
-    },  (res) ->
-      console.log("S3 : "+res)
-    )
+    },(res) ->  console.log('Erreur S3 : '+res) if res != null)
 
   socket.on 'disconnect', ->
     #gestion de la coupure de connexion du client
@@ -396,12 +395,10 @@ io.sockets.on 'connection', (socket) ->
       last_messages.shift() if (last_messages.length > history)
       io.sockets.emit('nwmsg',message)
       s3.client.putObject({
-        Bucket: 'podcastsciencepm',
+        Bucket: 'chatroomPodcastScience',
         Key: 'messagesPodcastScience.JSON',
         Body: JSON.stringify(all_messages)
-      },  (res) ->
-            console.log(res)
-        )
+      },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
             
 
   #GESTION DE L'admin (qui n'envoi pas de HELLO)
@@ -447,5 +444,29 @@ io.sockets.on 'connection', (socket) ->
         
         
 
-
+  # Reitinialisation de la chatroom
+                
+  socket.on 'reinit_chatroom', (password) ->
+    if password == admin_password
+      console.log("Reinitiailisation de la chatroom")
+      livedraw_iframe='<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
+      episode='Bienvenue sur le balado qui fait aimer la science!'
+      last_messages = []  
+      all_messages = []
+      s3.client.putObject({
+        Bucket: 'chatroomPodcastScience',
+        Key: 'episodePodcastScience.JSON',
+        Body: JSON.stringify({
+          'titre':episode,
+          'iframe':livedraw_iframe
+        }),  
+      },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+      s3.client.putObject({
+        Bucket: 'chatroomPodcastScience',
+        Key: 'messagesPodcastScience.JSON',
+        Body: JSON.stringify(all_messages)
+      },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+      io.sockets.emit('del_msglist')
+      io.sockets.emit('new-drawings',livedraw_iframe)
+      io.sockets.emit('new-title',episode)
 
