@@ -114,7 +114,7 @@ episode = 'Bienvenue sur le balado qui fait aimer la science!'
 
 
 s3.client.getObject({
-  Bucket: 'chatroomPodcastScience',
+  Bucket: 'chatroompodcastscience',
   Key: 'episodePodcastScience.JSON'
 },  (error,res) ->
   if(!error)
@@ -140,7 +140,7 @@ admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 #Chargement de l'historique des messages
 liste_connex    = []
 s3.client.getObject({
-  Bucket: 'chatroomPodcastScience',
+  Bucket: 'chatroompodcastscience',
   Key: 'messagesPodcastScience.JSON'
 }, (error,res) ->
   if(!error)
@@ -364,7 +364,7 @@ io.sockets.on 'connection', (socket) ->
   maj_S3episode = () ->
     console.log("MAJ de l'episode")
     s3.client.putObject({
-    Bucket: 'chatroomPodcastScience',
+    Bucket: 'chatroompodcastscience',
     Key: 'episodePodcastScience.JSON',
     Body: JSON.stringify({
       'titre':episode,
@@ -395,7 +395,7 @@ io.sockets.on 'connection', (socket) ->
       last_messages.shift() if (last_messages.length > history)
       io.sockets.emit('nwmsg',message)
       s3.client.putObject({
-        Bucket: 'chatroomPodcastScience',
+        Bucket: 'chatroompodcastscience',
         Key: 'messagesPodcastScience.JSON',
         Body: JSON.stringify(all_messages)
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
@@ -454,7 +454,7 @@ io.sockets.on 'connection', (socket) ->
       last_messages = []  
       all_messages = []
       s3.client.putObject({
-        Bucket: 'chatroomPodcastScience',
+        Bucket: 'chatroompodcastscience',
         Key: 'episodePodcastScience.JSON',
         Body: JSON.stringify({
           'titre':episode,
@@ -462,7 +462,7 @@ io.sockets.on 'connection', (socket) ->
         }),  
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)
       s3.client.putObject({
-        Bucket: 'chatroomPodcastScience',
+        Bucket: 'chatroompodcastscience',
         Key: 'messagesPodcastScience.JSON',
         Body: JSON.stringify(all_messages)
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)
