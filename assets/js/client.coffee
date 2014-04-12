@@ -183,7 +183,7 @@ $(document).ready ->
       msg = "Damned! Vous avez été deconnecté !"
       $('#wrong-mail').html(msg).fadeIn()
 
-  $('#reinitChatroom').on 'click',  (e) ->
+  $('#reinitChatroomForm').on 'submit',  (e) ->
       console.log("Reinitiailisation de la chatroom")
       socket.emit('reinit_chatroom',$('#admin-password2').val())
             
