@@ -184,6 +184,7 @@ $(document).ready ->
       $('#wrong-mail').html(msg).fadeIn()
 
   $('#reinitChatroomForm').on 'submit',  (e) ->
+      e.preventDefault()
       console.log("Reinitiailisation de la chatroom")
       socket.emit('reinit_chatroom',$('#admin-password2').val())
             
