@@ -9,6 +9,7 @@ $(document).ready ->
   username=""
   email=""
   last_msg_id = false
+  last_msg_txt = ""  
 
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html()
@@ -76,15 +77,36 @@ $(document).ready ->
 
 
   # envoi de message
-  $('#message-form').submit (e) ->
+  envoi_nouveau_message = (e) ->
     e.preventDefault()
+    last_msg_txt = $('#message-to-send').val()
     socket.emit 'nwmsg', {
-      message: $('#message-to-send').val(),
+      message: last_msg_txt,
       id_connexion: id_connexion
     }
     $('#message-to-send').val("")
     $('#message-to-send').focus()
+    
+  envoi_modif_message = (e) ->
+    e.preventDefault()
+    last_msg_txt = $('#message-to-send').val()
+    socket.emit 'editmsg', {
+      message: last_msg_txt,
+      id_connexion: id_connexion
+    }
+    $('#message-form').off 'submit'
+    $('#message-form').on 'submit',  envoi_nouveau_message
+    $('#message-to-send').addClass('newmsg')
+    $('#message-to-send').removeClass('editmsg')
+    $('#message-to-send').val("")
+    $('#message-to-send').focus()
+    
+  $('#message-form').on 'submit',  envoi_nouveau_message
+    
 
+  socket.on 'editmsg', (message) ->
+    $('#msg_'+message.id).html(message.message)
+    
   socket.on 'nwmsg', (message) ->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
     d=new Date();
@@ -94,7 +116,7 @@ $(document).ready ->
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
     else
-      $(".message:last").append('<p>'+message.message+'</p>')
+      $(".message:last").append('<p id="msg_'+message.id+'">'+message.message+'</p>')
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
@@ -170,3 +192,23 @@ $(document).ready ->
     console.log("Vidage de la liste des messages")
     last_msg_id=""
     $('#messages li').remove()
+    
+   $('input#message-to-send').on 'keydown', (e)->
+     input = $('#message-to-send')
+     if e.which == 38 
+       e.preventDefault()
+       if input.is('.newmsg')
+         $('#message-form').off 'submit'
+         $('#message-form').on 'submit',  envoi_modif_message
+         input.addClass('editmsg')
+         input.removeClass('newmsg')
+         input.val(last_msg_txt)
+         input[0].selectionStart = last_msg_txt.length
+         input[0].selectionEnd = last_msg_txt.length
+     if e.which == 40 && input.is('.editmsg')
+       e.preventDefault()
+       $('#message-form').off 'submit'
+       $('#message-form').on 'submit',  envoi_nouveau_message
+       input.addClass('newmsg')
+       input.removeClass('editmsg')
+       input.val("")

@@ -81,10 +81,10 @@ block bloc_chatroom
               .message
                 span.pseudo {{user.username}}
                 span.timestamp &nbsp[{{h}}:{{m}}:{{s}}]
-                p {{{message}}}
+                p(id="msg_{{id}}") {{{message}}}
   div.write
       form#message-form  
-        input(type="text-area", placeholder='Poster un message')#message-to-send
+        input(type="text-area", placeholder='Poster un message')#message-to-send.newmsg
         input(type="submit", value='Envoyer')#send-message
 
 

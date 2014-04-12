@@ -220,7 +220,8 @@ io.sockets.on 'connection', (socket) ->
   #Les valeurs sont donc initialisées pour cela
   me = false
   id_connexion= false
-
+  cpt_message=0
+  id_last_message=""
 
   envoieInitialChatroom = () ->
     console.log("envoi de l'historique")
@@ -383,10 +384,13 @@ io.sockets.on 'connection', (socket) ->
   # gestion des messages
   socket.on 'nwmsg', (message) ->
     if verif_connexion(message.id_connexion)
+      cpt_message+=1
       message.user = me
       date = new Date()
       message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
       message.message = replaceSalaud(message.message)
+      id_last_message = md5(Date.now()+cpt_message+message.user.mail)
+      message.id = id_last_message
       message.h = pad2(date.getHours())
       message.m = pad2(date.getMinutes())
       message.s = pad2(date.getSeconds())
@@ -399,8 +403,25 @@ io.sockets.on 'connection', (socket) ->
         Key: 'messagesPodcastScience.JSON',
         Body: JSON.stringify(all_messages)
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
-            
-
+   
+    
+  socket.on 'editmsg', (message) -> 
+    console.log("demande de modif de message : "+message.message)
+    if verif_connexion(message.id_connexion)
+      message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
+      message.message = replaceSalaud(message.message)
+      message.id = id_last_message
+      io.sockets.emit('editmsg',message)
+      for key,elt of all_messages
+        elt.message = message.message if elt.id == id_last_message
+      for key,elt of last_messages
+        elt.message = message.message if elt.id == id_last_message
+      s3.client.putObject({
+        Bucket: 'chatroompodcastscience',
+        Key: 'messagesPodcastScience.JSON',
+        Body: JSON.stringify(all_messages)
+      },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
+    
   #GESTION DE L'admin (qui n'envoi pas de HELLO)
             
 

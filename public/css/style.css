@@ -870,3 +870,13 @@
         font-size: small;
         font-weight: 100;
     }
+
+    input.newmsg{
+        background-color: #fff
+    }
+    input.editmsg{
+        background-color: #b0c7dd
+    }
+    input.editmsg:focus{
+        color: #fff
+    }
