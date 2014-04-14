@@ -477,7 +477,7 @@ io.sockets.on 'connection', (socket) ->
     if password == admin_password
       console.log("Reinitiailisation de la chatroom")
       livedraw_iframe='<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
-      episode='Bienvenue sur le balado qui fait aimer la science!'
+      episode=config.titre
       last_messages = []  
       all_messages = []
       s3.client.putObject({
