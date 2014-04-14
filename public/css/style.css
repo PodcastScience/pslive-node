@@ -217,10 +217,11 @@
 		float: left;
 	}
 	header .rec { float: right; }
-
+/*
 	header .logo {
 		padding: 1.4em 2% 1.4em 0;
 	}
+*/
 	header .logo img {
 		
 	}

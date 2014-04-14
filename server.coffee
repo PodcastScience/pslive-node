@@ -14,6 +14,12 @@ AWS = require('aws-sdk')
 AWS.config.update({region: 'eu-west-1'});
 s3 = new AWS.S3()
 
+config = {
+    "titre" : "Bienvenu au live de PodcastSuisse",
+    "S3bucket" : "chatroompodcastsuisse",
+    "prefixeSharyPic" : ""
+    
+}
 
 app = express()
 
@@ -110,12 +116,12 @@ compte = (tab)->
 
 ## Chargement de la chatroom dans Amazon S3
 livedraw_iframe = '<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
-episode = 'Bienvenue sur le balado qui fait aimer la science!'
+episode = config.titre
 
 
 s3.client.getObject({
-  Bucket: 'chatroompodcastscience',
-  Key: 'episodePodcastScience.JSON'
+  Bucket: config.S3bucket,
+  Key: 'episode.JSON'
 },  (error,res) ->
   if(!error)
     console.log("chargement episode ok")
@@ -140,8 +146,8 @@ admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 #Chargement de l'historique des messages
 liste_connex    = []
 s3.client.getObject({
-  Bucket: 'chatroompodcastscience',
-  Key: 'messagesPodcastScience.JSON'
+  Bucket: config.S3bucket,
+  Key: 'messages.JSON'
 }, (error,res) ->
   if(!error)
     all_messages=JSON.parse(res.Body)
@@ -365,8 +371,8 @@ io.sockets.on 'connection', (socket) ->
   maj_S3episode = () ->
     console.log("MAJ de l'episode")
     s3.client.putObject({
-    Bucket: 'chatroompodcastscience',
-    Key: 'episodePodcastScience.JSON',
+    Bucket: config.S3bucket,
+    Key: 'episode.JSON',
     Body: JSON.stringify({
       'titre':episode,
       'iframe':livedraw_iframe
@@ -399,8 +405,8 @@ io.sockets.on 'connection', (socket) ->
       last_messages.shift() if (last_messages.length > history)
       io.sockets.emit('nwmsg',message)
       s3.client.putObject({
-        Bucket: 'chatroompodcastscience',
-        Key: 'messagesPodcastScience.JSON',
+        Bucket: config.S3bucket,
+        Key: 'messages.JSON',
         Body: JSON.stringify(all_messages)
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
    
@@ -417,8 +423,8 @@ io.sockets.on 'connection', (socket) ->
       for key,elt of last_messages
         elt.message = message.message if elt.id == id_last_message
       s3.client.putObject({
-        Bucket: 'chatroompodcastscience',
-        Key: 'messagesPodcastScience.JSON',
+        Bucket: config.S3bucket,
+        Key: 'messages.JSON',
         Body: JSON.stringify(all_messages)
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
     
@@ -428,7 +434,7 @@ io.sockets.on 'connection', (socket) ->
 
   # Changement du titre et chargement de l'iframe
   socket.on 'change-title', (message) ->
-    nomEvent= 'ps' +message.number
+    nomEvent = config.prefixeSharyPic + message.number
     if message.password == admin_password 
       options = {
         host: 'api.sharypic.com',
@@ -475,16 +481,16 @@ io.sockets.on 'connection', (socket) ->
       last_messages = []  
       all_messages = []
       s3.client.putObject({
-        Bucket: 'chatroompodcastscience',
-        Key: 'episodePodcastScience.JSON',
+        Bucket: config.S3bucket,
+        Key: 'episode.JSON',
         Body: JSON.stringify({
           'titre':episode,
           'iframe':livedraw_iframe
         }),  
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)
       s3.client.putObject({
-        Bucket: 'chatroompodcastscience',
-        Key: 'messagesPodcastScience.JSON',
+        Bucket: config.S3bucket,
+        Key: 'messages.JSON',
         Body: JSON.stringify(all_messages)
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)
       io.sockets.emit('del_msglist')
