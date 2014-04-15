@@ -15,7 +15,7 @@ AWS.config.update({region: 'eu-west-1'});
 s3 = new AWS.S3()
 
 config = {
-    "titre" : "Bienvenu au live de PodcastSuisse",
+    "titre" : "Bienvenue sur le live de Podcast Suisse",
     "S3bucket" : "chatroompodcastsuisse",
     "prefixeSharyPic" : ""
     
