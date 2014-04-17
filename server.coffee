@@ -167,7 +167,6 @@ createSharypicEvent = (name,libelle) ->
   console.log("Creation de l'event SharyPic : " + name)
   param=JSON.stringify({
     name: name,
-    pname: name,
     description: name+" - "+libelle,
     public: true,
     hashtag: "#"+name
@@ -194,6 +193,10 @@ createSharypicEvent = (name,libelle) ->
     )
     res.on('end',() ->
         console.log("Event SharyPic cree : " +  data)
+        try
+          setSharypicEventPname(name,libelle)
+        catch e
+          console.log("Erreur lors de l'ajout du pname "+e)
         jsonData = JSON.parse data
         livedraw_iframe = getIframeStr(jsonData)
         io.sockets.emit('new-drawings',livedraw_iframe)
@@ -201,6 +204,44 @@ createSharypicEvent = (name,libelle) ->
   ).on('error', (e) ->  console.log("Got error: " + e.message))
   req.write(param);
   req.end();
+    
+    
+setSharypicEventPname = (name,libelle) ->
+  console.log("Ajout du pname de l'event SharyPic : " + name)
+  param=JSON.stringify({
+    pname: name
+  })
+
+  headers = {
+    'Content-Type': 'application/json',
+    'Content-Length': param.length
+  }
+
+  options = {
+    host: 'api.sharypic.com',
+    port: 443,
+    path: '/v1/user/events.json?api_key='+sharypicAPIKey,
+    method: 'PUT',
+    form: param,
+    headers:headers
+  }
+
+  req = https.request(options,(res) ->
+    data = ''
+    res.on('data', (chunk) ->
+        data += chunk
+    )
+    res.on('end',() ->
+        console.log("Event SharyPic modifié : " +  data)
+    )
+  ).on('error', (e) ->  console.log("Got error: " + e.message))
+  req.write(param);
+  req.end();
+    
+    
+    
+    
+    
 #Fin des Fonctions pour la gestion de SharyPic
 
 
@@ -428,6 +469,7 @@ io.sockets.on 'connection', (socket) ->
 
   # Changement du titre et chargement de l'iframe
   socket.on 'change-title', (message) ->
+    console.log(message.password+":"+admin_password )
     nomEvent= 'ps' +message.number
     if message.password == admin_password 
       options = {
