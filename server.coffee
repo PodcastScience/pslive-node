@@ -15,6 +15,12 @@ AWS.config.update({region: 'eu-west-1'});
 s3 = new AWS.S3()
 
 
+console.log('AWS_ACCESS_KEY_ID:'+process.env.AWS_ACCESS_KEY_ID);
+console.log('AWS_SECRET_ACCESS_KEY:'+process.env.AWS_SECRET_ACCESS_KEY);
+console.log('PSLIVE_ADMIN_PASSWORD:'+process.env.PSLIVE_ADMIN_PASSWORD);
+console.log('PSLIVE_SHARYPIC_APIKEY'+process.env.PSLIVE_SHARYPIC_APIKEY);
+console.log('PSLIVE_S3_BUCKET'+process.env.PSLIVE_S3_BUCKET);
+
 app = express()
 
 # functions
@@ -114,8 +120,8 @@ episode = 'Bienvenue sur le balado qui fait aimer la science!'
 
 
 s3.client.getObject({
-  Bucket: 'chatroompodcastscience',
-  Key: 'episodePodcastScience.JSON'
+  Bucket: process.env.PSLIVE_S3_BUCKET,
+  Key: 'episode.JSON'
 },  (error,res) ->
   if(!error)
     console.log("chargement episode ok")
@@ -140,8 +146,8 @@ admin_password = process.env.PSLIVE_ADMIN_PASSWORD
 #Chargement de l'historique des messages
 liste_connex    = []
 s3.client.getObject({
-  Bucket: 'chatroompodcastscience',
-  Key: 'messagesPodcastScience.JSON'
+  Bucket: process.env.PSLIVE_S3_BUCKET,
+  Key: 'messages.JSON'
 }, (error,res) ->
   if(!error)
     all_messages=JSON.parse(res.Body)
@@ -194,9 +200,9 @@ createSharypicEvent = (name,libelle) ->
     res.on('end',() ->
         console.log("Event SharyPic cree : " +  data)
         try
-          setSharypicEventPname(name,libelle)
+          setSharypicEventPname(name,JSON.parse(data).uid)
         catch e
-          console.log("Erreur lors de l'ajout du pname "+e)
+          console.log("Erreur lors de l'ajout du pname :"+e)
         jsonData = JSON.parse data
         livedraw_iframe = getIframeStr(jsonData)
         io.sockets.emit('new-drawings',livedraw_iframe)
@@ -206,7 +212,7 @@ createSharypicEvent = (name,libelle) ->
   req.end();
     
     
-setSharypicEventPname = (name,libelle) ->
+setSharypicEventPname = (name,uid) ->
   console.log("Ajout du pname de l'event SharyPic : " + name)
   param=JSON.stringify({
     pname: name
@@ -214,13 +220,14 @@ setSharypicEventPname = (name,libelle) ->
 
   headers = {
     'Content-Type': 'application/json',
-    'Content-Length': param.length
+    'Content-Length': param.length,
+    'X-API-Key':sharypicAPIKey
   }
 
   options = {
     host: 'api.sharypic.com',
     port: 443,
-    path: '/v1/user/events.json?api_key='+sharypicAPIKey,
+    path: '/v1/user/events/'+uid+'.json',
     method: 'PUT',
     form: param,
     headers:headers
@@ -406,8 +413,8 @@ io.sockets.on 'connection', (socket) ->
   maj_S3episode = () ->
     console.log("MAJ de l'episode")
     s3.client.putObject({
-    Bucket: 'chatroompodcastscience',
-    Key: 'episodePodcastScience.JSON',
+    Bucket: process.env.PSLIVE_S3_BUCKET,
+    Key: 'episode.JSON',
     Body: JSON.stringify({
       'titre':episode,
       'iframe':livedraw_iframe
@@ -440,8 +447,8 @@ io.sockets.on 'connection', (socket) ->
       last_messages.shift() if (last_messages.length > history)
       io.sockets.emit('nwmsg',message)
       s3.client.putObject({
-        Bucket: 'chatroompodcastscience',
-        Key: 'messagesPodcastScience.JSON',
+        Bucket: process.env.PSLIVE_S3_BUCKET,
+        Key: 'messages.JSON',
         Body: JSON.stringify(all_messages)
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
    
@@ -458,8 +465,8 @@ io.sockets.on 'connection', (socket) ->
       for key,elt of last_messages
         elt.message = message.message if elt.id == id_last_message
       s3.client.putObject({
-        Bucket: 'chatroompodcastscience',
-        Key: 'messagesPodcastScience.JSON',
+        Bucket: process.env.PSLIVE_S3_BUCKET,
+        Key: 'messages.JSON',
         Body: JSON.stringify(all_messages)
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
     
@@ -495,7 +502,10 @@ io.sockets.on 'connection', (socket) ->
             bTrouve=true
             dateref=value.created_at
         if !bTrouve && message.createEvent
-          createSharypicEvent(nomEvent,message.title)
+          try
+            createSharypicEvent(nomEvent,message.title)
+          catch e
+            console.log("Erreur lors de la creation de l'event SharyPic :"+e)
         else
           io.sockets.emit('new-drawings',livedraw_iframe)
           maj_S3episode()
@@ -517,16 +527,16 @@ io.sockets.on 'connection', (socket) ->
       last_messages = []  
       all_messages = []
       s3.client.putObject({
-        Bucket: 'chatroompodcastscience',
-        Key: 'episodePodcastScience.JSON',
+        Bucket: process.env.PSLIVE_S3_BUCKET,
+        Key: 'episode.JSON',
         Body: JSON.stringify({
           'titre':episode,
           'iframe':livedraw_iframe
         }),  
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)
       s3.client.putObject({
-        Bucket: 'chatroompodcastscience',
-        Key: 'messagesPodcastScience.JSON',
+        Bucket: process.env.PSLIVE_S3_BUCKET,
+        Key: 'messages.JSON',
         Body: JSON.stringify(all_messages)
       },(res) ->  console.log('Erreur S3 : '+res) if res != null)
       io.sockets.emit('del_msglist')
