@@ -17,8 +17,6 @@ AWS.config.update({region: 'eu-west-1'});
 launch_suite = ->
   s3 = new AWS.S3()
 
-
-
   config = {
       "titre" : "Bienvenue sur le live de Podcast Suisse",
       "S3bucket" : "chatroompodcastsuisse",
@@ -124,18 +122,17 @@ launch_suite = ->
   episode = config.titre
 
 
-  s3.client.getObject({
+  s3.client.getObject
     Bucket: config.S3bucket,
     Key: 'episode.JSON'
-  },  (error,res) ->
+  ,  (error,res) ->
     if(!error)
       console.log("chargement episode ok")
       livedraw_iframe=JSON.parse(res.Body).iframe
       episode=JSON.parse(res.Body).titre
     else
       console.log("erreur chargement episode")
-    
-   )
+
 
   #Initialisation des variables
   users = new Object()
