@@ -470,7 +470,7 @@ launch_suite = ->
         #   else
           
           
-        episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
+        episode= message.title
         io.sockets.emit('new-title',episode)
         maj_S3episode()
           
