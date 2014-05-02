@@ -6,8 +6,8 @@ $(document).ready ->
 
   connect_url = "/"
   id_connexion= false
-  username=""
-  email=""
+  username= ""
+  email= ""
   last_msg_id = false
   last_msg_txt = ""  
 
@@ -29,7 +29,7 @@ $(document).ready ->
       send_login()
 
   socket.on 'update_compteur', (connected) ->
-    str=""
+    str= ""
     if (connected.connecte==0)
       str+="<span class='connectes'>"+connected.connecte+"</span> auditeur connecté"
     if (connected.connecte==1)
@@ -121,23 +121,22 @@ $(document).ready ->
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
 
-  $('#admin-form').submit( (e) ->
+  $('#admin-form').submit (e) ->
     e.preventDefault()
     #maj du titre
-    if $('#episode-number').val()!='' && $('#episode-title').val()!=''
-      socket.emit('change-title', {
-        password: $('#admin-password').val(),
-        number: $('#episode-number').val(),
-        createEvent: $('#create-event:checked').val()=='on',
+    if $('#episode-title').val()!=''
+      socket.emit 'change-title', 
+        password: $('#admin-password').val()
+        number: $('#episode-number').val()
+        iframe_code: $('#iframe-code').val()
+        createEvent: $('#create-event:checked').val()=='on'
         title: $('#episode-title').val()
-        })
     else
-      if $('#episode-number').val()
-        alert "Titre de l'épisode non renseigné"
-      else
-        if $('#episode-title').val()
-          alert "Numero de l'épisode non renseigné"
-    )
+      # if $('#episode-number').val()
+      #   alert "Titre de l'épisode non renseigné"
+      # else
+      #   if $('#episode-title').val()
+      alert "Numero de l'épisode non renseigné"
 
 
   socket.on 'new-drawings', (livedraw_iframe) ->
@@ -191,7 +190,7 @@ $(document).ready ->
   socket.on 'del_msglist', () ->
     # Message ne marchent plus apres le vidage mais remarche si on redemarre le serveur 
     console.log("Vidage de la liste des messages")
-    last_msg_id=""
+    last_msg_id= ""
     $('#messages li').remove()
     
    $('input#message-to-send').on 'keydown', (e)->
