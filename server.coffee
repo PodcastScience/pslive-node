@@ -37,8 +37,14 @@ launch_suite = ->
     if (text!=retval)
       retval=retval+"<br><span style='font-weight:lighter;font-size:x-small;'>*Correction apportée selon la volonté du DictaTupe.</span>"
     return retval
-
-          
+  
+  
+  gruyere = (text) ->
+    exp=/Gruy[eè]re/ig
+    retval=text.replace(exp,"Gruyère\*")
+    if (text!=retval)
+      retval=retval+"<br><span style='font-weight:lighter;font-size:x-small;'>*Note du Syndicat des Francais de PodcastSuisse : Mais le Comté est meilleur.</span>"
+    return retval        
     
   pad2 = (val) ->
     if (val<10)
@@ -398,6 +404,7 @@ launch_suite = ->
         date = new Date()
         message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
         message.message = replaceSalaud(message.message)
+        message.message = gruyere(message.message)
         id_last_message = md5(Date.now()+cpt_message+message.user.mail)
         message.id = id_last_message
         message.h = pad2(date.getHours())
