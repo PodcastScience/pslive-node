@@ -483,7 +483,7 @@ launch_suite = ->
           
     #rafraichissement de sp
     socket.on 'refreshSP', () ->   
-      console.log 'demande de reinitialisation de la chatroom de '+me.username  
+      console.log 'demande de reinitialisation de la chatroom'  
       io.sockets.emit 'new-drawings',livedraw_iframe
 
 
