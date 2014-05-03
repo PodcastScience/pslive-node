@@ -163,6 +163,8 @@ $(document).ready ->
       socket.emit('Hello',id_connexion)
 
 
+  $('.rec').on 'dblclick', ->
+    socket.emit 'refreshSP'
 
   $(window).on 'beforeunload', ->
     console.log("il s'est barré")

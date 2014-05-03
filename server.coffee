@@ -481,7 +481,10 @@ launch_suite = ->
         io.sockets.emit('new-title',episode)
         maj_S3episode()
           
-          
+    #rafraichissement de sp
+    socket.on 'refreshSP', (message) ->     
+      io.sockets.emit 'new-drawings',livedraw_iframe
+
 
     # Reitinialisation de la chatroom
                   
