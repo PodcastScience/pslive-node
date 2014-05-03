@@ -299,7 +299,7 @@ launch_suite = ->
         # Verification de l'existance de l'utilisateur
         # Le cas échéant, on incremente un compteur
         for key, existing_user of users
-          console.log 'Verif '+existing_user.mail+'/'+existing_user.username
+          console.log 'Verif '+existing_user.mail+'/'+existing_user.heroku labs:enable websockets -a myapp
           if (user.mail == existing_user.mail) && (user.mail!='')
             me = existing_user
             console.log '\tuser already exist!'
@@ -483,7 +483,7 @@ launch_suite = ->
           
     #rafraichissement de sp
     socket.on 'refreshSP', () ->   
-      console.log 'demande de reinitialisation de la chatroom de '+me.user  
+      console.log 'demande de reinitialisation de la chatroom de '+me.username  
       io.sockets.emit 'new-drawings',livedraw_iframe
 
 
