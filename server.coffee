@@ -14,7 +14,6 @@ AWS = require('aws-sdk')
 AWS.config.update({region: 'eu-west-1'});
 s3 = new AWS.S3()
 
-
 app = express()
 
 # functions
@@ -124,13 +123,14 @@ s3.client.getObject({
   else
     console.log("erreur chargement episode")
   
- )
+)
 
 #Initialisation des variables
 users = new Object()
 last_messages = []  
 all_messages = []
 history = 10
+uidSharyLast = ''
 sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
 #sharypicAPIKey = ''
 admin_password = process.env.PSLIVE_ADMIN_PASSWORD
@@ -159,7 +159,7 @@ console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion
 
 #Fonction pour la gestion de SharyPic
 getIframeStr = (jsonData) -> 
-  '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+jsonData.uid+'/widget?collection=all&theme=dark&autoplay=true&share=true&scoped_to=all&timing=20000"><a href="https://www.sharypic.com/'+jsonData.uid+'/all" title="'+jsonData.description+'" >'+jsonData.description+'</a></iframe>'
+  '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+jsonData.uid+'/widget?collection=all&theme=light&autoplay=false&share=true&scoped_to=all&timing=20000"><a href="https://www.sharypic.com/'+jsonData.uid+'/all" title="'+jsonData.description+'" >'+jsonData.description+'</a></iframe>'
   
 
     
@@ -196,6 +196,7 @@ createSharypicEvent = (name,libelle) ->
         console.log("Event SharyPic cree : " +  data)
         jsonData = JSON.parse data
         livedraw_iframe = getIframeStr(jsonData)
+        initUidSharylast
         io.sockets.emit('new-drawings',livedraw_iframe)
     )
   ).on('error', (e) ->  console.log("Got error: " + e.message))
@@ -456,6 +457,7 @@ io.sockets.on 'connection', (socket) ->
           createSharypicEvent(nomEvent,message.title)
         else
           io.sockets.emit('new-drawings',livedraw_iframe)
+          initUidSharylast
           maj_S3episode()
         
         
@@ -463,7 +465,29 @@ io.sockets.on 'connection', (socket) ->
       io.sockets.emit('new-title',episode)
       maj_S3episode()
         
-        
+  SharyLast = (callback) ->
+    param=JSON.stringify length: 1
+    headers = 
+      'Content-Type': 'application/json'
+      'Content-Length': param.length
+    options = 
+        host: 'api.sharypic.com'
+        port: 443
+        path: '/v1/user/events/:event-uid/collections/all/media/latest.json?api_key='+sharypicAPIKey
+        method: 'POST'
+        form: param
+        headers:headers
+    data = ''
+    req = https.request(options,(res) ->
+      res.on('data',(d)->data+=d)
+      res.on('end',extractSharyLast)
+    ).on('error', (e) ->  console.log("Got error: " + e.message))
+    extractSharyLast = () ->
+      console.log("Sharypic : "+data)
+      jsonData = JSON.parse data
+      callback jsonData.uid
+
+
 
   # Reitinialisation de la chatroom
                 
@@ -491,3 +515,17 @@ io.sockets.on 'connection', (socket) ->
       io.sockets.emit('new-drawings',livedraw_iframe)
       io.sockets.emit('new-title',episode)
 
+
+  #rafraichissement de sp
+  socket.on 'refreshSP', () ->   
+    console.log 'demande de reinitialisation de la chatroom'  
+    SharyLast (uid)->
+      unless uid==uidSharyLast
+        uidSharyLast=uid
+        io.sockets.emit 'new-drawings',livedraw_iframe
+
+  initUidSharylast () ->
+    SharyLast (uid)->
+      unless uid==uidSharyLast
+        uidSharyLast=uid
+        io.sockets.emit 'new-drawings',livedraw_iframe
