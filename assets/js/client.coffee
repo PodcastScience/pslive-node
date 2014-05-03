@@ -164,6 +164,7 @@ $(document).ready ->
 
 
   $('.rec').on 'dblclick', ->
+    console.log 'Demande de Refresh'
     socket.emit 'refreshSP'
 
   $(window).on 'beforeunload', ->

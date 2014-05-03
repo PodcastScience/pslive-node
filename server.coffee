@@ -482,7 +482,8 @@ launch_suite = ->
         maj_S3episode()
           
     #rafraichissement de sp
-    socket.on 'refreshSP', (message) ->     
+    socket.on 'refreshSP', () ->   
+      console.log 'demande de reinitialisation de la chatroom de me.user'  
       io.sockets.emit 'new-drawings',livedraw_iframe
 
 
