@@ -19,7 +19,7 @@ $(document).ready ->
   $('#user_box').remove()
 
   highlightPseudo= (text) ->
-    exp=/@username/ig
+    exp=/(@username)/ig
     text.replace(exp,"<span class='mypseudo'>$1</span>")
   
 
