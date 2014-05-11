@@ -18,12 +18,6 @@ $(document).ready ->
   user_box_template = $('#user_box').html()
   $('#user_box').remove()
 
-  highlightPseudo= (text) ->
-    exp=/@username/ig
-    text.replace(exp,"<span class='mypseudo'>$1</span>")
-  
-
-
   unless window.location.pathname=='/admin'
     #console.log('Envoi du Hello initial') 
     socket.emit('Hello','')
@@ -117,8 +111,7 @@ $(document).ready ->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
     d=new Date();
     decalage=d.getTimezoneOffset()/60
-    message.h=(parseInt(message.h)-decalage)%24
-    message.message = highlightPseudo message.message
+    message.h=(parseInt(message.h)-decalage)%24;
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id

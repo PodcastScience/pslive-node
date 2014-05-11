@@ -564,11 +564,6 @@
 	.message p{
 		/*font-size: small;*/
 	}
-	.message .mypseudo{
-		/*font-size: small;*/
-		color:red;
-		font-weight: bolder;
-	}
 
 	.write {
 		padding-top: 1em;

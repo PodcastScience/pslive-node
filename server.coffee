@@ -298,8 +298,7 @@ io.sockets.on 'connection', (socket) ->
         me.id = Date.now()
         me.cpt=1
         console.log 'cpt '+me.mail+':'+me.cpt
-        #me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
-        me.avatar = '/images/Podcastscience.png'
+        me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
         users[me.id] = me
         #on informe tout le monde qu'un nouvel utilisateur s'est connecté
         io.sockets.emit('newuser',me)
