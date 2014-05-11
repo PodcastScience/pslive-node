@@ -224,8 +224,8 @@ $(document).ready ->
 
  
     
-  $('input#message-to-send').on 'keyup', (e)->
-    console.log  "keyup ("+String.fromCharCode(e.which)+'+'+e.which+ ')'
+  $('input#message-to-send').on 'keydown', (e)->
+    console.log  "keyup ("+String.fromCharCode(e.which)+'+'+e.which+ '+'+(String.fromCharCode(e.which)!="")+')'
     if String.fromCharCode(e.which)!=""
       input = $('#message-to-send')[0] 
       curseur=input.selectionStart
@@ -246,7 +246,7 @@ $(document).ready ->
         if u.match(pattern,'ig')
           console.log "user ok"
           userref=u if userref=="" || userref.length>=u.length
-        e.preventDefault()
+        #e.preventDefault()
         complement= userref.substring(curseur-debut-1)
         console.log "complement : "+complement+' '+complement.length+' lettres'
         input.value=valeur.substring(0,curseur)+complement+valeur.substring(curseur+1)
