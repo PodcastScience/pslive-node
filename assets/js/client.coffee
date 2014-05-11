@@ -10,7 +10,7 @@ $(document).ready ->
   email=""
   last_msg_id = false
   last_msg_txt = ""  
-
+  userlist = []
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html()
   $('#message-box li').remove()
@@ -19,9 +19,8 @@ $(document).ready ->
   $('#user_box').remove()
 
   highlightPseudo= (text) ->
-    exp=/(@username)/ig
-    text.replace(exp,"<span class='mypseudo'>$1</span>")
-  
+    exp=  RegExp("@("+username+"( |$))","ig")
+    text.replace(exp,"<span class='mypseudo'>@$1</span>")
 
 
   unless window.location.pathname=='/admin'
@@ -66,6 +65,7 @@ $(document).ready ->
   # gestion des utilisateurs
   socket.on 'newuser', (user) ->
     id_to_find = "\##{user.id}"
+    userlist.push(user.username)
     if($('#members-list').find(id_to_find).length == 0)
       #html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
       $('#members-list').append(Mustache.render(user_box_template,user))
@@ -111,9 +111,9 @@ $(document).ready ->
     
 
   socket.on 'editmsg', (message) ->
-    $('#msg_'+message.id).html(message.message)
+    $('#msg_'+message.id).html(highlightPseudo message.message)
     
-  socket.on 'nwmsg', (message) ->
+  socket.on 'nwmsg', (message) -> 
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
     d=new Date();
     decalage=d.getTimezoneOffset()/60
@@ -201,22 +201,55 @@ $(document).ready ->
     last_msg_id=""
     $('#messages li').remove()
     
-   $('input#message-to-send').on 'keydown', (e)->
-     input = $('#message-to-send')
-     if e.which == 38 
-       e.preventDefault()
-       if input.is('.newmsg')
-         $('#message-form').off 'submit'
-         $('#message-form').on 'submit',  envoi_modif_message
-         input.addClass('editmsg')
-         input.removeClass('newmsg')
-         input.val(last_msg_txt)
-         input[0].selectionStart = last_msg_txt.length
-         input[0].selectionEnd = last_msg_txt.length
-     if e.which == 40 && input.is('.editmsg')
-       e.preventDefault()
-       $('#message-form').off 'submit'
-       $('#message-form').on 'submit',  envoi_nouveau_message
-       input.addClass('newmsg')
-       input.removeClass('editmsg')
-       input.val("")
+  $('input#message-to-send').on 'keydown', (e)->
+    input = $('#message-to-send')
+    if e.which == 38 
+      e.preventDefault()
+      if input.is('.newmsg')
+        $('#message-form').off 'submit'
+        $('#message-form').on 'submit',  envoi_modif_message
+        input.addClass('editmsg')
+        input.removeClass('newmsg')
+        input.val(last_msg_txt)
+        input[0].selectionStart = last_msg_txt.length
+        input[0].selectionEnd = last_msg_txt.length
+    if e.which == 40 && input.is('.editmsg')
+      e.preventDefault()
+      $('#message-form').off 'submit'
+      $('#message-form').on 'submit',  envoi_nouveau_message
+      input.addClass('newmsg')
+      input.removeClass('editmsg')
+      input.val("")
+
+
+ 
+    
+  $('input#message-to-send').on 'keyup', (e)->
+    console.log  "keyup ("+String.fromCharCode(e.which)+'+'+e.which+ ')'
+    if String.fromCharCode(e.which)!=""
+      input = $('#message-to-send')[0] 
+      curseur=input.selectionStart
+      valeur=input.value
+      input.value=valeur.substring(0,curseur)+valeur.substring(input.selectionEnd+1)
+      input.selectionStart=curseur
+      valeur=input.value
+      console.log "Debut de la completion : "+valeur
+      debut=valeur.substr(0, curseur).lastIndexOf("@")
+      return 0 if  debut== -1 || debut==curseur-1
+      console.log "debut OK"
+      nom_saisie=valeur.substring(debut+1,curseur)
+      console.log "saisie : "+ nom_saisie
+      pattern = new RegExp '^'+nom_saisie
+      userref=""
+      for u in userlist 
+        console.log "verif user : "+u
+        if u.match(pattern,'ig')
+          console.log "user ok"
+          userref=u if userref=="" || userref.length>=u.length
+        e.preventDefault()
+        complement= userref.substring(curseur-debut-1)
+        console.log "complement : "+complement+' '+complement.length+' lettres'
+        input.value=valeur.substring(0,curseur)+complement+valeur.substring(curseur+1)
+        input.selectionStart = curseur;
+        input.selectionEnd = complement.length+curseur;
+ 
