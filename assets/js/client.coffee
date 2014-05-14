@@ -19,8 +19,24 @@ $(document).ready ->
   $('#user_box').remove()
 
   highlightPseudo= (text) ->
-    exp=  RegExp("@("+username+"( |$))","ig")
-    text.replace(exp,"<span class='mypseudo'>@$1</span>")
+    userref=''
+    equiv=[]
+    userlist.sort((a,b)-> b.length-a.length)
+    i=0
+    for u in userlist 
+      i++
+      equiv[i]=u
+      pattern=RegExp("@("+u+")","ig")
+      text=text.replace(pattern,"@"+i)
+    for val,idx in equiv 
+      pattern=RegExp("@("+idx+")","ig")
+      unless val==username
+        text=text.replace(pattern,"@"+val)
+      else
+        text=text.replace(pattern,"<span class='mypseudo'>@"+val+"</span>")
+    return text
+
+
 
 
   unless window.location.pathname=='/admin'
@@ -223,33 +239,47 @@ $(document).ready ->
 
 
  
-    
-  $('input#message-to-send').on 'keydown', (e)->
-    console.log  "keyup ("+String.fromCharCode(e.which)+'+'+e.which+ '+'+(String.fromCharCode(e.which)!="")+')'
-    if String.fromCharCode(e.which)!=""
+  # Gestion de la completion des nom d'utilisateur. 
+  $('input#message-to-send').on 'keypress', (e)->
+    char = String.fromCharCode(e.which)
+    if char != ""  && e.which>32
+      e.preventDefault()
       input = $('#message-to-send')[0] 
       curseur=input.selectionStart
       valeur=input.value
-      input.value=valeur.substring(0,curseur)+valeur.substring(input.selectionEnd+1)
+      #les 3 lignes qui suivent sont necessaires pour effacer l'autocompletion precedente 
+      input.value=valeur.substring(0,curseur)+valeur.substring(input.selectionEnd)
       input.selectionStart=curseur
       valeur=input.value
-      console.log "Debut de la completion : "+valeur
       debut=valeur.substr(0, curseur).lastIndexOf("@")
-      return 0 if  debut== -1 || debut==curseur-1
-      console.log "debut OK"
-      nom_saisie=valeur.substring(debut+1,curseur)
-      console.log "saisie : "+ nom_saisie
-      pattern = new RegExp '^'+nom_saisie
+      if  debut== -1 || debut==curseur
+        input.value = insertText valeur,curseur,char 
+        input.selectionStart = curseur+1
+        input.selectionEnd =  curseur+1
+        return 0 
+      nom_saisie=valeur.substring(debut+1,curseur)+char
+      pattern = new RegExp '^'+nom_saisie , 'ig'
       userref=""
       for u in userlist 
-        console.log "verif user : "+u
-        if u.match(pattern,'ig')
-          console.log "user ok"
+        if u.match pattern
           userref=u if userref=="" || userref.length>=u.length
-        #e.preventDefault()
-        complement= userref.substring(curseur-debut-1)
-        console.log "complement : "+complement+' '+complement.length+' lettres'
-        input.value=valeur.substring(0,curseur)+complement+valeur.substring(curseur+1)
-        input.selectionStart = curseur;
-        input.selectionEnd = complement.length+curseur;
+      unless userref == ""
+        patterncomplet = new RegExp '^'+userref , 'ig'
+        complement= userref.substring(curseur-debut)
+        str=valeur.substring(debut+1,curseur)+valeur.substring(curseur) 
+        unless str.match patterncomplet
+          input.value =  insertText valeur,curseur,char+complement
+        else
+          input.value =  insertText valeur,curseur,''
+        input.selectionStart = curseur+1
+        input.selectionEnd = complement.length+curseur+1
+      else
+        input.value =  insertText valeur,curseur,char
+        input.selectionStart = curseur+1
+        input.selectionEnd =  curseur+1  
+
+
+  
+  insertText = (valeur,position,texte) ->
+    valeur.substring(0,position)+texte+valeur.substring(position)
  
