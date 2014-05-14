@@ -243,6 +243,11 @@
 		border: 1px solid #e1e1e1;
 		transition: .5s ease-in-out;
 		line-height: .7em;
+		-webkit-user-select: none; // For Webkit
+		-khtml-user-select: none;
+		-moz-user-select: none; // For Mozilla
+		-o-user-select: none;
+		user-select: none; // Default
 	}
 
 	/* ----------------------------- */
