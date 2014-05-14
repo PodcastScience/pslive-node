@@ -10,13 +10,35 @@ $(document).ready ->
   email=""
   last_msg_id = false
   last_msg_txt = ""  
-
+  userlist = []
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html()
   $('#message-box li').remove()
 
   user_box_template = $('#user_box').html()
   $('#user_box').remove()
+
+
+  highlightPseudo= (text) ->
+    userref=''
+    equiv=[]
+    userlist.sort((a,b)-> b.length-a.length)
+    i=0
+    for u in userlist 
+      i++
+      equiv[i]=u
+      pattern=RegExp("@("+u+")","ig")
+      text=text.replace(pattern,"@"+i)
+      console.log text
+    for val,idx in equiv 
+      pattern=RegExp("@("+idx+")","ig")
+      unless val==username
+        text=text.replace(pattern,"@"+val)
+      else
+        text=text.replace(pattern,"<span class='mypseudo'>@"+val+"</span>")
+      console.log  text
+    return text
+
 
   unless window.location.pathname=='/admin'
     #console.log('Envoi du Hello initial') 
@@ -60,6 +82,7 @@ $(document).ready ->
   # gestion des utilisateurs
   socket.on 'newuser', (user) ->
     id_to_find = "\##{user.id}"
+    userlist.push(user.username)
     if($('#members-list').find(id_to_find).length == 0)
       #html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
       $('#members-list').append(Mustache.render(user_box_template,user))
@@ -105,13 +128,14 @@ $(document).ready ->
     
 
   socket.on 'editmsg', (message) ->
-    $('#msg_'+message.id).html(message.message)
+    $('#msg_'+message.id).html(highlightPseudo message.message)
     
-  socket.on 'nwmsg', (message) ->
+  socket.on 'nwmsg', (message) -> 
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
     d=new Date();
     decalage=d.getTimezoneOffset()/60
     message.h=(parseInt(message.h)-decalage)%24;
+    message.message=highlightPseudo message.message
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
@@ -197,22 +221,69 @@ $(document).ready ->
     last_msg_id=""
     $('#messages li').remove()
     
-   $('input#message-to-send').on 'keydown', (e)->
-     input = $('#message-to-send')
-     if e.which == 38 
-       e.preventDefault()
-       if input.is('.newmsg')
-         $('#message-form').off 'submit'
-         $('#message-form').on 'submit',  envoi_modif_message
-         input.addClass('editmsg')
-         input.removeClass('newmsg')
-         input.val(last_msg_txt)
-         input[0].selectionStart = last_msg_txt.length
-         input[0].selectionEnd = last_msg_txt.length
-     if e.which == 40 && input.is('.editmsg')
-       e.preventDefault()
-       $('#message-form').off 'submit'
-       $('#message-form').on 'submit',  envoi_nouveau_message
-       input.addClass('newmsg')
-       input.removeClass('editmsg')
-       input.val("")
+  $('input#message-to-send').on 'keydown', (e)->
+    input = $('#message-to-send')
+    if e.which == 38 
+      e.preventDefault()
+      if input.is('.newmsg')
+        $('#message-form').off 'submit'
+        $('#message-form').on 'submit',  envoi_modif_message
+        input.addClass('editmsg')
+        input.removeClass('newmsg')
+        input.val(last_msg_txt)
+        input[0].selectionStart = last_msg_txt.length
+        input[0].selectionEnd = last_msg_txt.length
+    if e.which == 40 && input.is('.editmsg')
+      e.preventDefault()
+      $('#message-form').off 'submit'
+      $('#message-form').on 'submit',  envoi_nouveau_message
+      input.addClass('newmsg')
+      input.removeClass('editmsg')
+      input.val("")
+
+
+ 
+  # Gestion de la completion des nom d'utilisateur. 
+  $('input#message-to-send').on 'keypress', (e)->
+    char = String.fromCharCode(e.which)
+    if char != ""  && e.which>32
+      e.preventDefault()
+      input = $('#message-to-send')[0] 
+      curseur=input.selectionStart
+      valeur=input.value
+      #les 3 lignes qui suivent sont necessaires pour effacer l'autocompletion precedente 
+      input.value=valeur.substring(0,curseur)+valeur.substring(input.selectionEnd)
+      input.selectionStart=curseur
+      valeur=input.value
+      debut=valeur.substr(0, curseur).lastIndexOf("@")
+      if  debut== -1 || debut==curseur
+        input.value = insertText valeur,curseur,char 
+        input.selectionStart = curseur+1
+        input.selectionEnd =  curseur+1
+        return 0 
+      nom_saisie=valeur.substring(debut+1,curseur)+char
+      pattern = new RegExp '^'+nom_saisie , 'ig'
+      userref=""
+      for u in userlist 
+        if u.match pattern
+          userref=u if userref=="" || userref.length>=u.length
+      unless userref == ""
+        patterncomplet = new RegExp '^'+userref , 'ig'
+        complement= userref.substring(curseur-debut)
+        str=valeur.substring(debut+1,curseur)+valeur.substring(curseur) 
+        unless str.match patterncomplet
+          input.value =  insertText valeur,curseur,char+complement
+        else
+          input.value =  insertText valeur,curseur,''
+        input.selectionStart = curseur+1
+        input.selectionEnd = complement.length+curseur+1
+      else
+        input.value =  insertText valeur,curseur,char
+        input.selectionStart = curseur+1
+        input.selectionEnd =  curseur+1  
+
+
+  
+  insertText = (valeur,position,texte) ->
+    valeur.substring(0,position)+texte+valeur.substring(position)
+ 
