@@ -288,16 +288,14 @@ $(document).ready ->
 
   updateInputScroll = (input) ->
     pos=getCurseurPosPx(input)
-    console.log pos+","+(input.scrollLeft+$('#message-to-send').innerWidth())
     input.scrollLeft=pos if pos>(input.scrollLeft+$('#message-to-send').innerWidth())
 
   getCurseurPosPx = (input) ->
+    #Pas la plus jolie des methodes, mais je n'ai pas trouvé mieux...
     virtInput=$("#virtInput")
     posCurseur=input.selectionStart
-    #virtInput.value=input.value.substring(0,posCurseur)
     longueur = input.value.substring(0,posCurseur).length
     virtInput.attr('size',longueur)
-    #console.log "virtInput: "+virtInput.value+"/"+virtInput.innerWidth()
     return virtInput.innerWidth()
 
   insertText = (valeur,position,texte) ->
