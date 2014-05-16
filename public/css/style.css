@@ -568,6 +568,7 @@
 	}
 	.message p{
 		/*font-size: small;*/
+		word-wrap: break-word;
 	}
 	.message .mypseudo{
 		/*font-size: small;*/
@@ -889,4 +890,7 @@
     }
     input.editmsg:focus{
         color: #fff
+    }
+    #virtInput{
+    	display: none;
     }

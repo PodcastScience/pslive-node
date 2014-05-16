@@ -23,20 +23,17 @@ $(document).ready ->
     userref=''
     equiv=[]
     userlist.sort((a,b)-> b.length-a.length)
-    i=0
     for u in userlist 
-      i++
-      equiv[i]=u
+      idx="i"+(Math.floor((90000000000)*Math.random())+10000000000);
+      equiv.push { 'idx' : idx , 'name' : u }
       pattern=RegExp("@("+u+")","ig")
-      text=text.replace(pattern,"@"+i)
-      console.log text
-    for val,idx in equiv 
-      pattern=RegExp("@("+idx+")","ig")
-      unless val==username
-        text=text.replace(pattern,"@"+val)
+      text=text.replace(pattern,"@"+idx)
+    for val in equiv 
+      pattern=RegExp("@("+val.idx+")","ig")
+      unless val.name==username
+        text=text.replace(pattern,"@"+val.name)
       else
-        text=text.replace(pattern,"<span class='mypseudo'>@"+val+"</span>")
-      console.log  text
+        text=text.replace(pattern,"<span class='mypseudo'>@"+val.name+"</span>")
     return text
 
 
@@ -223,6 +220,9 @@ $(document).ready ->
     
   $('input#message-to-send').on 'keydown', (e)->
     input = $('#message-to-send')
+
+    if e.which == 37
+      console.log 'test'
     if e.which == 38 
       e.preventDefault()
       if input.is('.newmsg')
@@ -260,9 +260,10 @@ $(document).ready ->
         input.value = insertText valeur,curseur,char 
         input.selectionStart = curseur+1
         input.selectionEnd =  curseur+1
+        updateInputScroll input
         return 0 
       nom_saisie=valeur.substring(debut+1,curseur)+char
-      pattern = new RegExp '^'+nom_saisie , 'ig'
+      pattern = new RegExp '^'+ regexpSpecialChar(nom_saisie) , 'ig'
       userref=""
       for u in userlist 
         if u.match pattern
@@ -277,13 +278,35 @@ $(document).ready ->
           input.value =  insertText valeur,curseur,''
         input.selectionStart = curseur+1
         input.selectionEnd = complement.length+curseur+1
+        updateInputScroll input
       else
         input.value =  insertText valeur,curseur,char
         input.selectionStart = curseur+1
         input.selectionEnd =  curseur+1  
+        updateInputScroll input
 
 
-  
+  updateInputScroll = (input) ->
+    pos=getCurseurPosPx(input)
+    console.log pos+","+(input.scrollLeft+$('#message-to-send').innerWidth())
+    input.scrollLeft=pos if pos>(input.scrollLeft+$('#message-to-send').innerWidth())
+
+  getCurseurPosPx = (input) ->
+    virtInput=$("#virtInput")
+    posCurseur=input.selectionStart
+    #virtInput.value=input.value.substring(0,posCurseur)
+    longueur = input.value.substring(0,posCurseur).length
+    virtInput.attr('size',longueur)
+    #console.log "virtInput: "+virtInput.value+"/"+virtInput.innerWidth()
+    return virtInput.innerWidth()
+
   insertText = (valeur,position,texte) ->
     valeur.substring(0,position)+texte+valeur.substring(position)
- 
+
+  regexpSpecialChar = (text) ->
+    escapechars = [
+      '/', '.', '*', '+', '?', '|',
+      '(', ')', '[', ']', '{', '}', '\\'
+    ]
+    exp = new RegExp '(\\' + escapechars.join('|\\') + ')', 'g'
+    text.replace exp , '\\$1'
