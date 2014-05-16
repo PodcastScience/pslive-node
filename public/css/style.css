@@ -893,4 +893,5 @@
     }
     #virtInput{
     	display: none;
+    	max-width: none;
     }
