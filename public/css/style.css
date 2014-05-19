@@ -892,6 +892,9 @@
         color: #fff
     }
     #virtInput{
-    	display: none;
+    	/*display: none;*/
+    	border: 1px solid black;
     	max-width: none;
+    	font-size: 1em;
+    	font-family: arial;
     }

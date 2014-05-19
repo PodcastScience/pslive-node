@@ -4,9 +4,11 @@ html
     meta(charset='utf-8')
     title [Live] PodcastScience
     meta(name='description', content='Live du balado qui fait aimer la science')
-    meta(name='author', content='Maxime Siméon')
+    //
+      meta(name='author', content='Maxime Siméon')
     meta(name='viewport', content='width=device-width initial-scale=1.0')
     link(rel='stylesheet', href='css/style.css')
+    link(rel='stylesheet', href='jquery-ui/css/ps-theme/jquery-ui-1.10.4.custom.min.css')
     //
        favicon 
     link(rel='apple-touch-icon', sizes='57x57', href='images/favicons/apple-touch-icon-57x57.png')
@@ -40,6 +42,7 @@ html
     script(src='http://code.jquery.com/jquery-latest.min.js')
     script(src='/socket.io/socket.io.js')
     script(src='/js/mustache.js')
+    script(src='/jquery-ui/js/jquery-ui-1.10.4.custom.min.js')
     != js('client')
   body.on
     block bloc_header
