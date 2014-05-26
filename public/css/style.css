@@ -891,7 +891,33 @@
     input.editmsg:focus{
         color: #fff
     }
-    #virtInput{
-    	display: none;
-    	max-width: none;
+
+
+    #slider li{
+    	width:640px;
+    	height:450px;
+    	overflow: hidden;
+    	text-align: center;
     }
+
+
+    #slider li img{
+    	max-height: 100%;
+    	max-width: 100%;
+    	position: relative; 
+    	top: 50%; 
+    	-webkit-transform: translateY(-50%); 
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+

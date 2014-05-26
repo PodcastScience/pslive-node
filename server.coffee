@@ -10,6 +10,7 @@ md5 = require('MD5')
 mu = require('mu2')
 validator = require('validator')
 AWS = require('aws-sdk')
+Twitter = require('./twitter');
 #AWS.config.loadFromPath('./configAWS.json');
 AWS.config.update({region: 'eu-west-1'});
 s3 = new AWS.S3()
@@ -101,6 +102,14 @@ io.configure ->
 
 #Initialisation des variables
 users = new Object()
+
+twitter = new Twitter({
+    consumer_key: 'NpOPeL9mcrBqeBOkesGpw',
+    consumer_secret: 'OAqoMr3GJEa5N74C0m8AqUDcGGPcQQs9tFRqgYEols',
+    access_token_key: '47723390-Y33rFqQJIdtm9tSzqkW9b8GzkBxNJRn6W0OQlLKfV',
+    access_token_secret: 'wWF6DD7Ouq0GF8zeL17MLP1ypzxUheDaMYV71r8E61sN3'
+})
+
 last_messages = []  
 all_messages = []
 history = 10
@@ -116,6 +125,7 @@ bucketName = 'chatroompodcastscience'
 SPUpdateDelay = 30000
 #admin_password = ""
 
+twitter.stream {track: '#testpsPM'} 
 
 
 ###############################
@@ -147,144 +157,11 @@ pad2 = (val) ->
   else
     return val
   
-
+#------------------------------------
+#Fonction pour la gestion de twitter
 
 #------------------------------------
-#Fonction pour la gestion de SharyPic
 
-#fonction qui permet de generer le code l'iframe SharyPic en fonction de la structure JSON de l'API decrivant un event
-getIframeStr = (jsonData) -> 
-  uidSharyEvent = jsonData.uid
-  console.log "uid de l'event Sharypic: "+uidSharyEvent
-  '<iframe width="640" height="480" scrolling="no" frameborder="0" src="http://www.sharypic.com/events/'+uidSharyEvent+'/widget?collection=all&theme=light&autoplay=false&share=true&scoped_to=all&timing=20000"><a href="https://www.sharypic.com/'+jsonData.uid+'/all" title="'+jsonData.description+'" >'+jsonData.description+'</a></iframe>'
-  
-
-#verification de la variable uidSharyLast, en cas de changement, faire une maj des clients
-verifUidSharylast = () ->
-  unless uidSharyEvent==''
-    options = 
-        host: 'api.sharypic.com'
-        port: 443
-        path: '/v1/user/events/'+uidSharyEvent+'/collections/all/media/latest.json?api_key='+sharypicAPIKey+'&length=1&order_direction=desc'
-    data = ''
-    console.log "verifUidSharylast: lancement de la requete :"+options.path
-    req = https.get(options,(res) ->
-      console.log 'verifUidSharylast: Entree dans la callback de la requete'
-      res.on('data',(d)->data+=d)
-      res.on('end',extractSharyLast)
-    ).on('error', (e) ->  console.log("Got error: " + e.message))
-  else
-    console.log "verifUidSharylast: uidSharyEvent vide -> abandon"
-  extractSharyLast = () ->
-    try
-      jsonData = JSON.parse data
-    catch e then  console.log("verifUidSharylast: donnees invalides" + e.message + "/"+ data)
-    try
-      if jsonData.next_media[0]
-        uid=jsonData.next_media[0].uid
-      else
-        uid=''
-        console.log("verifUidSharylast: Aucune image")
-    catch e then  console.log("verifUidSharylast: " + e.message + "/"+ data)
-    unless uid==uidSharyLast
-      console.log "verifUidSharylast: Il y a une nouvelle image, il faut mettre a jour! ("+uid+"/"+uidSharyLast+")"
-      uidSharyLast=uid
-      io.sockets.emit 'new-drawings',livedraw_iframe
-    else
-      console.log "verifUidSharylast: Il n'y a pas de nouvelle image, pas de maj"
-
-#Creation d'un Event SharyPic
-createSharypicEvent = (libelle) ->
-  console.log("Creation de l'event SharyPic : " + nomEvent)
-  param=JSON.stringify({
-    name: nomEvent,
-    pname: nomEvent,
-    description: nomEvent+" - "+libelle,
-    public: true,
-    hashtag: "#"+nomEvent
-  })
-  headers = {
-    'Content-Type': 'application/json',
-    'Content-Length': param.length
-  }
-  options = {
-    host: 'api.sharypic.com',
-    port: 443,
-    path: '/v1/user/events.json?api_key='+sharypicAPIKey,
-    method: 'POST',
-    form: param,
-    headers:headers
-  }
-  req = https.request(options,(res) ->
-    data = ''
-    res.on('data', (chunk) ->
-        data += chunk
-    )
-    res.on('end',() ->
-        console.log("Event SharyPic cree : " +  data)
-        jsonData = JSON.parse data
-        livedraw_iframe = getIframeStr(jsonData)
-        verifUidSharylast()
-        maj_S3episode()
-    )
-  ).on('error', (e) ->  console.log("Got error: " + e.message))
-  req.write(param);
-  req.end();
-
-#Chargement de l'event sur SharyPic. Si bCreation est vrai et que l'event n'existe pas encore alors le créé.
-getSharyEventId =  (bCreation,titre) ->
-  unless nomEvent==''
-    options = {
-      host: 'api.sharypic.com',
-      port: 443,
-      path: '/v1/user/events.json?api_key='+sharypicAPIKey
-    }
-    data = ''
-    req = https.get(options,(res) ->
-      res.on('data',(d)->data+=d)
-      res.on('end',getSharyEvents)
-    ).on('error', (e) ->  console.log("getSharyEventId: Got error: " + e.message))    
-    getSharyEvents = () ->
-      #console.log("Sharypic : "+data)
-      dateref=0
-      try  
-        jsonData = JSON.parse data
-      catch e then  console.log("getSharyEvents: donnees invalides : "+data)
-      bTrouve=false
-      for key, value of jsonData
-        console.log value.name+'/'+nomEvent;
-        if value.name==nomEvent & value.created_at>dateref
-          console.log("getSharyEvents: Event "+nomEvent+" trouvé")
-          livedraw_iframe = getIframeStr value
-          bTrouve=true
-          dateref=value.created_at
-      if !bTrouve && bCreation
-        createSharypicEvent titre
-      else
-        try
-          console.log "getSharyEvents: Appel de la verifUidSharylast"
-          verifUidSharylast()
-        catch e then  console.log("getSharyEvents: Erreur de traitement verifUidSharylast: "+e.message)
-        try
-          console.log "getSharyEvents: Appel de maj_S3episode"
-          maj_S3episode()
-        catch e then  console.log("getSharyEvents: Erreur de traitement maj S3: "+e.message)
-
-
-
-
-
-
-#Verification periodique de sharypic en cas de changer
-VerifShary = () ->
-  console.log "Verification periodique de sharypic"
-  verifUidSharylast()
-  setTimeout VerifShary, SPUpdateDelay
-  #SPUpdateDelay+=5000 if SPUpdateDelay<30000
-
-
-#Fin des Fonctions pour la gestion de SharyPic
-#---------------------------------------------
 
 
 
@@ -301,11 +178,44 @@ maj_S3episode = () ->
   },(res) ->  console.log('Erreur S3 : '+res) if res != null)
 
 
+maj_S3images = () ->
+  console.log("maj_S3episode : MAJ de l'episode")
+  s3.client.putObject({
+    Bucket: bucketName,
+    Key: 'imagePodcastScience'+nomEvent+'.JSON',
+    Body: JSON.stringify(liste_images)
+  },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+
+
+get_S3images = (func) ->
+  console.log "chargement images"
+  try
+    s3.client.getObject
+      Bucket: bucketName
+      Key: 'imagePodcastScience'+nomEvent+'.JSON'
+      , (error,res) ->
+        console.log "reponse recu"
+        if(!error)
+          console.log "chargement images ok"
+          try
+            func JSON.parse(res.Body)
+          catch e
+            console.log "Echec de la lecture de la liste des images"
+        else
+          console.log "Erreur chargement images",error
+  catch e
+    console.log "Erreur",e
+  
+
+
 #########################################
 ### Fin des fonctions ###################
 #########################################
 
 
+
+
+liste_images   = []
 
 
 ## Chargement de la chatroom dans Amazon S3
@@ -320,8 +230,8 @@ s3.client.getObject
         livedraw_iframe=jsonData.iframe
         nomEvent=jsonData.nomEvent
         episode=jsonData.titre
-        getSharyEventId  false,''
-        console.log "livedraw_iframe :"+livedraw_iframe+"/nomEvent:"+nomEvent+"/episode:"+episode
+        get_S3images (val)->liste_images=val
+        #console.log "livedraw_iframe :"+livedraw_iframe+"/nomEvent:"+nomEvent+"/episode:"+episode
     else
       console.log "erreur chargement episode"
   
@@ -342,10 +252,10 @@ s3.client.getObject({
   if(!error)
     all_messages=JSON.parse(res.Body)
     for msg in all_messages
-      console.log("chargement derniers messages:"+msg.message)
+      #console.log("chargement derniers messages:"+msg.message)
       last_messages.push msg
       last_messages.shift() if (last_messages.length > history)
-  console.log(JSON.stringify(all_messages))
+  #console.log(JSON.stringify(all_messages))
 )
 console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion(s)')
 
@@ -353,17 +263,6 @@ console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion
 
 
 
-
-
-
-
-
-
-
-
-
-#Envoi des parametres du live
-VerifShary()
 
 
 
@@ -386,6 +285,9 @@ io.sockets.on 'connection', (socket) ->
     #Envoi des messages récents au client
     for message in last_messages
       socket.emit('nwmsg',message)
+    for url in liste_images
+      console.log url
+      socket.emit('add_img',url)
     socket.emit('new-title',episode)
     socket.emit 'new-drawings',livedraw_iframe
     
@@ -595,33 +497,50 @@ io.sockets.on 'connection', (socket) ->
       episode='Bienvenue sur le balado qui fait aimer la science!'
       last_messages = []  
       all_messages = []
-      s3.client.putObject({
-        Bucket: bucketName,
-        Key: 'episodePodcastScience.JSON',
-        Body: JSON.stringify({
-          'titre':episode,
-          'nomEvent':'',
-          'iframe':livedraw_iframe
-        }),  
-      },(res) ->  console.log('Erreur S3 : '+res) if res != null)
-      s3.client.putObject({
-        Bucket: bucketName,
-        Key: 'messagesPodcastScience.JSON',
-        Body: JSON.stringify(all_messages)
-      },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+      liste_images = []
+      try
+        s3.client.putObject({
+          Bucket: bucketName,
+          Key: 'episodePodcastScience.JSON',
+          Body: JSON.stringify({
+            'titre':episode,
+            'nomEvent':'',
+            'iframe':livedraw_iframe
+          }),  
+        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+        s3.client.putObject({
+          Bucket: bucketName,
+          Key: 'messagesPodcastScience.JSON',
+          Body: JSON.stringify(all_messages)
+        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+        s3.client.putObject({
+          Bucket: bucketName,
+          Key: 'imagePodcastScience'+nomEvent+'.JSON',
+          Body: JSON.stringify(liste_imagesliste_images)
+        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+      catch e 
+        console.log "erreur S3"
+
       io.sockets.emit('del_msglist')
+      io.sockets.emit('del_imglist')
       io.sockets.emit('new-drawings',livedraw_iframe)
       io.sockets.emit('new-title',episode)
 
 
-  #rafraichissement de sp
-  socket.on 'refreshSP', () ->   
-    console.log 'demande de reinitialisation de SharyPic' 
-    #SPUpdateDelay=5000
-    verifUidSharylast()
 
 
 
+
+twitter.on 'data', (data) -> 
+  console.log "reception : ",data
+  try
+    url = data.entities.media[0].media_url
+  catch e
+  return 0 if (url==null) || (typeof(url) == 'undefined')
+  liste_images.push(url)
+  maj_S3images()
+  console.log 'media:'+ url
+  io.sockets.emit('add_img',url)
 
 
 

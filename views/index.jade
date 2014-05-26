@@ -14,7 +14,7 @@ block bloc_header
 //scrolling="no" frameborder="0" allowtransparency="true"
 block bloc_player
   .player
-    iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html"  height="80" width="400" scrolling="no" frameborder="0" allowtransparency="true" )
+    iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html",height="80",width="400",scrolling="no",frameborder="0",allowtransparency="true" )
   
 
 
@@ -41,9 +41,12 @@ block bloc_login
 
 
 block bloc_sharypic
-  .sharypic
-    #live-draw-frame
-      iframe(scrolling='no', frameborder='0' src='/noshary')
+  ul#slider
+    //li(data-thumb="https://pbs.twimg.com/profile_images/1087778850/PodcastScience_02_white_background_bigger.png")
+      img(src="https://pbs.twimg.com/profile_images/1087778850/PodcastScience_02_white_background_bigger.png",alt="")
+    //li(data-thumb="https://pbs.twimg.com/media/BjR5apECcAAuGsJ.jpg:small")
+      img(src="https://pbs.twimg.com/media/BjR5apECcAAuGsJ.jpg:large",alt="")
+
             
 
 block liens_sans_flash

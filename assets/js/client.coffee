@@ -14,9 +14,15 @@ $(document).ready ->
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html()
   $('#message-box li').remove()
-
   user_box_template = $('#user_box').html()
   $('#user_box').remove()
+
+  slider=$('#slider').lightSlider({
+    gallery:true,
+    minSlide:1,
+    maxSlide:1
+  })  
+
 
 
   highlightPseudo= (text) ->
@@ -185,6 +191,14 @@ $(document).ready ->
       socket.emit('Hello',id_connexion)
 
 
+    
+  socket.on 'add_img',(url) ->
+    console.log("Ajout d'image : "+url)
+    $('#slider').prepend('<li data-thumb="'+url+'"><a href="javascript:void(0)"><img src="' +url+ '" alt=""></a></li>')
+    slider.refresh()
+    slider.goToSlide(0)
+
+
   $('.rec').on 'dblclick', ->
     console.log 'Demande de Refresh'
     socket.emit 'refreshSP' 
@@ -308,3 +322,5 @@ $(document).ready ->
     ]
     exp = new RegExp '(\\' + escapechars.join('|\\') + ')', 'g'
     text.replace exp , '\\$1'
+
+
