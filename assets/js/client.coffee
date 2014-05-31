@@ -235,9 +235,12 @@ $(document).ready ->
     last_msg_id=""
     $('#messages li').remove()
 
-  socket.on "error" , (data) ->
-    if window.location.pathname=='/admin' && data.data.code=420
-      alert("Erreur de Twitter : HTTP 420/Keep calm. Merci de réessayer dans 2 minutes")
+  socket.on "errorTwitter" , (data) ->
+    if window.location.pathname=='/admin'
+      if data.data.code=420
+        alert "Erreur de Twitter : HTTP 420/Keep calm. Merci de réessayer dans 2 minutes"
+      else
+        alert "Erreur de Twitter : HTTP "+data.data.code
     
   $('input#message-to-send').on 'keydown', (e)->
     input = $('#message-to-send')
@@ -264,70 +267,3 @@ $(document).ready ->
 
 
  
-  # Gestion de la completion des nom d'utilisateur. 
-  $('input#message-to-send').on 'keypress', (e)->
-    char = String.fromCharCode(e.which)
-    if char != ""  && e.which>32
-      e.preventDefault()
-      input = $('#message-to-send')[0] 
-      curseur=input.selectionStart
-      valeur=input.value
-      #les 3 lignes qui suivent sont necessaires pour effacer l'autocompletion precedente 
-      input.value=valeur.substring(0,curseur)+valeur.substring(input.selectionEnd)
-      input.selectionStart=curseur
-      valeur=input.value
-      debut=valeur.substr(0, curseur).lastIndexOf("@")
-      if  debut== -1 || debut==curseur
-        input.value = insertText valeur,curseur,char 
-        input.selectionStart = curseur+1
-        input.selectionEnd =  curseur+1
-        updateInputScroll input
-        return 0 
-      nom_saisie=valeur.substring(debut+1,curseur)+char
-      pattern = new RegExp '^'+ regexpSpecialChar(nom_saisie) , 'ig'
-      userref=""
-      for u in userlist 
-        if u.match pattern
-          userref=u if userref=="" || userref.length>=u.length
-      unless userref == ""
-        patterncomplet = new RegExp '^'+userref , 'ig'
-        complement= userref.substring(curseur-debut)
-        str=valeur.substring(debut+1,curseur)+valeur.substring(curseur) 
-        unless str.match patterncomplet
-          input.value =  insertText valeur,curseur,char+complement
-        else
-          input.value =  insertText valeur,curseur,''
-        input.selectionStart = curseur+1
-        input.selectionEnd = complement.length+curseur+1
-        updateInputScroll input
-      else
-        input.value =  insertText valeur,curseur,char
-        input.selectionStart = curseur+1
-        input.selectionEnd =  curseur+1  
-        updateInputScroll input
-
-
-  updateInputScroll = (input) ->
-    pos=getCurseurPosPx(input)
-    input.scrollLeft=pos if pos>(input.scrollLeft+$('#message-to-send').innerWidth())
-
-  getCurseurPosPx = (input) ->
-    #Pas la plus jolie des methodes, mais je n'ai pas trouvé mieux...
-    virtInput=$("#virtInput")
-    posCurseur=input.selectionStart
-    longueur = input.value.substring(0,posCurseur).length
-    virtInput.attr('size',longueur)
-    return virtInput.innerWidth()
-
-  insertText = (valeur,position,texte) ->
-    valeur.substring(0,position)+texte+valeur.substring(position)
-
-  regexpSpecialChar = (text) ->
-    escapechars = [
-      '/', '.', '*', '+', '?', '|',
-      '(', ')', '[', ']', '{', '}', '\\'
-    ]
-    exp = new RegExp '(\\' + escapechars.join('|\\') + ')', 'g'
-    text.replace exp , '\\$1'
-
-

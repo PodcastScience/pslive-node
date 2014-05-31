@@ -90,3 +90,4 @@ class Stream extends events.EventEmitter
 
 
 module.exports = Stream
+	

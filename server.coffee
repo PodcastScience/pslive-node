@@ -183,14 +183,16 @@ get_image = (url,cb) ->
 
 maj_S3episode = () ->
   console.log("maj_S3episode : MAJ de l'episode")
-  s3.client.putObject({
+  options = {
     Bucket: bucketName,
     Key: 'episodePodcastScience.JSON',
     Body: JSON.stringify({
       'titre':episode,
       'nomEvent':nomEvent
     })
-  },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+  }
+  console.log options
+  s3.client.putObject options,(res) ->  console.log('Erreur S3 : '+res) if res != null
 
 
 
@@ -338,6 +340,7 @@ io.sockets.on 'connection', (socket) ->
     for im in liste_images
       console.log im
       socket.emit('add_img',im) 
+    console.log episode
     socket.emit('new-title',episode)
     
     
@@ -529,8 +532,8 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'change-title', (message) ->
     nomEvent= 'ps' +message.number
     if message.password == admin_password   
-      maj_S3episode()
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
+      maj_S3episode()
       try
         twitter.destroy()
       try
@@ -604,5 +607,9 @@ twitter.on 'data', (data) ->
 
 
 twitter.on 'error', (data) -> 
-  io.sockets.emit "error",data
+  io.sockets.emit "errorTwitter",data
 
+
+twitter.on 'close', (data) -> 
+  console.log  "Twitter stream is closed :",data
+  twitter = new Twitter(auth_twitter) 
