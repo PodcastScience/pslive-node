@@ -17,11 +17,6 @@ $(document).ready ->
   user_box_template = $('#user_box').html()
   $('#user_box').remove()
 
-  slider=$('#slider').lightSlider({
-    gallery:true,
-    minSlide:1,
-    maxSlide:1
-  })  
 
 
 
@@ -46,6 +41,12 @@ $(document).ready ->
   unless window.location.pathname=='/admin'
     #console.log('Envoi du Hello initial') 
     socket.emit('Hello','')
+    slider=$('#slider').lightSlider({
+      gallery:true,
+      minSlide:1,
+      maxSlide:1
+    })  
+
     
   socket.on 'Olleh', (id) ->
     console.log('Olleh recu *'+id+'*')
@@ -167,9 +168,6 @@ $(document).ready ->
     )
 
 
-  socket.on 'new-drawings', (livedraw_iframe) ->
-    $('#live-draw-frame').html(livedraw_iframe)
-
 
   socket.on 'new-title', (episode) ->
     #console.log("Nouveau Titre")
@@ -192,9 +190,14 @@ $(document).ready ->
 
 
     
-  socket.on 'add_img',(url) ->
-    console.log("Ajout d'image : "+url)
-    $('#slider').prepend('<li data-thumb="'+url+'"><a href="javascript:void(0)"><img src="' +url+ '" alt=""></a></li>')
+  socket.on 'del_imglist',() ->
+    $('#slider').html('')
+    slider.refresh()
+
+
+  socket.on 'add_img',(im) ->
+    console.log("Ajout d'image : "+im.nom)
+    $('#slider').prepend('<li data-thumb="/image?nom='+im.nom+'"><img title="par '+im.poster+'" src="/image?nom=' +im.nom+ '" alt="par '+im.poster+'"></li>')
     slider.refresh()
     slider.goToSlide(0)
 
@@ -231,6 +234,10 @@ $(document).ready ->
     console.log("Vidage de la liste des messages")
     last_msg_id=""
     $('#messages li').remove()
+
+  socket.on "error" , (data) ->
+    if window.location.pathname=='/admin' && data.data.code=420
+      alert("Erreur de Twitter : HTTP 420/Keep calm. Merci de réessayer dans 2 minutes")
     
   $('input#message-to-send').on 'keydown', (e)->
     input = $('#message-to-send')

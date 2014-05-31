@@ -14,7 +14,8 @@ Twitter = require('./twitter');
 #AWS.config.loadFromPath('./configAWS.json');
 AWS.config.update({region: 'eu-west-1'});
 s3 = new AWS.S3()
-
+fs = require('fs')
+mime = require('mime')
 app = express()
 
 
@@ -57,10 +58,13 @@ if ('development' == app.get('env'))
 app.get('/', routes.index)
 app.get('/admin', routes.admin)
 app.get('/users', user.list)
+app.get '/image', (req, res) ->
+  #console.log images
+  console.log "Affichage de l'image "+req.query.nom
+  try
+    res.end images[req.query.nom] ,'binary'
 app.get '/messages', (req, res) ->
   res.send all_messages.map((message) -> "<b>#{message.user.username}:</b> #{message.message}").join("<br/>")
-app.get '/noshary', (req, res) ->
-  res.send "Pas de dessins ce soir :("
 app.get '/timestamp', (req, res) ->
   res.send all_messages.map((message) -> 
     "<b>#{message.user.username}</b> [#{(message.h+2)%24}:#{message.m}:#{message.s}]: <span id='[#{(message.h+2)%24}:#{message.m}:#{message.s}]'>#{message.message}</span>"
@@ -103,29 +107,26 @@ io.configure ->
 #Initialisation des variables
 users = new Object()
 
-twitter = new Twitter({
-    consumer_key: 'NpOPeL9mcrBqeBOkesGpw',
-    consumer_secret: 'OAqoMr3GJEa5N74C0m8AqUDcGGPcQQs9tFRqgYEols',
-    access_token_key: '47723390-Y33rFqQJIdtm9tSzqkW9b8GzkBxNJRn6W0OQlLKfV',
-    access_token_secret: 'wWF6DD7Ouq0GF8zeL17MLP1ypzxUheDaMYV71r8E61sN3'
-})
+auth_twitter = {
+    consumer_key:         process.env.PSLIVE_TWITTER_CONSUMERKEY,
+    consumer_secret:      process.env.PSLIVE_TWITTER_CONSUMERSECRET,
+    access_token_key:     process.env.PSLIVE_TWITTER_TOKENKEY,
+    access_token_secret:  process.env.PSLIVE_TWITTER_TOKENSECRET
+}
+console.log auth_twitter
+twitter = new Twitter(auth_twitter)
 
-last_messages = []  
-all_messages = []
-history = 10
-uidSharyLast = ''
-uidSharyEvent = ''
-nomEvent = ''
-sharypicAPIKey = process.env.PSLIVE_SHARYPIC_APIKEY
-#sharypicAPIKey = ''
-admin_password = process.env.PSLIVE_ADMIN_PASSWORD
-livedraw_iframe = '<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
-episode = 'Bienvenue sur le balado qui fait aimer la science!'
-bucketName = 'chatroompodcastscience'
-SPUpdateDelay = 30000
-#admin_password = ""
+last_messages   = []
+all_messages    = []
+liste_images    = []
+images          = []
+history         = 10
+nomEvent        = ''
+admin_password  = process.env.PSLIVE_ADMIN_PASSWORD
+episode         = 'Bienvenue sur le balado qui fait aimer la science!'
+bucketName      = 'chatroomtest2'
 
-twitter.stream {track: '#testpsPM'} 
+
 
 
 ###############################
@@ -133,7 +134,7 @@ twitter.stream {track: '#testpsPM'}
 ###############################
 
 #simple
-replaceURLWithHTMLLinks = (text) ->
+replaceURLWithHTMLLinks = (text) -> 
   exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig
   return text.replace(exp,"<a href='$1' target='_blank'>$1</a>")
 
@@ -158,7 +159,22 @@ pad2 = (val) ->
     return val
   
 #------------------------------------
-#Fonction pour la gestion de twitter
+#Fonction pour la gestion des images
+get_image = (url,cb) ->
+  nom=url.slice url.lastIndexOf('/')+1
+  console.log "chargement images en RAM : ",url
+  http.get url, (response)->
+      data=''
+      response.setEncoding('binary')
+      console.log "reception d'une reponse"
+      response.on 'data',
+        (chunk)->data+=chunk
+        console.log "data"
+      response.on 'end',()->
+        images[nom]=data
+        console.log "Fin du chargement de "+nom+":"+images[nom].length
+        cb nom
+  return nom
 
 #------------------------------------
 
@@ -172,14 +188,15 @@ maj_S3episode = () ->
     Key: 'episodePodcastScience.JSON',
     Body: JSON.stringify({
       'titre':episode,
-      'nomEvent':nomEvent,
-      'iframe':livedraw_iframe
+      'nomEvent':nomEvent
     })
   },(res) ->  console.log('Erreur S3 : '+res) if res != null)
 
 
-maj_S3images = () ->
-  console.log("maj_S3episode : MAJ de l'episode")
+
+
+maj_S3images_list = () ->
+  console.log "maj_S3images_list : MAJ de la liste des images" ,liste_images
   s3.client.putObject({
     Bucket: bucketName,
     Key: 'imagePodcastScience'+nomEvent+'.JSON',
@@ -187,7 +204,9 @@ maj_S3images = () ->
   },(res) ->  console.log('Erreur S3 : '+res) if res != null)
 
 
-get_S3images = (func) ->
+
+
+get_S3images_list = (func) ->
   console.log "chargement images"
   try
     s3.client.getObject
@@ -200,12 +219,39 @@ get_S3images = (func) ->
           try
             func JSON.parse(res.Body)
           catch e
-            console.log "Echec de la lecture de la liste des images"
+            console.log "Echec de la lecture de la liste des images : "+typeof(func),e
         else
           console.log "Erreur chargement images",error
   catch e
     console.log "Erreur",e
   
+
+store_S3images = (nom,data) ->
+  console.log("store_S3images : stockage d'une image")
+  databin = new Buffer(data, 'binary')
+  options = {
+    Bucket: bucketName,
+    Key: 'images/'+nomEvent+'_'+nom,
+    Body: databin,
+    ContentType: mime.lookup nom
+  }
+  s3.client.putObject options ,(res) ->  
+    console.log('Erreur S3 : '+res) if res != null
+
+
+load_S3images = (nom) ->
+  console.log("load_S3images : chargement d'une image")
+  options = {
+    Bucket: bucketName,
+    Key: 'images/'+nomEvent+'_'+nom
+  }
+  s3.client.getObject options ,(error,res) ->
+      console.log "reponse recu"
+      if(!error)
+        images[nom]=res.Body
+      else
+        console.log "Erreur chargement image "+nomEvent+'_'+nom,error
+
 
 
 #########################################
@@ -215,7 +261,6 @@ get_S3images = (func) ->
 
 
 
-liste_images   = []
 
 
 ## Chargement de la chatroom dans Amazon S3
@@ -227,11 +272,16 @@ s3.client.getObject
       console.log "chargement episode ok"
       try
         jsonData=JSON.parse(res.Body)
-        livedraw_iframe=jsonData.iframe
         nomEvent=jsonData.nomEvent
         episode=jsonData.titre
-        get_S3images (val)->liste_images=val
-        #console.log "livedraw_iframe :"+livedraw_iframe+"/nomEvent:"+nomEvent+"/episode:"+episode
+        get_S3images_list (val)->
+          liste_images=val
+          for im in liste_images
+            load_S3images im.nom
+        twitter.stream {track: '#'+nomEvent} 
+      catch e
+        console.log "erreur",e
+      
     else
       console.log "erreur chargement episode"
   
@@ -285,11 +335,10 @@ io.sockets.on 'connection', (socket) ->
     #Envoi des messages récents au client
     for message in last_messages
       socket.emit('nwmsg',message)
-    for url in liste_images
-      console.log url
-      socket.emit('add_img',url)
+    for im in liste_images
+      console.log im
+      socket.emit('add_img',im) 
     socket.emit('new-title',episode)
-    socket.emit 'new-drawings',livedraw_iframe
     
     
     
@@ -461,6 +510,7 @@ io.sockets.on 'connection', (socket) ->
       message.message = replaceSalaud(message.message)
       message.id = id_last_message
       io.sockets.emit('editmsg',message)
+      twitter.destroy()
       for key,elt of all_messages
         elt.message = message.message if elt.id == id_last_message
       for key,elt of last_messages
@@ -479,8 +529,15 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'change-title', (message) ->
     nomEvent= 'ps' +message.number
     if message.password == admin_password   
+      maj_S3episode()
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
-      getSharyEventId  message.createEvent, message.title
+      try
+        twitter.destroy()
+      try
+        twitter.stream {track: '#'+nomEvent} 
+      catch e
+        console.log "erreur Twitter"+e
+      
       io.sockets.emit('new-title',episode)
       #maj_S3episode()
         
@@ -493,7 +550,6 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'reinit_chatroom', (password) ->
     if password == admin_password
       console.log("Reinitiailisation de la chatroom")
-      livedraw_iframe='<iframe scrolling="no", frameborder="0" src="/noshary"></iframe>'
       episode='Bienvenue sur le balado qui fait aimer la science!'
       last_messages = []  
       all_messages = []
@@ -501,11 +557,16 @@ io.sockets.on 'connection', (socket) ->
       try
         s3.client.putObject({
           Bucket: bucketName,
+          Key: 'imagePodcastScience'+nomEvent+'.JSON',
+          Body: JSON.stringify(liste_images)
+        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+        nomEvent=""
+        s3.client.putObject({
+          Bucket: bucketName,
           Key: 'episodePodcastScience.JSON',
           Body: JSON.stringify({
             'titre':episode,
-            'nomEvent':'',
-            'iframe':livedraw_iframe
+            'nomEvent':''
           }),  
         },(res) ->  console.log('Erreur S3 : '+res) if res != null)
         s3.client.putObject({
@@ -513,20 +574,14 @@ io.sockets.on 'connection', (socket) ->
           Key: 'messagesPodcastScience.JSON',
           Body: JSON.stringify(all_messages)
         },(res) ->  console.log('Erreur S3 : '+res) if res != null)
-        s3.client.putObject({
-          Bucket: bucketName,
-          Key: 'imagePodcastScience'+nomEvent+'.JSON',
-          Body: JSON.stringify(liste_imagesliste_images)
-        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
       catch e 
-        console.log "erreur S3"
+        console.log "erreur S3"+e
 
       io.sockets.emit('del_msglist')
       io.sockets.emit('del_imglist')
-      io.sockets.emit('new-drawings',livedraw_iframe)
       io.sockets.emit('new-title',episode)
 
-
+  
 
 
 
@@ -534,13 +589,20 @@ io.sockets.on 'connection', (socket) ->
 twitter.on 'data', (data) -> 
   console.log "reception : ",data
   try
-    url = data.entities.media[0].media_url
+    url     = data.entities.media[0].media_url
+    poster  = data.user.name
   catch e
   return 0 if (url==null) || (typeof(url) == 'undefined')
-  liste_images.push(url)
-  maj_S3images()
-  console.log 'media:'+ url
-  io.sockets.emit('add_img',url)
+  nom=get_image url, (nom)-> 
+    liste_images.push {'nom' : nom, 'poster':poster} 
+    io.sockets.emit('add_img',{'nom' : nom, 'poster':poster})
+    store_S3images nom, images[nom]
+    maj_S3images_list()
+  console.log 'media:'+ nom
+  
 
 
+
+twitter.on 'error', (data) -> 
+  io.sockets.emit "error",data
 

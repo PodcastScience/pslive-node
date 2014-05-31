@@ -10,9 +10,13 @@
 
 ```````
 heroku config:add PSLIVE_ADMIN_PASSWORD="Mon Super Password"
-heroku config:add PSLIVE_SHARYPIC_APIKEY="Mon APIKEY Sharypic"
 heroku config:add AWS_ACCESS_KEY_ID="Mon Access Key AWS"
 heroku config:add AWS_SECRET_ACCESS_KEY="Mon Secret Access Key AWS"
+heroku config:add PSLIVE_TWITTER_CONSUMERKEY="..."   
+heroku config:add PSLIVE_TWITTER_CONSUMERSECRET="..."
+heroku config:add PSLIVE_TWITTER_TOKENKEY="..."      
+heroku config:add PSLIVE_TWITTER_TOKENSECRET="..."   
+
 
 ```````
 

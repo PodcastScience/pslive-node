@@ -894,6 +894,7 @@
 
 
     #slider li{
+    	background-color: #f2f2f2;
     	width:640px;
     	height:450px;
     	overflow: hidden;
