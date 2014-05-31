@@ -18,7 +18,8 @@
     "mu2": "0.5.20",
     "validator": "3.2.0",
     "aws-sdk": "latest",
-    "oauth": "0.9.8"
+    "oauth": "0.9.8",
+    "mime": "1.2.11"
   },
   "engines": {
     "node": "0.8.x",
