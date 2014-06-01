@@ -591,13 +591,25 @@ io.sockets.on 'connection', (socket) ->
 twitter.on 'data', (data) -> 
   console.log "reception : ",data
   try
-    url     = data.entities.media[0].media_url
-    poster  = data.user.name
+    url         = data.entities.media[0].media_url
+    poster      = data.user.name
+    poster_user = data.user.screen_name
+    avatar      = data.user.profile_image_url
+    tweet       = data.text
   catch e
   return 0 if (url==null) || (typeof(url) == 'undefined')
   nom=get_image url, (nom)-> 
-    liste_images.push {'nom' : nom, 'poster':poster} 
-    io.sockets.emit('add_img',{'nom' : nom, 'poster':poster})
+    param_img={
+      'nom' : nom, 
+      'poster':poster,
+      'poster_user':poster_user,
+      'avatar':avatar,
+      'tweet':replaceURLWithHTMLLinks tweet
+    }
+    console.log 1
+    liste_images.push param_img 
+    console.log 2
+    io.sockets.emit 'add_img',param_img
     store_S3images nom, images[nom]
     maj_S3images_list()
   console.log 'media:'+ nom

@@ -41,6 +41,7 @@ $(document).ready ->
   unless window.location.pathname=='/admin'
     #console.log('Envoi du Hello initial') 
     socket.emit('Hello','')
+
     slider=$('#slider').lightSlider({
       gallery:true,
       minSlide:1,
@@ -198,8 +199,8 @@ $(document).ready ->
 
 
   socket.on 'add_img',(im) ->
-    console.log("Ajout d'image : "+im.nom)
-    $('#slider').prepend('<li data-thumb="/image?nom='+im.nom+'"><img title="par '+im.poster+'" src="/image?nom=' +im.nom+ '" alt="par '+im.poster+'"></li>')
+    console.log("Ajout d'image : ",im)
+    $('#slider').prepend('<li class="slider_elt" data-thumb="/image?nom='+im.nom+'"><img  class="img_slider" title="par '+im.poster+'" src="/image?nom=' +im.nom+ '" alt="par '+im.poster+'"><div class="author"><a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank"><img class="twitterAvatar"  src="'+im.avatar+'"/></a><span class="tweet"><a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'</span></div></li>')
     slider.refresh()
     slider.goToSlide(0)
 

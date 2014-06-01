@@ -892,24 +892,40 @@
         color: #fff
     }
 
-
+    #slider{
+    	overflow: hidden;
+    }
     #slider li{
     	background-color: #f2f2f2;
     	width:640px;
     	height:450px;
     	overflow: hidden;
     	text-align: center;
+    	display: block;
+    	position: relative;
     }
 
 
-    #slider li img{
+    #slider li img.img_slider{
+    	display: block;
     	max-height: 100%;
     	max-width: 100%;
     	position: relative; 
     	top: 50%; 
-    	-webkit-transform: translateY(-50%); 
+    	left:50%;
+    	-webkit-transform: translateY(-50%) translateX(-50%); 
+    	-moz-transform: translateY(-50%) translateX(-50%); 
+    	-o-transform: translateY(-50%) translateX(-50%); 
+    	transform: translateY(-50%) translateX(-50%); 
+
     }
 
+
+    #slider li img.twitterAvatar{
+    	height:32px;
+    	width:32px;
+    	opacity: 1;
+    }
 
 
     .minitext{
@@ -918,13 +934,34 @@
 		margin-left: 0.4em;
 		padding-top: 0;
 		color:grey;
+
     }
 
 
+    .author{
+    	display: block;
+    	font-size: small;
+    	position: absolute;
+    	background-color:rgba(255,255,255, 0.8);
+    	color: black;
+    	text-align:left;
+    	top:0px;
+    	padding-left: 1em;
+    	padding: 0.2em;
+    	width: 100%;
+    	overflow: hidden;
+
+    }	
+	.csSlideOuter{
+    	border: 1px solid #e1e1e1;
+	}
 
 
-
-
-
-
-
+    .author a.linkTwitter{
+    	float: left;
+    }
+    .tweet{
+    	display: block;
+    	position:relative;
+    	top: 50%; 
+    }
