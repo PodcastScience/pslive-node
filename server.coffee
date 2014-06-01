@@ -540,7 +540,6 @@ io.sockets.on 'connection', (socket) ->
         twitter.stream {track: '#'+nomEvent} 
       catch e
         console.log "erreur Twitter"+e
-      
       io.sockets.emit('new-title',episode)
       #maj_S3episode()
         

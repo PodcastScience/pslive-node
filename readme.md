@@ -29,8 +29,4 @@ git push heroku master
 ```````
 
 
-
-## Bugs identifiés  
-
-[X] scroll auto désactivable et désactivé quand on a scrollé
-[X] bug sur le nombre de personnes en live
+*

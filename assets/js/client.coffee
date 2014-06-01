@@ -44,7 +44,9 @@ $(document).ready ->
     slider=$('#slider').lightSlider({
       gallery:true,
       minSlide:1,
-      maxSlide:1
+      maxSlide:1,
+      speed:400,
+      keyPress:false
     })  
 
     

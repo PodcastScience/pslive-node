@@ -172,7 +172,7 @@
 	}
 	input[type=text],
 	input[type=text-area] {
-		padding: .8em;
+		padding: .5em;
 		border: 1px solid #e1e1e1;
 		background: #fff;
 		font-size: 1em;
@@ -184,7 +184,7 @@
 		border-color: #3d3d41;
 	}
 	input[type=submit] {
-		padding: .9em 1.2em;
+		padding: .6em 1.2em;
 		font-size: 1.07142857142857em;
 		text-transform: uppercase;
 		color: #fff;
@@ -912,7 +912,13 @@
 
 
 
-
+    .minitext{
+    	font-size: x-small;
+		padding-left: 0.5em;
+		margin-left: 0.4em;
+		padding-top: 0;
+		color:grey;
+    }
 
 
 
