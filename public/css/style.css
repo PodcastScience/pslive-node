@@ -938,7 +938,7 @@
     }
 
 
-    .author{
+    #slider .author{
     	display: block;
     	font-size: small;
     	position: absolute;
@@ -949,9 +949,17 @@
     	padding-left: 1em;
     	padding: 0.2em;
     	width: 100%;
+    	opacity: 0.1;
     	overflow: hidden;
-
+    	-webkit-transition: opacity 1s; 
+		-moz-transition: opacity 1s;
+		-o-transition: opacity 1s;
+		transition: opacity 1s;
     }	
+    #slider:hover .author{
+    	opacity: 1;
+    }
+
 	.csSlideOuter{
     	border: 1px solid #e1e1e1;
 	}

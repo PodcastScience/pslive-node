@@ -241,7 +241,7 @@ store_S3images = (nom,data) ->
     console.log('Erreur S3 : '+res) if res != null
 
 
-load_S3images = (nom) ->
+load_S3images = (nom,cb) ->
   console.log("load_S3images : chargement d'une image")
   options = {
     Bucket: bucketName,
@@ -251,6 +251,7 @@ load_S3images = (nom) ->
       console.log "reponse recu"
       if(!error)
         images[nom]=res.Body
+        cb() 
       else
         console.log "Erreur chargement image "+nomEvent+'_'+nom,error
 
@@ -279,7 +280,7 @@ s3.client.getObject
         get_S3images_list (val)->
           liste_images=val
           for im in liste_images
-            load_S3images im.nom
+            load_S3images im.nom, ()->
         twitter.stream {track: '#'+nomEvent} 
       catch e
         console.log "erreur",e
@@ -539,7 +540,7 @@ io.sockets.on 'connection', (socket) ->
       try
         twitter.stream {track: '#'+nomEvent} 
       catch e
-        console.log "erreur Twitter"+e
+        console.log "erreur Twitter",e
       io.sockets.emit('new-title',episode)
       #maj_S3episode()
         
@@ -556,6 +557,7 @@ io.sockets.on 'connection', (socket) ->
       last_messages = []  
       all_messages = []
       liste_images = []
+      images =[]
       try
         s3.client.putObject({
           Bucket: bucketName,
@@ -578,9 +580,12 @@ io.sockets.on 'connection', (socket) ->
         },(res) ->  console.log('Erreur S3 : '+res) if res != null)
       catch e 
         console.log "erreur S3"+e
-
       io.sockets.emit('del_msglist')
       io.sockets.emit('del_imglist')
+      get_S3images_list (val)->
+        liste_images=val
+        for im in liste_images
+          load_S3images im.nom , (param_img)->io.sockets.emit 'add_img',im
       io.sockets.emit('new-title',episode)
 
   
