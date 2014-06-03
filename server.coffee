@@ -124,7 +124,7 @@ history         = 10
 nomEvent        = ''
 admin_password  = process.env.PSLIVE_ADMIN_PASSWORD
 episode         = 'Bienvenue sur le balado qui fait aimer la science!'
-bucketName      = process.env.PSLIVE_PSLIVE_S3_BUCKET
+bucketName      = process.env.PSLIVE_S3_BUCKET
 
 
 
