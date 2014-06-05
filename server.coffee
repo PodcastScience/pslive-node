@@ -71,7 +71,6 @@ app.get '/timestamp', (req, res) ->
   ).join("<br/>")
 app.get '/questions', (req, res) ->
   res.send all_messages.filter( (msg,idx) -> 
-    console.log(msg.message+'/'+idx)
     if typeof(msg)!='undefined' && typeof(msg.message)!='undefined'
       msg.message.indexOf("@ps")>-1 || msg.message.indexOf("@PS")>-1
     else
@@ -144,6 +143,8 @@ replaceSalaud = (text) ->
   if (text!=retval)
     retval=retval+"<br><span style='font-weight:lighter;font-size:x-small;'>*Correction apportée selon la volonté du DictaTupe.</span>"
   return retval
+
+
 
 #fonction pour compter (.length ne marche pas.... a voir)
 compte = (tab)->
@@ -396,7 +397,7 @@ io.sockets.on 'connection', (socket) ->
       # Verification de l'existance de l'utilisateur
       # Le cas échéant, on incremente un compteur
       for key, existing_user of users
-        console.log 'Verif '+existing_user.mail+'/'+existing_user.username
+        #console.log 'Verif '+existing_user.mail+'/'+existing_user.username
         if (user.mail == existing_user.mail) && (user.mail!='')
           me = existing_user
           console.log '\tuser already exist!'
@@ -431,7 +432,6 @@ io.sockets.on 'connection', (socket) ->
   verif_connexion=(id_connexion_loc)->
     console.log("Verif si la connexion "+id_connexion_loc+" existe")
     for key, val of liste_connex
-      console.log(key)
       if (key == id_connexion_loc)
         return true
     #Si ce n'est pas le cas, on le deconnecte.
@@ -496,6 +496,8 @@ io.sockets.on 'connection', (socket) ->
       message.h = pad2(date.getHours())
       message.m = pad2(date.getMinutes())
       message.s = pad2(date.getSeconds())
+      if(me.mail=="scienceabilly@gmail.com" )
+        message.message='Bande de Batards ! '+message.message
       all_messages.push message
       last_messages.push message
       last_messages.shift() if (last_messages.length > history)
@@ -611,9 +613,7 @@ twitter.on 'data', (data) ->
       'avatar':avatar,
       'tweet':replaceURLWithHTMLLinks tweet
     }
-    console.log 1
     liste_images.push param_img 
-    console.log 2
     io.sockets.emit 'add_img',param_img
     store_S3images nom, images[nom]
     maj_S3images_list()
@@ -626,6 +626,12 @@ twitter.on 'error', (data) ->
   io.sockets.emit "errorTwitter",data
 
 
+twitter.on 'heartbeat', (data) -> 
+  console.log  "Twitter stream is alive"
+  io.sockets.emit 'heartbeat_twitter'
+
 twitter.on 'close', (data) -> 
   console.log  "Twitter stream is closed :",data
   twitter = new Twitter(auth_twitter) 
+
+

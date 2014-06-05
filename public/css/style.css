@@ -949,7 +949,7 @@
     	padding-left: 1em;
     	padding: 0.2em;
     	width: 100%;
-    	opacity: 0.1;
+    	opacity: 0;
     	overflow: hidden;
     	-webkit-transition: opacity 1s; 
 		-moz-transition: opacity 1s;
@@ -972,4 +972,8 @@
     	display: block;
     	position:relative;
     	top: 50%; 
+    }
+
+    .twitter_heartbeat {
+    	border-color: red;
     }

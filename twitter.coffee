@@ -59,7 +59,8 @@ class Stream extends events.EventEmitter
           response.setEncoding 'utf8'
           response.on 'data', (data) ->
             if data == separator
-              return
+              console.log "Twitter: heartbeat"
+              this.emit "heartbeat"
             console.log "données recu"
             if (!buffer.length) 
               line_end_pos = data.indexOf(separator)

@@ -72,12 +72,12 @@ $(document).ready ->
     $('.nb-connected').html(str)
 
   # log des users
-  $('#loginform').submit( (e) ->
+  $('#loginform').submit (e) ->
     e.preventDefault()
     username = $('#username').val()
     email = $('#mail').val()
     send_login()
-    )
+    
 
   socket.on 'erreur', (message) ->
     #console.log('Erreur recu')
@@ -245,6 +245,12 @@ $(document).ready ->
       else
         alert "Erreur de Twitter : HTTP "+data.data.code
     
+  socket.on "heartbeat_twitter" , () ->
+    $("#lastheartbeat").html( new Date )
+    $("#slider").addClass "twitter_heartbeat"
+    setTimeout ()-> $("#slider").removeClass "twitter_heartbeat"
+
+
   $('input#message-to-send').on 'keydown', (e)->
     input = $('#message-to-send')
 
