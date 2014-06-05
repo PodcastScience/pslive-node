@@ -976,4 +976,8 @@
 
     .twitter_heartbeat {
     	border-color: red;
+
+    }
+    #lasttheartbeat{
+    	display: none;
     }

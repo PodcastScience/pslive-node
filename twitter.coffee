@@ -60,7 +60,7 @@ class Stream extends events.EventEmitter
           response.on 'data', (data) ->
             if data == separator
               console.log "Twitter: heartbeat"
-              this.emit "heartbeat"
+              stream.emit "heartbeat"
             console.log "données recu"
             if (!buffer.length) 
               line_end_pos = data.indexOf(separator)
@@ -78,9 +78,15 @@ class Stream extends events.EventEmitter
                 stream.emit 'data', retval
                 buffer=''
                 data_length = 0        
-        response.on 'error', (error) ->this.emit 'close', error
-        response.on 'end', () -> this.emit 'close', 'socket end'
-        response.on 'close', () ->  request.abort()
+        response.on 'error', (error) ->
+          console.log 'twitter error',Error
+          this.emit 'close', error
+        response.on 'end', () -> 
+          console.log 'twitter end'
+          this.emit 'close', 'socket end'
+        response.on 'close', () -> 
+          console.log 'twitter close'
+          request.abort()
       request.on 'error', (error) -> this.emit 'error', {type: 'request', data: error}
       request.end()
 

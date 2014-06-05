@@ -246,9 +246,14 @@ $(document).ready ->
         alert "Erreur de Twitter : HTTP "+data.data.code
     
   socket.on "heartbeat_twitter" , () ->
-    $("#lastheartbeat").html( new Date )
+    console.log 'heartbeat_twitter recu'
+    d=  new Date()
+    h = d.getHours()
+    m = d.getMinutes()
+    s = d.getSeconds()
+    $("#lasttheartbeat").html( "*"+h+':'+m+':'+s)
     $("#slider").addClass "twitter_heartbeat"
-    setTimeout ()-> $("#slider").removeClass "twitter_heartbeat"
+    setTimeout ()-> $("#slider").removeClass "twitter_heartbeat",3000
 
 
   $('input#message-to-send').on 'keydown', (e)->
