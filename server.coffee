@@ -498,6 +498,8 @@ io.sockets.on 'connection', (socket) ->
       message.s = pad2(date.getSeconds()) 
       if(me.mail=="scienceabilly@gmail.com" )
         me.username=me.username+' (Bande de Batards!)'
+      if(me.mail=="alan@podcastscience.fm" )
+        me.username=me.username+' (Mort a la SNCF!)'
       all_messages.push message
       last_messages.push message
       last_messages.shift() if (last_messages.length > history)
