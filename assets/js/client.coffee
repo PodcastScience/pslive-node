@@ -1,8 +1,8 @@
 $(document).ready ->
 
-  $(window).konami
-     cheat: ->
-     alert "C'est pas bien de diviser par zéro..."
+  # $(window).konami
+  #     cheat: ->
+  #       alert "C'est pas bien de diviser par zéro..."
 
   connect_url = "/"
   id_connexion= false
