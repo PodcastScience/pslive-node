@@ -1,8 +1,8 @@
 $(document).ready ->
 
-  # $(window).konami
-  #     cheat: ->
-  #       alert "C'est pas bien de diviser par zéro..."
+  $(window).konami
+     cheat: ->
+     alert "C'est pas bien de diviser par zéro..."
 
   connect_url = "/"
   id_connexion= false
@@ -252,7 +252,7 @@ $(document).ready ->
     m = d.getMinutes()
     s = d.getSeconds()
     $("#lasttheartbeat").html( "*"+h+':'+m+':'+s)
-    $("#slider").addClass "twitter_heartbeat"
+    $("#slider").   addClass "twitter_heartbeat"
     setTimeout ()-> $("#slider").removeClass "twitter_heartbeat",3000
 
 

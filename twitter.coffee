@@ -80,10 +80,10 @@ class Stream extends events.EventEmitter
                 data_length = 0        
         response.on 'error', (error) ->
           console.log 'twitter error',Error
-          this.emit 'close', error
+          stream.emit 'close', error
         response.on 'end', () -> 
           console.log 'twitter end'
-          this.emit 'close', 'socket end'
+          stream.emit 'close', 'socket end'
         response.on 'close', () -> 
           console.log 'twitter close'
           request.abort()
