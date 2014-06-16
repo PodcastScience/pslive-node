@@ -238,6 +238,14 @@ $(document).ready ->
     last_msg_id=""
     $('#messages li').remove()
 
+  socket.on "twitter_start" , () ->
+    $(".csSlideOuter").css(border,'1px solid #e1e1e1')
+
+  socket.on "twitter_stop" , () ->
+    $(".csSlideOuter").css(border,'none')
+
+
+
   socket.on "errorTwitter" , (data) ->
     if window.location.pathname=='/admin'
       if data.data.code=420

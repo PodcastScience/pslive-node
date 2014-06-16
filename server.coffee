@@ -269,9 +269,6 @@ load_S3images = (nom,cb) ->
  
 
 
-console.log "###########################################",s3
-console.log "###########################################",s3.client
-console.log "###########################################"
 s3.client=s3
 ## Chargement de la chatroom dans Amazon S3
 s3.client.getObject
@@ -625,6 +622,9 @@ twitter.on 'data', (data) ->
   
 
 
+twitter.on 'start', () -> 
+  io.sockets.emit "twitter_start"
+
 
 twitter.on 'error', (data) -> 
   io.sockets.emit "errorTwitter",data
@@ -636,6 +636,7 @@ twitter.on 'heartbeat', (data) ->
 
 twitter.on 'close', (data) -> 
   console.log  "Twitter stream is closed :",data
+  io.sockets.emit 'twitter_close'
   twitter = new Twitter(auth_twitter) 
 
 
