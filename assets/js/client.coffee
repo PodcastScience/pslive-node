@@ -239,10 +239,14 @@ $(document).ready ->
     $('#messages li').remove()
 
   socket.on "twitter_start" , () ->
-    $(".csSlideOuter").css(border,'1px solid #e1e1e1')
+    console.log "Depart du scan de Twitter"
+    if window.location.pathname=='/admin'
+        alert "Depart du scan de Twitter"
 
   socket.on "twitter_stop" , () ->
-    $(".csSlideOuter").css(border,'none')
+    console.log "Arret du scan de Twitter"
+    if window.location.pathname=='/admin'
+        alert "Arret du scan de Twitter"
 
 
 
