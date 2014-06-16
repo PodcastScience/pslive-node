@@ -17,7 +17,6 @@ try
   s3 = new AWS.S3()
 catch e 
   console.log "error",e
-console.log s3
 fs = require('fs')
 mime = require('mime')
 app = express()
@@ -270,6 +269,7 @@ load_S3images = (nom,cb) ->
  
 
 
+console.log s3
 
 ## Chargement de la chatroom dans Amazon S3
 s3.client.getObject
