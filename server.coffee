@@ -269,7 +269,7 @@ load_S3images = (nom,cb) ->
  
 
 
-console.log s3
+console.log s3.client
 
 ## Chargement de la chatroom dans Amazon S3
 s3.client.getObject
