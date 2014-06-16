@@ -12,8 +12,12 @@ validator = require('validator')
 AWS = require('aws-sdk')
 Twitter = require('./twitter');
 #AWS.config.loadFromPath('./configAWS.json');
-AWS.config.update({region: 'eu-west-1'});
-s3 = new AWS.S3()
+AWS.config.update({region: 'eu-west-1'})
+try
+  s3 = new AWS.S3()
+catch e 
+  console.log "error",e
+  console.log s3
 fs = require('fs')
 mime = require('mime')
 app = express()
