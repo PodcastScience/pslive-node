@@ -17,7 +17,7 @@ try
   s3 = new AWS.S3()
 catch e 
   console.log "error",e
-  console.log s3
+console.log s3
 fs = require('fs')
 mime = require('mime')
 app = express()
