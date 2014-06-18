@@ -517,7 +517,7 @@ io.sockets.on 'connection', (socket) ->
       message.message = replaceSalaud(message.message)
       message.id = id_last_message
       io.sockets.emit('editmsg',message)
-      twitter.destroy()
+      #twitter.destroy()
       for key,elt of all_messages
         elt.message = message.message if elt.id == id_last_message
       for key,elt of last_messages
