@@ -11,6 +11,7 @@ mu = require('mu2')
 validator = require('validator')
 AWS = require('aws-sdk')
 Twitter = require('./twitter');
+Backend = require('./backend_interface');
 #AWS.config.loadFromPath('./configAWS.json');
 AWS.config.update({region: 'eu-west-1'})
 try
@@ -35,7 +36,7 @@ app = express()
 #all environments
 app.use require('connect-assets')()
 console.log js('client')
-app.set('port', process.env.PORT || 3000)
+app.set('port', process.env.PORT || 3001)
 app.set('views', __dirname + '/views')
 app.set('view engine', 'jade')
 app.use(express.favicon("/images/fav.png"))
@@ -118,6 +119,11 @@ auth_twitter = {
 console.log auth_twitter
 twitter = new Twitter(auth_twitter)
 
+backend = new Backend({ 
+    url:  localhost ,
+    port: 3000
+  })
+
 last_messages   = []
 all_messages    = []
 liste_images    = []
@@ -180,6 +186,7 @@ get_image = (url,cb) ->
         cb nom
   return nom
 
+
 #------------------------------------
 
 
@@ -201,63 +208,43 @@ maj_S3episode = () ->
 
 
 
-maj_S3images_list = () ->
-  console.log "maj_S3images_list : MAJ de la liste des images" ,liste_images
-  s3.client.putObject({
-    Bucket: bucketName,
-    Key: 'imagePodcastScience'+nomEvent+'.JSON',
-    Body: JSON.stringify(liste_images)
-  },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+
+
+#get_S3images_list = (func) ->
+#  console.log "chargement images"
+#  try
+#    s3.client.getObject
+#      Bucket: bucketName
+#      Key: 'imagePodcastScience'+nomEvent+'.JSON'
+#      , (error,res) ->
+#        console.log "reponse recu"
+#        if(!error)
+#          console.log "chargement images ok"
+#          try
+#            func JSON.parse(res.Body)
+#          catch e
+#            console.log "Echec de la lecture de la liste des images : "+typeof(func),e
+#        else
+#          console.log "Erreur chargement images",error
+#  catch e
+#    console.log "Erreur",e
 
 
 
 
-get_S3images_list = (func) ->
-  console.log "chargement images"
-  try
-    s3.client.getObject
-      Bucket: bucketName
-      Key: 'imagePodcastScience'+nomEvent+'.JSON'
-      , (error,res) ->
-        console.log "reponse recu"
-        if(!error)
-          console.log "chargement images ok"
-          try
-            func JSON.parse(res.Body)
-          catch e
-            console.log "Echec de la lecture de la liste des images : "+typeof(func),e
-        else
-          console.log "Erreur chargement images",error
-  catch e
-    console.log "Erreur",e
-  
-
-store_S3images = (nom,data) ->
-  console.log("store_S3images : stockage d'une image")
-  databin = new Buffer(data, 'binary')
-  options = {
-    Bucket: bucketName,
-    Key: 'images/'+nomEvent+'_'+nom,
-    Body: databin,
-    ContentType: mime.lookup nom
-  }
-  s3.client.putObject options ,(res) ->  
-    console.log('Erreur S3 : '+res) if res != null
-
-
-load_S3images = (nom,cb) ->
-  console.log("load_S3images : chargement d'une image")
-  options = {
-    Bucket: bucketName,
-    Key: 'images/'+nomEvent+'_'+nom
-  }
-  s3.client.getObject options ,(error,res) ->
-      console.log "reponse recu"
-      if(!error)
-        images[nom]=res.Body
-        cb() 
-      else
-        console.log "Erreur chargement image "+nomEvent+'_'+nom,error
+#load_S3images = (nom,cb) ->
+#  console.log("load_S3images : chargement d'une image")
+#  options = {
+#    Bucket: bucketName,
+#    Key: 'images/'+nomEvent+'_'+nom
+#  }
+#  s3.client.getObject options ,(error,res) ->
+#      console.log "reponse recu"
+#      if(!error)
+#        images[nom]=res.Body
+#        cb() 
+#      else
+#        console.log "Erreur chargement image "+nomEvent+'_'+nom,error
 
 
 
@@ -281,10 +268,11 @@ s3.client.getObject
         jsonData=JSON.parse(res.Body)
         nomEvent=jsonData.nomEvent
         episode=jsonData.titre
-        get_S3images_list (val)->
-          liste_images=val
-          for im in liste_images
-            load_S3images im.nom, ()->
+        backend.download_images liste_images, images
+        #get_S3images_list (val)->
+        #  liste_images=val
+        #  for im in liste_images
+        #    load_S3images im.nom, ()->
         twitter.stream {track: '#'+nomEvent} 
       catch e
         console.log "erreur",e
@@ -585,10 +573,11 @@ io.sockets.on 'connection', (socket) ->
         console.log "erreur S3"+e
       io.sockets.emit('del_msglist')
       io.sockets.emit('del_imglist')
-      get_S3images_list (val)->
-        liste_images=val
-        for im in liste_images
-          load_S3images im.nom , (param_img)->io.sockets.emit 'add_img',im
+      backend.download_images liste_images, images
+      #get_S3images_list (val)->
+      #  liste_images=val
+      #  for im in liste_images
+      #    load_S3images im.nom , (param_img)->io.sockets.emit 'add_img',im
       io.sockets.emit('new-title',episode)
 
   
@@ -616,8 +605,7 @@ twitter.on 'data', (data) ->
     }
     liste_images.push param_img 
     io.sockets.emit 'add_img',param_img
-    store_S3images nom, images[nom]
-    maj_S3images_list()
+    backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, images[nom]
   console.log 'media:'+ nom
   
 
