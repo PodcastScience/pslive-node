@@ -9,15 +9,8 @@ path = require('path')
 md5 = require('MD5')
 mu = require('mu2')
 validator = require('validator')
-AWS = require('aws-sdk')
 Twitter = require('./twitter');
 Backend = require('./backend_interface');
-#AWS.config.loadFromPath('./configAWS.json');
-AWS.config.update({region: 'eu-west-1'})
-try
-  s3 = new AWS.S3()
-catch e 
-  console.log "error",e
 fs = require('fs')
 mime = require('mime')
 app = express()
@@ -120,7 +113,7 @@ console.log auth_twitter
 twitter = new Twitter(auth_twitter)
 
 backend = new Backend({ 
-    url:  localhost ,
+    url:  'localhost' ,
     port: 3000
   })
 
@@ -132,7 +125,6 @@ history         = 10
 nomEvent        = ''
 admin_password  = process.env.PSLIVE_ADMIN_PASSWORD
 episode         = 'Bienvenue sur le balado qui fait aimer la science!'
-bucketName      = process.env.PSLIVE_S3_BUCKET
 
 
 
@@ -187,123 +179,22 @@ get_image = (url,cb) ->
   return nom
 
 
-#------------------------------------
-
-
-
-
-maj_S3episode = () ->
-  console.log("maj_S3episode : MAJ de l'episode")
-  options = {
-    Bucket: bucketName,
-    Key: 'episodePodcastScience.JSON',
-    Body: JSON.stringify({
-      'titre':episode,
-      'nomEvent':nomEvent
-    })
-  }
-  console.log options
-  s3.client.putObject options,(res) ->  console.log('Erreur S3 : '+res) if res != null
-
-
-
-
-
-
-#get_S3images_list = (func) ->
-#  console.log "chargement images"
-#  try
-#    s3.client.getObject
-#      Bucket: bucketName
-#      Key: 'imagePodcastScience'+nomEvent+'.JSON'
-#      , (error,res) ->
-#        console.log "reponse recu"
-#        if(!error)
-#          console.log "chargement images ok"
-#          try
-#            func JSON.parse(res.Body)
-#          catch e
-#            console.log "Echec de la lecture de la liste des images : "+typeof(func),e
-#        else
-#          console.log "Erreur chargement images",error
-#  catch e
-#    console.log "Erreur",e
-
-
-
-
-#load_S3images = (nom,cb) ->
-#  console.log("load_S3images : chargement d'une image")
-#  options = {
-#    Bucket: bucketName,
-#    Key: 'images/'+nomEvent+'_'+nom
-#  }
-#  s3.client.getObject options ,(error,res) ->
-#      console.log "reponse recu"
-#      if(!error)
-#        images[nom]=res.Body
-#        cb() 
-#      else
-#        console.log "Erreur chargement image "+nomEvent+'_'+nom,error
-
-
-
-#########################################
-### Fin des fonctions ###################
-#########################################
-
 
  
 
-
-s3.client=s3
-## Chargement de la chatroom dans Amazon S3
-s3.client.getObject
-  Bucket: bucketName
-  Key: 'episodePodcastScience.JSON'
-  , (error,res) ->
-    if(!error)
-      console.log "chargement episode ok"
-      try
-        jsonData=JSON.parse(res.Body)
-        nomEvent=jsonData.nomEvent
-        episode=jsonData.titre
-        backend.download_images liste_images, images
-        #get_S3images_list (val)->
-        #  liste_images=val
-        #  for im in liste_images
-        #    load_S3images im.nom, ()->
-        twitter.stream {track: '#'+nomEvent} 
-      catch e
-        console.log "erreur",e
-      
-    else
-      console.log "erreur chargement episode"
-  
-
-
-
-
-
-
-
-
-#Chargement de l'historique des messages
 liste_connex    = []
-s3.client.getObject({
-  Bucket: bucketName,
-  Key: 'messagesPodcastScience.JSON'
-}, (error,res) ->
-  if(!error)
-    all_messages=JSON.parse(res.Body)
-    for msg in all_messages
-      #console.log("chargement derniers messages:"+msg.message)
-      last_messages.push msg
-      last_messages.shift() if (last_messages.length > history)
-  #console.log(JSON.stringify(all_messages))
-)
-console.log('Init de la liste des connexions: '+compte(liste_connex)+' connexion(s)')
+  
+load_episode = (number,title,chatroom) ->
+    console.log "*********************************************************"
+    all_messages=chatroom
+    nomEvent = number 
+    episode = title
+    backend.download_images liste_images, images
+    twitter.stream {track: '#'+nomEvent} 
 
+console.log backend
+
+backend.get_default_emission( load_episode )
 
 
 
@@ -491,11 +382,7 @@ io.sockets.on 'connection', (socket) ->
       last_messages.push message
       last_messages.shift() if (last_messages.length > history)
       io.sockets.emit('nwmsg',message)
-      s3.client.putObject({
-        Bucket: bucketName,
-        Key: 'messagesPodcastScience.JSON',
-        Body: JSON.stringify(all_messages)
-      },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
+      backend.set_chatroom JSON.stringify(all_messages)
    
     
   socket.on 'editmsg', (message) -> 
@@ -510,11 +397,7 @@ io.sockets.on 'connection', (socket) ->
         elt.message = message.message if elt.id == id_last_message
       for key,elt of last_messages
         elt.message = message.message if elt.id == id_last_message
-      s3.client.putObject({
-        Bucket: bucketName,
-        Key: 'messagesPodcastScience.JSON',
-        Body: JSON.stringify(all_messages)
-      },(res) ->  console.log('Erreur S3 : '+res) if res != null)   
+      backend.set_chatroom JSON.stringify(all_messages)
     
   #GESTION DE L'admin (qui n'envoi pas de HELLO)
             
@@ -525,7 +408,7 @@ io.sockets.on 'connection', (socket) ->
     nomEvent= 'ps' +message.number
     if message.password == admin_password   
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
-      maj_S3episode()
+      backend.select_emission(nomEvent,episode, (res) -> all_messages=res)
       try
         twitter.destroy()
       try
@@ -533,52 +416,47 @@ io.sockets.on 'connection', (socket) ->
       catch e
         console.log "erreur Twitter",e
       io.sockets.emit('new-title',episode)
-      #maj_S3episode()
         
  
 
 
 
   # Reitinialisation de la chatroom
-                
-  socket.on 'reinit_chatroom', (password) ->
-    if password == admin_password
-      console.log("Reinitiailisation de la chatroom")
-      episode='Bienvenue sur le balado qui fait aimer la science!'
-      last_messages = []  
-      all_messages = []
-      liste_images = []
-      images =[]
-      try
-        s3.client.putObject({
-          Bucket: bucketName,
-          Key: 'imagePodcastScience'+nomEvent+'.JSON',
-          Body: JSON.stringify(liste_images)
-        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
-        nomEvent=""
-        s3.client.putObject({
-          Bucket: bucketName,
-          Key: 'episodePodcastScience.JSON',
-          Body: JSON.stringify({
-            'titre':episode,
-            'nomEvent':''
-          }),  
-        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
-        s3.client.putObject({
-          Bucket: bucketName,
-          Key: 'messagesPodcastScience.JSON',
-          Body: JSON.stringify(all_messages)
-        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
-      catch e 
-        console.log "erreur S3"+e
-      io.sockets.emit('del_msglist')
-      io.sockets.emit('del_imglist')
-      backend.download_images liste_images, images
-      #get_S3images_list (val)->
-      #  liste_images=val
-      #  for im in liste_images
-      #    load_S3images im.nom , (param_img)->io.sockets.emit 'add_img',im
-      io.sockets.emit('new-title',episode)
+#                
+#  socket.on 'reinit_chatroom', (password) ->
+#    if password == admin_password
+#      console.log("Reinitiailisation de la chatroom")
+#      episode='Bienvenue sur le balado qui fait aimer la science!'
+#      last_messages = []  
+#      all_messages = []
+#      liste_images = []
+#      images =[]
+#      try
+#        s3.client.putObject({
+#          Bucket: bucketName,
+#          Key: 'imagePodcastScience'+nomEvent+'.JSON',
+#          Body: JSON.stringify(liste_images)
+#        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+#        nomEvent=""
+#        s3.client.putObject({
+#          Bucket: bucketName,
+#          Key: 'episodePodcastScience.JSON',
+#          Body: JSON.stringify({
+#            'titre':episode,
+#            'nomEvent':''
+#          }),  
+#        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+#        s3.client.putObject({
+#          Bucket: bucketName,
+#          Key: 'messagesPodcastScience.JSON',
+#          Body: JSON.stringify(all_messages)
+#        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
+#      catch e 
+#        console.log "erreur S3"+e
+#      io.sockets.emit('del_msglist')
+#      io.sockets.emit('del_imglist')
+#      backend.download_images liste_images, images
+#      io.sockets.emit('new-title',episode)
 
   
 

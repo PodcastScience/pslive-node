@@ -55,7 +55,7 @@ class Stream extends events.EventEmitter
         else
           separator = '\r\n'
           buffer = ''
-          data_length=0
+          data_length=@stream_imm
           response.setEncoding 'utf8'
           response.on 'data', (data) ->
             if data == separator
