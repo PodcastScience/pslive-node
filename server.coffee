@@ -186,10 +186,12 @@ liste_connex    = []
   
 load_episode = (number,title,chatroom) ->
     console.log "*********************************************************"
-    all_messages=chatroom
-    nomEvent = number 
-    episode = title
-    backend.download_images liste_images, images
+    all_messages=(chatroom || [])
+    nomEvent = number
+    episode= "<span class='number'> Episode #"+number+" - </span> "+title
+    backend.download_images (meta,image)->      
+      liste_images.push(meta)
+      images[meta.nom]=image
     twitter.stream {track: '#'+nomEvent} 
 
 console.log backend
@@ -408,7 +410,7 @@ io.sockets.on 'connection', (socket) ->
     nomEvent= 'ps' +message.number
     if message.password == admin_password   
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
-      backend.select_emission(nomEvent,episode, (res) -> all_messages=res)
+      backend.select_emission(nomEvent,message.title, (res) -> all_messages=res)
       try
         twitter.destroy()
       try

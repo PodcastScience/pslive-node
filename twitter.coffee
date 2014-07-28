@@ -37,6 +37,7 @@ class Stream extends events.EventEmitter
         return
       console.log "debut du stream Twitter avec le hashtag ",params
       if typeof params != 'object'
+        console.log "probleme de params",params
         params = {} 
       params.delimited = 'length'
       params.stall_warnings = 'true'
