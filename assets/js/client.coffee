@@ -194,6 +194,7 @@ $(document).ready ->
 
     
   socket.on 'del_imglist',() ->
+    console.log "suppression des images"
     $('#slider').html('')
     slider.refresh()
 

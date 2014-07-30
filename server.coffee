@@ -56,7 +56,6 @@ app.get('/', routes.index)
 app.get('/admin', routes.admin)
 app.get('/users', user.list)
 app.get '/image', (req, res) ->
-  #console.log images
   console.log "Affichage de l'image "+req.query.nom
   try
     res.end images[req.query.nom] ,'binary'
@@ -113,8 +112,8 @@ console.log auth_twitter
 twitter = new Twitter(auth_twitter)
 
 backend = new Backend({ 
-    url:  'localhost' ,
-    port: 3000
+    url:  (process.env.PSLIVE_BACKEND_URL || 'localhost') ,
+    port: (process.env.PSLIVE_BACKEND_PORT || 3000)
   })
 
 last_messages   = []
@@ -184,14 +183,18 @@ get_image = (url,cb) ->
 
 liste_connex    = []
   
-load_episode = (number,title,chatroom) ->
+load_episode = (number,title,chatroom) =>
     console.log "*********************************************************"
-    all_messages=(chatroom || [])
+    all_messages  = (chatroom || [])
+    last_messages = []
+    for msg in all_messages
+      last_messages.push msg
+      last_messages.shift() if (last_messages.length > history)
     nomEvent = number
     episode= "<span class='number'> Episode #"+number+" - </span> "+title
-    backend.download_images (meta,image)->      
-      liste_images.push(meta)
-      images[meta.nom]=image
+    backend.download_images (meta,images_)->      
+      liste_images=meta
+      images=images_
     twitter.stream {track: '#'+nomEvent} 
 
 console.log backend
@@ -201,8 +204,21 @@ backend.get_default_emission( load_episode )
 
 
 
+send_chatroom = (socket_) ->
+  console.log("envoi de l'historique")
+  for message in last_messages
+    console.log message
+    socket_.emit('nwmsg',message)
+  for im in liste_images
+    console.log im
+    socket_.emit('add_img',im) 
+  console.log episode
+  socket_.emit('new-title',episode)
 
-
+change_chatroom = () ->
+  io.sockets.emit 'del_imglist'
+  io.sockets.emit 'del_msglist'
+  send_chatroom io.sockets
 
 
 
@@ -219,19 +235,11 @@ io.sockets.on 'connection', (socket) ->
   id_last_message=""
 
   envoieInitialChatroom = () ->
-    console.log("envoi de l'historique")
     #Envoi des messages récents au client
-    for message in last_messages
-      socket.emit('nwmsg',message)
-    for im in liste_images
-      console.log im
-      socket.emit('add_img',im) 
-    console.log episode
-    socket.emit('new-title',episode)
-    
-    
-    
-    
+  
+    send_chatroom socket
+
+
   # gestion de la connexion au live. Le client evoi un Hello au serveur
   # qui lui reponf Olleh avec un id qui permettra de au serveur de s'assurer
   # que le client est connu (notamment compté)
@@ -394,7 +402,6 @@ io.sockets.on 'connection', (socket) ->
       message.message = replaceSalaud(message.message)
       message.id = id_last_message
       io.sockets.emit('editmsg',message)
-      #twitter.destroy()
       for key,elt of all_messages
         elt.message = message.message if elt.id == id_last_message
       for key,elt of last_messages
@@ -410,101 +417,95 @@ io.sockets.on 'connection', (socket) ->
     nomEvent= 'ps' +message.number
     if message.password == admin_password   
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
-      backend.select_emission(nomEvent,message.title, (res) -> all_messages=res)
+      backend.select_emission(nomEvent,message.title, (res) -> 
+        console.log res
+        all_messages  = (res || [])
+        last_messages = []
+        for msg in all_messages
+          last_messages.push msg
+          last_messages.shift() if (last_messages.length > history)
+        backend.download_images (meta,images_)->      
+          liste_images=meta
+          images=images_
+          change_chatroom()
+      )
       try
         twitter.destroy()
       try
         twitter.stream {track: '#'+nomEvent} 
       catch e
         console.log "erreur Twitter",e
-      io.sockets.emit('new-title',episode)
         
  
 
 
-
   # Reitinialisation de la chatroom
 #                
-#  socket.on 'reinit_chatroom', (password) ->
-#    if password == admin_password
-#      console.log("Reinitiailisation de la chatroom")
-#      episode='Bienvenue sur le balado qui fait aimer la science!'
-#      last_messages = []  
-#      all_messages = []
-#      liste_images = []
-#      images =[]
-#      try
-#        s3.client.putObject({
-#          Bucket: bucketName,
-#          Key: 'imagePodcastScience'+nomEvent+'.JSON',
-#          Body: JSON.stringify(liste_images)
-#        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
-#        nomEvent=""
-#        s3.client.putObject({
-#          Bucket: bucketName,
-#          Key: 'episodePodcastScience.JSON',
-#          Body: JSON.stringify({
-#            'titre':episode,
-#            'nomEvent':''
-#          }),  
-#        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
-#        s3.client.putObject({
-#          Bucket: bucketName,
-#          Key: 'messagesPodcastScience.JSON',
-#          Body: JSON.stringify(all_messages)
-#        },(res) ->  console.log('Erreur S3 : '+res) if res != null)
-#      catch e 
-#        console.log "erreur S3"+e
-#      io.sockets.emit('del_msglist')
-#      io.sockets.emit('del_imglist')
-#      backend.download_images liste_images, images
-#      io.sockets.emit('new-title',episode)
-
-  
+  socket.on 'reinit_chatroom', (password) ->
+    console.log("Reinitiailisation de la chatroom")
+    episode='Bienvenue sur le balado qui fait aimer la science!'
+    nomEvent = "podcastscience"
+    backend.select_emission(nomEvent,episode, (res) -> 
+        console.log res
+        last_messages = []  
+        all_messages = []
+        backend.download_images (meta,images_)->      
+          liste_images=meta
+          images=images_
+          change_chatroom()
+      )
+    try
+      twitter.destroy()
 
 
 
 
-twitter.on 'data', (data) -> 
-  console.log "reception : ",data
-  try
-    url         = data.entities.media[0].media_url
-    poster      = data.user.name
-    poster_user = data.user.screen_name
-    avatar      = data.user.profile_image_url
-    tweet       = data.text
-  catch e
-  return 0 if (url==null) || (typeof(url) == 'undefined')
-  nom=get_image url, (nom)-> 
-    param_img={
-      'nom' : nom, 
-      'poster':poster,
-      'poster_user':poster_user,
-      'avatar':avatar,
-      'tweet':replaceURLWithHTMLLinks tweet
-    }
-    liste_images.push param_img 
-    io.sockets.emit 'add_img',param_img
-    backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, images[nom]
-  console.log 'media:'+ nom
-  
 
 
-twitter.on 'start', () -> 
-  io.sockets.emit "twitter_start"
+init_twitter = (twitter) ->
+  twitter.on 'data', (data) -> 
+    console.log "reception : ",data
+    try
+      url         = data.entities.media[0].media_url
+      poster      = data.user.name
+      poster_user = data.user.screen_name
+      avatar      = data.user.profile_image_url
+      tweet       = data.text
+    catch e
+    return 0 if (url==null) || (typeof(url) == 'undefined')
+    nom=get_image url, (nom)-> 
+      param_img={
+        'nom' : nom, 
+        'poster':poster,
+        'poster_user':poster_user,
+        'avatar':avatar,
+        'tweet':replaceURLWithHTMLLinks tweet
+      }
+      liste_images.push param_img 
+      io.sockets.emit 'add_img',param_img
+      backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, images[nom]
+    console.log 'media:'+ nom
+    
 
 
-twitter.on 'error', (data) -> 
-  io.sockets.emit "errorTwitter",data
+  twitter.on 'start', () -> 
+    io.sockets.emit "twitter_start"
 
 
-twitter.on 'heartbeat', (data) -> 
-  console.log  "Twitter stream is alive"
-  io.sockets.emit 'heartbeat_twitter'
-
-twitter.on 'close', (data) -> 
-  console.log  "Twitter stream is closed :",data
-  io.sockets.emit 'twitter_close'
-  twitter = new Twitter(auth_twitter) 
+  twitter.on 'error', (data) -> 
+    io.sockets.emit "errorTwitter",data
 
 
+  twitter.on 'heartbeat', (data) -> 
+    console.log  "Twitter stream is alive"
+    io.sockets.emit 'heartbeat_twitter'
+
+  twitter.on 'close', (data) -> 
+    console.log  "Twitter stream is closed :",data
+    io.sockets.emit 'twitter_close'
+    twitter = new Twitter(auth_twitter) 
+    init_twitter twitter
+
+
+
+init_twitter twitter
