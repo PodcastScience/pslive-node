@@ -37,13 +37,17 @@ class Backend
 		}
 		req = http.request options, (res)=> 
 			http_request_callback res, (data)=>
-				@id_emission=data.id
-				try 
-					chatroom = JSON.parse(data.chatroom)
+				try
+					@id_emission=data.id 
+					try 
+						chatroom = JSON.parse(data.chatroom)
+					catch e
+						console.log  "Erreur du parsing de la chatroom",e
+					cb(data.number,data.title,chatroom)
 				catch e
-					console.log  "Erreur du parsing de la chatroom",e
-				cb(data.number,data.title,chatroom)
-		req.on 'error',(err)->console.log err
+					@id_emission = 0
+					cb(0,"Bienvenue sur le balado qui fait aimer la science!",{})
+		req.on 'error',(err)->console.log Error
 		req.end()
 
 
