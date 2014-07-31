@@ -103,17 +103,20 @@ class Backend
 			http_request_callback res, (data)->
 				images_tmp=[]
 				meta_tmp=[]
-				data.map (image)->
-					img = {
-						'nom' : image.name, 
-						'poster' : image.author,
-						'poster_user' : image.user,
-						'avatar' : image.avatar,
-						'tweet' : image.msg
-					}
-					image_data=new Buffer( image.image , 'base64' )
-					meta_tmp.push img
-					images_tmp[img.nom] = image_data
+				try
+					data.map (image)->
+						img = {
+							'nom' : image.name, 
+							'poster' : image.author,
+							'poster_user' : image.user,
+							'avatar' : image.avatar,
+							'tweet' : image.msg
+						}
+						image_data=new Buffer( image.image , 'base64' )
+						meta_tmp.push img
+						images_tmp[img.nom] = image_data
+				catch
+					console.log "pas d'image"
 				cb meta_tmp, images_tmp
 		req.on 'error',(err)->console.log err
 		req.end()
