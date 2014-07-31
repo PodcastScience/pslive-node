@@ -65,7 +65,7 @@ class Backend
 				'content_type': mime.lookup(nom),
 				'id_episode': @id_emission
 			})
-			console.log "upload d'une image : ", params
+			console.log "upload d'une image : ",params.name
 			headers = {
 				'Content-Type': 'application/json',
 				'Content-Length':  Buffer.byteLength(params, 'utf-8')
