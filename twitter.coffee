@@ -78,7 +78,9 @@ class Stream extends events.EventEmitter
               if (parsed) 
                 stream.emit 'data', retval
                 buffer=''
-                data_length = 0        
+                data_length = 0 
+            else
+              console.log "donnees incomplete ("+buffer.length+"/"+data_length+")",buffer       
         response.on 'error', (error) ->
           console.log 'twitter error',Error
           stream.emit 'close', error
