@@ -51,7 +51,7 @@ class Backend
 		req.end()
 
 
-	upload_image: (episode,nom,auteur,user,avatar,message,data) ->
+	upload_image: (episode,nom,auteur,user,avatar,message,data,cb) ->
 		console.log "Entrée dans upload_image"
 		try
 			databin64 = new Buffer(data, 'binary').toString('base64') 
@@ -79,11 +79,22 @@ class Backend
 				headers: headers
 			}
 			req = http.request options, (res)-> 
+				try
+					http_request_callback res, (data)=>
+						try
+							cb data.url
+						catch e
+							console.log "cb", e
+						
+						
+				catch e
+					console.log "req:",e
+				
 			req.on 'error', (err)->console.log err
 			req.write params  
 			req.end()
 		catch e
-			console.log e
+			console.log "Erreur upload",e
 
 
 
@@ -101,23 +112,24 @@ class Backend
 		console.log "download des images : ", @id_emission
 		req = http.request options, (res)-> 
 			http_request_callback res, (data)->
-				images_tmp=[]
+				console.log data
 				meta_tmp=[]
 				try
 					data.map (image)->
 						img = {
 							'nom' : image.name, 
+							'url' : image.url,
 							'poster' : image.author,
 							'poster_user' : image.user,
 							'avatar' : image.avatar,
 							'tweet' : image.msg
 						}
-						image_data=new Buffer( image.image , 'base64' )
 						meta_tmp.push img
-						images_tmp[img.nom] = image_data
-				catch
+						console.log img.url
+				catch e
 					console.log "pas d'image"
-				cb meta_tmp, images_tmp
+				console.log meta_tmp
+				cb meta_tmp
 		req.on 'error',(err)->console.log err
 		req.end()
 

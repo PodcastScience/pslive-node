@@ -55,10 +55,6 @@ if ('development' == app.get('env'))
 app.get('/', routes.index)
 app.get('/admin', routes.admin)
 app.get('/users', user.list)
-app.get '/image', (req, res) ->
-  console.log "Affichage de l'image "+req.query.nom
-  try
-    res.end images[req.query.nom] ,'binary'
 app.get '/messages', (req, res) ->
   res.send all_messages.map((message) -> "<b>#{message.user.username}:</b> #{message.message}").join("<br/>")
 app.get '/timestamp', (req, res) ->
@@ -119,7 +115,6 @@ backend = new Backend({
 last_messages   = []
 all_messages    = []
 liste_images    = []
-images          = []
 history         = 10
 nomEvent        = ''
 admin_password  = process.env.PSLIVE_ADMIN_PASSWORD
@@ -172,10 +167,8 @@ get_image = (url,cb) ->
         (chunk)->data+=chunk
         console.log "data"
       response.on 'end',()->
-        images[nom]=data
-        console.log "Fin du chargement de "+nom+":"+images[nom].length
-        cb nom
-  return nom
+        console.log "Fin du chargement de "+nom+":"
+        cb nom,data
 
 
 
@@ -192,9 +185,8 @@ load_episode = (number,title,chatroom) =>
       last_messages.shift() if (last_messages.length > history)
     nomEvent = number
     episode= "<span class='number'> Episode #"+number+" - </span> "+title
-    backend.download_images (meta,images_)->      
+    backend.download_images (meta)->      
       liste_images=meta
-      images=images_
     twitter.stream {track: '#'+nomEvent} 
 
 console.log backend
@@ -424,9 +416,8 @@ io.sockets.on 'connection', (socket) ->
         for msg in all_messages
           last_messages.push msg
           last_messages.shift() if (last_messages.length > history)
-        backend.download_images (meta,images_)->      
+        backend.download_images (meta)->      
           liste_images=meta
-          images=images_
           change_chatroom()
       )
       try
@@ -449,9 +440,8 @@ io.sockets.on 'connection', (socket) ->
         console.log res
         last_messages = []  
         all_messages = []
-        backend.download_images (meta,images_)->      
+        backend.download_images (meta)->
           liste_images=meta
-          images=images_
           change_chatroom()
       )
     try
@@ -471,9 +461,10 @@ init_twitter = (twitter) ->
       poster_user = data.user.screen_name
       avatar      = data.user.profile_image_url
       tweet       = data.text
+
     catch e
     return 0 if (url==null) || (typeof(url) == 'undefined')
-    nom=get_image url, (nom)-> 
+    get_image url, (nom,data)->
       param_img={
         'nom' : nom, 
         'poster':poster,
@@ -481,10 +472,13 @@ init_twitter = (twitter) ->
         'avatar':avatar,
         'tweet':replaceURLWithHTMLLinks tweet
       }
-      liste_images.push param_img 
-      io.sockets.emit 'add_img',param_img
-      backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, images[nom]
-    console.log 'media:'+ nom
+      backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, data, (url_wp)->  
+        console.log "image uploadée"
+        param_img.url=url_wp
+        console.log param_img
+        liste_images.push param_img 
+        io.sockets.emit 'add_img',param_img
+        console.log 'media:'+ nom
     
 
 
