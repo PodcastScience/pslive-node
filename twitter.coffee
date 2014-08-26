@@ -32,7 +32,7 @@ class Stream extends events.EventEmitter
     )
     stream_imm = (params) =>
       stream = this
-      params.track = params.track+",#psatcern"
+      params.track = params.track
       if params.track=='#' 
         console.log "hashtag invalide :",params
         return
