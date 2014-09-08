@@ -472,6 +472,11 @@ init_twitter = (twitter) ->
         'avatar':avatar,
         'tweet':replaceURLWithHTMLLinks tweet
       }
+      for idx,i of liste_images
+        console.log i.nom +  "/" + nom
+        if i.nom==nom
+          console.log "image deja presente"
+          return false
       backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, data, (url_wp)->  
         console.log "image uploadée"
         param_img.url=url_wp
