@@ -43,7 +43,11 @@ html
     script(src='/js/mustache.js')
     != js('client')
   body.on
+    #shadowing
+    #videobox.box
+    #imagebox.box
     block bloc_header
+
     noscript.warning
       p.wrap
         strong Sans le JavaScript activé ça va moins bien fonctionner.

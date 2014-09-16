@@ -8,6 +8,7 @@ https = require('https')
 path = require('path')
 md5 = require('MD5')
 mu = require('mu2')
+url_parser = require('url')
 validator = require('validator')
 Twitter = require('./twitter');
 Backend = require('./backend_interface');
@@ -455,36 +456,73 @@ io.sockets.on 'connection', (socket) ->
 init_twitter = (twitter) ->
   twitter.on 'data', (data) -> 
     console.log "reception : ",data
+    console.log "url : ", data.entities.urls
     try
       url         = data.entities.media[0].media_url
       poster      = data.user.name
       poster_user = data.user.screen_name
       avatar      = data.user.profile_image_url
       tweet       = data.text
-
+      media_type  = 'img'
     catch e
+      try
+        site = data.entities.urls[0].display_url.split('/')[0]
+        if site=='vimeo.com' or site='youtube.com' or site='dailymotion.com'
+          url         = data.entities.urls[0].display_url
+          poster      = data.user.name
+          poster_user = data.user.screen_name
+          avatar      = data.user.profile_image_url
+          tweet       = data.text
+          media_type  = 'video'
+      catch e
     return 0 if (url==null) || (typeof(url) == 'undefined')
-    get_image url, (nom,data)->
+
+    if media_type == 'img'
+      get_image url, (nom,data)->
+        param_img={
+          'nom' : nom, 
+          'poster':poster,
+          'poster_user':poster_user,
+          'avatar':avatar,
+          'tweet':replaceURLWithHTMLLinks tweet
+          'media_type' : media_type
+        }
+        for idx,i of liste_images
+          if i.nom==nom
+            console.log "image deja presente"
+            return false
+        backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, data, (url_wp)->  
+          console.log "image uploadée"
+          param_img.url=url_wp
+          console.log param_img
+          liste_images.push param_img 
+          io.sockets.emit 'add_img',param_img
+          console.log 'media:'+ nom
+    if media_type == 'video'
+      url_o = url_parser.parse data.entities.urls[0].expanded_url ,  true , true
+      nom =  url_o.query.v
+      console.log   url_o
+      console.log   url_o.query
       param_img={
         'nom' : nom, 
         'poster':poster,
         'poster_user':poster_user,
         'avatar':avatar,
         'tweet':replaceURLWithHTMLLinks tweet
+        'media_type' : media_type
       }
       for idx,i of liste_images
-        console.log i.nom +  "/" + nom
         if i.nom==nom
-          console.log "image deja presente"
+          console.log "video deja presente"
           return false
-      backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, data, (url_wp)->  
-        console.log "image uploadée"
-        param_img.url=url_wp
-        console.log param_img
-        liste_images.push param_img 
-        io.sockets.emit 'add_img',param_img
-        console.log 'media:'+ nom
-    
+      backend.upload_video nomEvent, nom, poster,poster_user,avatar, tweet, url, (url_wp)->  
+      param_img.url=url
+      param_img.site = site
+      console.log param_img
+      liste_images.push param_img 
+      io.sockets.emit 'add_img',param_img
+      console.log 'media:'+ nom
+
 
 
   twitter.on 'start', () -> 

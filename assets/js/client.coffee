@@ -201,7 +201,40 @@ $(document).ready ->
 
   socket.on 'add_img',(im) ->
     console.log("Ajout d'image : ",im)
-    $('#slider').prepend('<li class="slider_elt" data-thumb="'+im.url+'"><img  class="img_slider" title="par '+im.poster+'" src="'+im.url+'" alt="par '+im.poster+'"><div class="author"><a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank"><img class="twitterAvatar"  src="'+im.avatar+'"/></a><span class="tweet"><a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'</span></div></li>')
+    if(im.media_type=='img' || im.media_type!='video')
+      $('#slider').prepend('
+          <li class="slider_elt" data-thumb="'+im.url+'">
+            <img  class="img_slider" title="par '+im.poster+'" src="'+im.url+'" alt="par '+im.poster+'" onclick="openLightboxImage(\''+im.url+'\')" >
+            <div class="author">
+              <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">
+                <img class="twitterAvatar"  src="'+im.avatar+'"/>
+              </a>
+              <span class="tweet">
+                <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'
+              </span>
+            </div>
+          </li>
+        ')
+    if(im.media_type=='video')
+      $('#slider').prepend('
+        <li class="slider_elt" data-thumb="http://img.youtube.com/vi/'+im.nom+'/1.jpg">
+          <img  class="img_slider"  title="par '+im.poster+'" src="http://img.youtube.com/vi/'+im.nom+'/0.jpg" onclick="openLightboxYouTube(\''+im.nom+'\')" alt="par '+im.poster+'">
+          <div class="author">
+            <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">
+              <img class="twitterAvatar"  src="'+im.avatar+'"/>
+            </a>
+            <span class="tweet">
+              <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'
+            </span>
+          </div>
+        </li>
+      ')
+     
+     # $('#slider').prepend('<li class="slider_elt" data-thumb="'+im.url+'">
+#<iframe id="player" type="text/html" width="640" height="390"
+ # src="http://www.youtube.com/embed/'+im.nom+'?enablejsapi=1&origin=http://live.podcastscience.fm"
+  #frameborder="0"></iframe>
+   #     </li>')
     slider.refresh()
     slider.goToSlide(0)
 
@@ -292,5 +325,3 @@ $(document).ready ->
       input.removeClass('editmsg')
       input.val("")
 
-
- 

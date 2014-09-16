@@ -364,3 +364,31 @@ $(document).ready(function() {
 	
 });
 
+
+
+
+
+openLightboxYouTube = function(id) {
+  $("#shadowing").css('display', 'block');
+  $("#videobox").html('\
+  		<div class="video-container">\
+			<iframe id="player" type="text/html" width="1024" height="640"\
+ 				src="http://www.youtube.com/embed/' + id + '?enablejsapi=1&origin=http://live.podcastscience.fm" frameborder="0">\
+ 			</iframe>\
+ 		</div>\
+  	');
+  $("#videobox").css('display', 'block');
+};
+openLightboxImage = function(url) {
+  $("#shadowing").css('display', 'block');
+  $("#imagebox").html('\
+  		<img  src="'+url+'"onclick="closeLightbox()" >\
+  	');
+  $("#imagebox").css('display', 'block');
+};
+closeLightbox = function() {
+  $(".box").css('display', 'none');
+  $(".box").html('');
+  $("#shadowing").css('display', 'none');
+};
+$("#shadowing").on('click', closeLightbox);
