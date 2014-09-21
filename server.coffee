@@ -467,7 +467,7 @@ init_twitter = (twitter) ->
     catch e
       try
         site = data.entities.urls[0].display_url.split('/')[0]
-        if site=='vimeo.com' or site='youtube.com' or site='dailymotion.com'
+        if site=='vimeo.com' || site=='youtube.com' || site=='dailymotion.com'
           url         = data.entities.urls[0].display_url
           poster      = data.user.name
           poster_user = data.user.screen_name

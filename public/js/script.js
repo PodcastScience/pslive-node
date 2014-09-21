@@ -366,19 +366,30 @@ $(document).ready(function() {
 
 
 
+var tag = document.createElement('script');
+tag.src = "http://www.youtube.com/player_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+YTplayer=null
 
-
-openLightboxYouTube = function(id) {
+function openLightboxYouTube(id) {
   $("#shadowing").css('display', 'block');
-  $("#videobox").html('\
-  		<div class="video-container">\
-			<iframe id="player" type="text/html" width="1024" height="640"\
- 				src="http://www.youtube.com/embed/' + id + '?enablejsapi=1&origin=http://live.podcastscience.fm" frameborder="0">\
- 			</iframe>\
- 		</div>\
-  	');
+  YTplayer = new YT.Player('videobox', {
+    playerVars: { 'autoplay': 1, 'controls': 1,'autohide':1,'wmode':'opaque' },
+    videoId: id,
+    events: {
+      'onReady': onYTPlayerReady}
+  });
   $("#videobox").css('display', 'block');
-};
+
+}
+function onYTPlayerReady(event) {
+	event.target.mute();
+}
+
+
+
+
 openLightboxImage = function(url) {
   $("#shadowing").css('display', 'block');
   $("#imagebox").html('\
@@ -387,8 +398,11 @@ openLightboxImage = function(url) {
   $("#imagebox").css('display', 'block');
 };
 closeLightbox = function() {
-  $(".box").css('display', 'none');
-  $(".box").html('');
+  $("#videobox").css('display', 'none');
+  $("#imagebox").html();
+  $("#imagebox").css('display', 'none');
   $("#shadowing").css('display', 'none');
+  if(YTplayer!=undefined)
+    YTplayer.destroy();
 };
 $("#shadowing").on('click', closeLightbox);
