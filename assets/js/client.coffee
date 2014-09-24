@@ -218,7 +218,8 @@ $(document).ready ->
     if(im.media_type=='video')
       $('#slider').prepend('
         <li class="slider_elt" data-thumb="http://img.youtube.com/vi/'+im.nom+'/1.jpg">
-          <img  class="img_slider"  title="par '+im.poster+'" src="http://img.youtube.com/vi/'+im.nom+'/0.jpg" onclick="openLightboxYouTube(\''+im.nom+'\')" alt="par '+im.poster+'">
+          <img  class="img_slider"  title="par '+im.poster+'" src="http://img.youtube.com/vi/'+im.nom+'/0.jpg" alt="par '+im.poster+'">
+          <img  class="btn_play" src="images/play.png"  onclick="openLightboxYouTube(\''+im.nom+'\')">
           <div class="author">
             <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">
               <img class="twitterAvatar"  src="'+im.avatar+'"/>
