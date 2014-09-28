@@ -8,6 +8,7 @@ https = require('https')
 path = require('path')
 md5 = require('MD5')
 mu = require('mu2')
+cheerio = require('cheerio')
 url_parser = require('url')
 validator = require('validator')
 Twitter = require('./twitter');
@@ -160,7 +161,7 @@ pad2 = (val) ->
 get_image = (url,cb) ->
   nom=url.slice url.lastIndexOf('/')+1
   console.log "chargement images en RAM : ",url
-  http.get url, (response)->
+  http.get url+':large', (response)->
       data=''
       response.setEncoding('binary')
       console.log "reception d'une reponse"
@@ -172,6 +173,19 @@ get_image = (url,cb) ->
         cb nom,data
 
 
+get_thumbnail = (site,url,cb) ->
+  if site=='vine.co'
+    console.log "chargement du thumbnail Vine",url
+    https.get url.replace('http://','https://'), (response)->
+      data=''
+      response.on 'data',(chunk)->
+        data+=chunk
+      response.on 'end',()->
+        console.log "pages chargee",data
+        $ = cheerio.load(data)
+        cb $('meta[property="twitter:image"]').attr('content')      
+  else
+    cb ""
 
  
 
@@ -204,7 +218,10 @@ send_chatroom = (socket_) ->
     socket_.emit('nwmsg',message)
   for im in liste_images
     console.log im
-    socket_.emit('add_img',im) 
+    site = im.url.split('/')[0]
+    get_thumbnail site,'https://'+im.url,(url_thumbnail) ->
+      im.url_thumbnail=url_thumbnail
+      socket_.emit('add_img',im) 
   console.log episode
   socket_.emit('new-title',episode)
 
@@ -467,7 +484,7 @@ init_twitter = (twitter) ->
     catch e
       try
         site = data.entities.urls[0].display_url.split('/')[0]
-        if site=='vimeo.com' || site=='youtube.com' || site=='dailymotion.com'
+        if site=='vimeo.com' || site=='youtube.com'  || site=='vine.co' 
           url         = data.entities.urls[0].display_url
           poster      = data.user.name
           poster_user = data.user.screen_name
@@ -500,9 +517,13 @@ init_twitter = (twitter) ->
           console.log 'media:'+ nom
     if media_type == 'video'
       url_o = url_parser.parse data.entities.urls[0].expanded_url ,  true , true
-      nom =  url_o.query.v
-      console.log   url_o
-      console.log   url_o.query
+      switch site
+        when 'youtube.com' then nom = url_o.query.v
+        when 'vimeo.com' then nom = url_o.pathname.split('/')[..].pop()
+        when 'vine.co' then nom = url_o.pathname.split('/')[..].pop()
+        else return false
+      console.log   '1',url_o
+      console.log   '2',url_o.query
       param_img={
         'nom' : nom, 
         'poster':poster,
@@ -515,14 +536,15 @@ init_twitter = (twitter) ->
         if i.nom==nom
           console.log "video deja presente"
           return false
-      backend.upload_video nomEvent, nom, poster,poster_user,avatar, tweet, url, (url_wp)->  
-      param_img.url=url
-      param_img.site = site
-      console.log param_img
-      liste_images.push param_img 
-      io.sockets.emit 'add_img',param_img
-      console.log 'media:'+ nom
-
+      get_thumbnail  site,  data.entities.urls[0].expanded_url , (url_thumbnail)->
+        param_img.url_thumbnail=url_thumbnail
+        backend.upload_video nomEvent, nom, poster,poster_user,avatar, tweet, url, (url_wp)->  
+        param_img.url=url
+        param_img.site = site
+        console.log param_img
+        liste_images.push param_img 
+        io.sockets.emit 'add_img',param_img
+        console.log 'media:'+ nom
 
 
   twitter.on 'start', () -> 

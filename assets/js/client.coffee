@@ -215,29 +215,73 @@ $(document).ready ->
             </div>
           </li>
         ')
+      slider.refresh()
+      slider.goToSlide(0)
     if(im.media_type=='video')
-      $('#slider').prepend('
-        <li class="slider_elt" data-thumb="http://img.youtube.com/vi/'+im.nom+'/1.jpg">
-          <img  class="img_slider"  title="par '+im.poster+'" src="http://img.youtube.com/vi/'+im.nom+'/0.jpg" alt="par '+im.poster+'">
-          <img  class="btn_play" src="images/play.png"  onclick="openLightboxYouTube(\''+im.nom+'\')">
-          <div class="author">
-            <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">
-              <img class="twitterAvatar"  src="'+im.avatar+'"/>
-            </a>
-            <span class="tweet">
-              <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'
-            </span>
-          </div>
-        </li>
-      ')
-     
+      site = im.url.split('/')[0]
+      if(site=='youtube.com')
+        $('#slider').prepend('
+          <li class="slider_elt" data-thumb="http://img.youtube.com/vi/'+im.nom+'/1.jpg">
+            <img  class="img_slider"  title="par '+im.poster+'" src="http://img.youtube.com/vi/'+im.nom+'/0.jpg" alt="par '+im.poster+'">
+            <img  class="btn_play" src="images/play.png"  onclick="openLightboxYouTube(\''+im.nom+'\')">
+            <div class="author">
+              <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">
+                <img class="twitterAvatar"  src="'+im.avatar+'"/>
+              </a>
+              <span class="tweet">
+                <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'
+              </span>
+            </div>
+          </li>
+        ')
+        slider.refresh()
+        slider.goToSlide(0)
+      if(site=='vimeo.com')
+        $.ajax({
+          url: 'http://vimeo.com/api/v2/video/'+im.nom+'.json'
+          dataType: 'JSON'
+        }).done((data)->
+          $('#slider').prepend('
+            <li class="slider_elt" data-thumb="'+data[0].thumbnail_small+'">
+              <img  class="img_slider"  title="par '+im.poster+'" src="'+data[0].thumbnail_large+'" alt="par '+im.poster+'">
+              <img  class="btn_play" src="images/play.png"  onclick="openLightboxVimeo(\''+im.nom+'\')">
+              <div class="author">
+                <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">
+                  <img class="twitterAvatar"  src="'+im.avatar+'"/>
+                </a>
+                <span class="tweet">
+                  <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'
+                </span>
+              </div>
+            </li>
+          ')
+          slider.refresh()
+          slider.goToSlide(0)
+        )
+      if(site=='vine.co')   
+        $('#slider').prepend('
+          <li class="slider_elt" data-thumb="'+im.url_thumbnail+'">
+              <iframe class="vine-embed" src="https://vine.co/v/'+im.nom+'/embed/simple?related=0" width="100%" height="100%" frameborder="0"></iframe>
+              <!--img  class="btn_play" src="images/play.png"  onclick="openLightboxVine(\''+im.nom+'\')"-->
+              <div class="author">
+                <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">
+                  <img class="twitterAvatar"  src="'+im.avatar+'"/>
+                </a>
+                <span class="tweet">
+                  <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'
+                </span>
+              </div>
+          </li>
+        ')
+        console.log 'vine',im
+        slider.refresh()
+        slider.goToSlide(0)
+       
      # $('#slider').prepend('<li class="slider_elt" data-thumb="'+im.url+'">
 #<iframe id="player" type="text/html" width="640" height="390"
  # src="http://www.youtube.com/embed/'+im.nom+'?enablejsapi=1&origin=http://live.podcastscience.fm"
   #frameborder="0"></iframe>
    #     </li>')
-    slider.refresh()
-    slider.goToSlide(0)
 
 
   $('.rec').on 'dblclick', ->

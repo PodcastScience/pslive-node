@@ -19,7 +19,8 @@
     "validator": "3.2.0",
     "aws-sdk": "latest",
     "oauth": "0.9.8",
-    "mime": "1.2.11"
+    "mime": "1.2.11",
+    "cheerio": "0.17.0"
   },
   "engines": {
     "node": "0.8.x",

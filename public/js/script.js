@@ -366,12 +366,15 @@ $(document).ready(function() {
 
 
 
+
+
+
 var tag = document.createElement('script');
 tag.src = "http://www.youtube.com/player_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 YTplayer=null
-
+ 
 function openLightboxYouTube(id) {
   $("#shadowing").css('display', 'block');
   YTplayer = new YT.Player('videobox', {
@@ -388,7 +391,16 @@ function onYTPlayerReady(event) {
 }
 
 
-
+function openLightboxVimeo(id) {
+  $("#shadowing").css('display', 'block');
+  $("#videobox").html('<iframe src="//player.vimeo.com/video/'+id+'?title=0&amp;byline=0&amp;portrait=0&amp;autoplay=1" width="100%" height="100%" frameborder="0" webkitallowfullscreen  mozallowfullscreen allowfullscreen> </iframe>')
+  $("#videobox").css('display', 'block');
+}
+function openLightboxVine(id) {
+  $("#shadowing").css('display', 'block');
+  $("#videobox").html('<iframe class="vine-embed" src="https://vine.co/v/'+id+'/embed/simple?related=0" width="100%" height="100%" frameborder="0"></iframe>')
+  $("#videobox").css('display', 'block');
+}
 
 openLightboxImage = function(url) {
   $("#shadowing").css('display', 'block');
