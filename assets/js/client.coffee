@@ -261,8 +261,9 @@ $(document).ready ->
       if(site=='vine.co')   
         $('#slider').prepend('
           <li class="slider_elt" data-thumb="'+im.url_thumbnail+'">
-              <iframe class="vine-embed" src="https://vine.co/v/'+im.nom+'/embed/simple?related=0" width="100%" height="100%" frameborder="0"></iframe>
-              <!--img  class="btn_play" src="images/play.png"  onclick="openLightboxVine(\''+im.nom+'\')"-->
+              <!--iframe class="vine-embed" src="https://vine.co/v/'+im.nom+'/embed/simple?related=0" width="100%" height="100%" frameborder="0"></iframe-->
+              <img class="vine-embed" src="'+im.url_thumbnail+'" width="100%" height="100%" frameborder="0"/>
+              <img class="btn_play" src="images/play.png"  onclick="openLightboxVine(\''+im.nom+'\')">
               <div class="author">
                 <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">
                   <img class="twitterAvatar"  src="'+im.avatar+'"/>
