@@ -398,6 +398,7 @@ io.sockets.on 'connection', (socket) ->
       message.h = pad2(date.getHours())
       message.m = pad2(date.getMinutes())
       message.s = pad2(date.getSeconds()) 
+      console.log message
       all_messages.push message
       last_messages.push message
       last_messages.shift() if (last_messages.length > history)
