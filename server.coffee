@@ -136,7 +136,7 @@ replaceURLWithHTMLLinks = (text) ->
 
 
 insertChatroomImages = (text,user,avatar) -> 
-  exp = /https?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]/i
+  exp = /http:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]/i
   console.log text
   if tab_url = text.match(exp)
     console.log tab_url
