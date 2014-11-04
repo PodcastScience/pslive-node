@@ -179,6 +179,10 @@ $(document).ready ->
 
     
     
+  socket.on 'AuthFailed',() ->
+    alert "Authentification Failed"
+
+
   socket.on 'disconnect',() ->
     console.log("evt disconnect recu *"+id_connexion+"*")
     if id_connexion

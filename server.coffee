@@ -199,7 +199,10 @@ load_episode = (number,title,chatroom) =>
       last_messages.push msg
       last_messages.shift() if (last_messages.length > history)
     nomEvent = number
-    episode= "<span class='number'> Episode #"+number+" - </span> "+title
+    if nomEvent == 'podcastscience'
+      episode=title
+    else
+      episode= "<span class='number'> Episode #"+number+" - </span> "+title
     backend.download_images (meta)->      
       liste_images=meta
     twitter.stream {track: '#'+nomEvent} 
@@ -213,15 +216,16 @@ backend.get_default_emission( load_episode )
 
 send_chatroom = (socket_) ->
   console.log("envoi de l'historique")
-  for message in last_messages
-    console.log message
-    socket_.emit('nwmsg',message)
-  for im in liste_images
-    console.log im
-    site = im.url.split('/')[0]
-    get_thumbnail site,'https://'+im.url,(url_thumbnail) ->
-      im.url_thumbnail=url_thumbnail
-      socket_.emit('add_img',im) 
+  if nomEvent != 'podcastscience'
+    for message in last_messages
+      console.log message
+      socket_.emit('nwmsg',message)
+    for im in liste_images
+      console.log im
+      site = im.url.split('/')[0]
+      get_thumbnail site,'https://'+im.url,(url_thumbnail) ->
+        im.url_thumbnail=url_thumbnail
+        socket_.emit('add_img',im) 
   console.log episode
   socket_.emit('new-title',episode)
 
@@ -445,6 +449,8 @@ io.sockets.on 'connection', (socket) ->
         twitter.stream {track: '#'+nomEvent} 
       catch e
         console.log "erreur Twitter",e
+    else
+        socket.emit 'AuthFailed'
         
  
 
