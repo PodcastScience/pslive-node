@@ -134,6 +134,37 @@ replaceURLWithHTMLLinks = (text) ->
   exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig
   return text.replace(exp,"<a href='$1' target='_blank'>$1</a>")
 
+
+insertChatroomImages = (text,user,avatar) -> 
+  exp = /https?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]/i
+  console.log text
+  if tab_url = text.match(exp)
+    console.log tab_url
+    tab_url.map (url)->
+      get_image url, (nom,data,content_type)->
+        if(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
+          param_img={
+            'nom' : nom, 
+            'poster':user,
+            'poster_user':user,
+            'avatar':avatar,
+            'tweet':replaceURLWithHTMLLinks text
+            'media_type' : 'img'
+          }
+          for idx,i of liste_images
+            if i.nom==nom
+              console.log "image deja presente"
+              return false
+          backend.upload_image nomEvent, nom, user,user,avatar, text, data, (url_wp)->  
+            console.log "image uploadée"
+            param_img.url=url_wp
+            console.log param_img
+            liste_images.push param_img 
+            io.sockets.emit 'add_img',param_img
+            console.log 'media:'+ nom
+
+
+
 replaceSalaud = (text) ->
   exp=/salaud/ig
   retval=text.replace(exp,"salop\*")
@@ -159,6 +190,24 @@ pad2 = (val) ->
 #------------------------------------
 #Fonction pour la gestion des images
 get_image = (url,cb) ->
+  nom=url.slice url.lastIndexOf('/')+1
+  console.log "chargement images en RAM : ",url
+  http.get url, (response)->
+      content_type=response.headers['content-type']
+      data=''
+      if !(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
+        cb nom,data,content_type
+      response.setEncoding('binary')
+      console.log "reception d'une reponse",response
+      response.on 'data',
+        (chunk)->data+=chunk
+        console.log "data"
+      response.on 'end',()->
+        console.log "Fin du chargement de "+nom+":"
+        cb nom,data,content_type
+
+
+get_image_twitter = (url,cb) ->
   nom=url.slice url.lastIndexOf('/')+1
   console.log "chargement images en RAM : ",url
   http.get url+':large', (response)->
@@ -395,6 +444,7 @@ io.sockets.on 'connection', (socket) ->
       cpt_message+=1
       message.user = me
       date = new Date()
+      insertChatroomImages message.message , message.user.username ,message.user.avatar
       message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
       message.message = replaceSalaud(message.message)
       id_last_message = md5(Date.now()+cpt_message+message.user.mail)
@@ -502,7 +552,7 @@ init_twitter = (twitter) ->
     return 0 if (url==null) || (typeof(url) == 'undefined')
 
     if media_type == 'img'
-      get_image url, (nom,data)->
+      get_image_twitter url, (nom,data)->
         param_img={
           'nom' : nom, 
           'poster':poster,
