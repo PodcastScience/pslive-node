@@ -136,7 +136,7 @@ replaceURLWithHTMLLinks = (text) ->
 
 
 insertChatroomImages = (text,user,avatar) -> 
-  exp = /http:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]/i
+  exp = /https?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]/i
   console.log text
   if tab_url = text.match(exp)
     console.log tab_url
@@ -191,8 +191,13 @@ pad2 = (val) ->
 #Fonction pour la gestion des images
 get_image = (url,cb) ->
   nom=url.slice url.lastIndexOf('/')+1
+  exp = /https:\/\//i
+  if url.match(exp)
+    proto=https 
+  else
+    proto=http
   console.log "chargement images en RAM : ",url
-  http.get url, (response)->
+  proto.get url, (response)->
       content_type=response.headers['content-type']
       data=''
       if !(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
