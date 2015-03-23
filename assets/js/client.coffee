@@ -158,12 +158,15 @@ $(document).ready ->
     decalage=d.getTimezoneOffset()/60
     message.h=(parseInt(message.h)-decalage)%24;
     message.message=highlightPseudo message.message
-    message.message=ircLike message.message, message.user.username
-    if last_msg_id != message.user.id
-      $('#messages').append(Mustache.render(msg_template,message))
-      last_msg_id = message.user.id
+    message_me=ircLike message.message, message.user.username
+    if message_me==message.message
+      if last_msg_id != message.user.id
+        $('#messages').append(Mustache.render(msg_template,message))
+        last_msg_id = message.user.id
+      else
+        $(".message:last").append('<p id="msg_'+message.id+'">'+message.message+'</p>')
     else
-      $(".message:last").append('<p id="msg_'+message.id+'">'+message.message+'</p>')
+       $('#messages').append(message_me)
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
