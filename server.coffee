@@ -470,6 +470,7 @@ io.sockets.on 'connection', (socket) ->
     if verif_connexion(message.id_connexion)
       message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
       message.message = replaceSalaud(message.message)
+      message.user = me
       message.id = id_last_message
       io.sockets.emit('editmsg',message)
       for key,elt of all_messages
