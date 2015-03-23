@@ -49,7 +49,7 @@ $(document).ready ->
         valeurRetour = valeurRetour.concat("</i></small>")
     else
       valeurRetour=text
-    return text
+    return valeurRetour
 
   unless window.location.pathname=='/admin'
     #console.log('Envoi du Hello initial') 
