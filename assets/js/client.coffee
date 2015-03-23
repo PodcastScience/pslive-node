@@ -150,7 +150,12 @@ $(document).ready ->
     
 
   socket.on 'editmsg', (message) ->
-    $('#msg_'+message.id).html(highlightPseudo message.message)
+    message.message=highlightPseudo message.message
+    message_me=ircLike message.message, message.user.username
+    if message_me==message.message
+      $('#msg_'+message.id).html(highlightPseudo message.message)
+    else
+      $('#msg_'+message.id).html(highlightPseudo message_me)
     
   socket.on 'nwmsg', (message) -> 
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
@@ -167,7 +172,7 @@ $(document).ready ->
         $(".message:last").append('<p id="msg_'+message.id+'">'+message.message+'</p>')
     else
       if last_msg_id != -1
-        $('#messages').append('<li class="message_me"><p>*'+message_me+'</p></li>')
+        $('#messages').append('<li class="message_me"><p id="msg_'+message.id+'">*'+message_me+'</p></li>')
         last_msg_id=-1;
       else
         $(".message_me:last").append('<p id="msg_'+message.id+'">*'+message_me+'</p>')
