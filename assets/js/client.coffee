@@ -44,7 +44,7 @@ $(document).ready ->
     if stringTab.length >= 2
       if stringTab[0].localeCompare("/me")==0
         valeurRetour = "<small><i> "
-        valeurRetour = valeurRetour.concat(username) 
+        valeurRetour = valeurRetour.concat(pseudo) 
         valeurRetour = valeurRetour.concat(stringMe[1])
         valeurRetour = valeurRetour.concat("</i></small>")
       else
