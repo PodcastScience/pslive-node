@@ -38,9 +38,9 @@ $(document).ready ->
     return text
 
  ircLike= (text) -> 
-  var stringTab = text.split(" ");
-  var stringMe = text.split("/me");     
-  var valeurRetour ="";
+  stringTab = text.split(" ")
+  stringMe = text.split("/me")     
+  valeurRetour =""
   if(stringTab.length >= 2){
    if(stringTab[0].localeCompare("/me")==0){
      valeurRetour="<small><i> ";
