@@ -166,7 +166,7 @@ $(document).ready ->
       else
         $(".message:last").append('<p id="msg_'+message.id+'">'+message.message+'</p>')
     else
-       $('#messages').append('<p>*'+message_me+'</p>')
+       $('#messages').append('<li>*'+message_me+'</li>')
        last_msg_id=0;
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
