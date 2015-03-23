@@ -43,10 +43,10 @@ $(document).ready ->
     valeurRetour =""
     if stringTab.length >= 2
       if stringTab[0].localeCompare("/me")==0
-        valeurRetour = "<small><i> "
+        valeurRetour = "<i> "
         valeurRetour = valeurRetour.concat(pseudo) 
         valeurRetour = valeurRetour.concat(stringMe[1])
-        valeurRetour = valeurRetour.concat("</i></small>")
+        valeurRetour = valeurRetour.concat("</i>")
       else
         valeurRetour=text
     else
@@ -153,9 +153,9 @@ $(document).ready ->
     message.message=highlightPseudo message.message
     message_me=ircLike message.message, message.user.username
     if message_me==message.message
-      $('#msg_'+message.id).html(highlightPseudo message.message)
+      $('#msg_'+message.id).html(message.message)
     else
-      $('#msg_'+message.id).html(highlightPseudo message_me)
+      $('#msg_'+message.id).html(message_me)
     
   socket.on 'nwmsg', (message) -> 
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
