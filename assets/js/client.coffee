@@ -37,7 +37,7 @@ $(document).ready ->
         text=text.replace(pattern,"<span class='mypseudo'>@"+val.name+"</span>")
     return text
 
-  ircLike= (text) -> 
+  ircLike= (text,pseudo) -> 
     stringTab = text.split(" ")
     stringMe = text.split("/me")     
     valeurRetour =""
@@ -158,7 +158,7 @@ $(document).ready ->
     decalage=d.getTimezoneOffset()/60
     message.h=(parseInt(message.h)-decalage)%24;
     message.message=highlightPseudo message.message
-    message.message=ircLike message.message
+    message.message=ircLike message.message message.user.username
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
