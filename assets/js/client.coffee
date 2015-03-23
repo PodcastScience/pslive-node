@@ -158,7 +158,7 @@ $(document).ready ->
     decalage=d.getTimezoneOffset()/60
     message.h=(parseInt(message.h)-decalage)%24;
     message.message=highlightPseudo message.message
-    message.message=ircLike message.message message.user.username
+    message.message=ircLike message.message message.user.id
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
