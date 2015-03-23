@@ -47,6 +47,8 @@ $(document).ready ->
         valeurRetour = valeurRetour.concat(username) 
         valeurRetour = valeurRetour.concat(stringMe[1])
         valeurRetour = valeurRetour.concat("</i></small>")
+      else
+        valeurRetour=text
     else
       valeurRetour=text
     return valeurRetour
