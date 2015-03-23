@@ -37,6 +37,24 @@ $(document).ready ->
         text=text.replace(pattern,"<span class='mypseudo'>@"+val.name+"</span>")
     return text
 
+ ircLike= (text) -> 
+  var stringTab = text.split(" ");
+  var stringMe = text.split("/me");     
+  var valeurRetour ="";
+  if(stringTab.length >= 2){
+   if(stringTab[0].localeCompare("/me")==0){
+     valeurRetour="<small><i> ";
+     valeurRetour = valeurRetour.concat(username) ;
+     valeurRetour = valeurRetour.concat(stringMe[1]);
+     valeurRetour = valeurRetour.concat("</i></small>");
+    }  
+    else
+    {
+     valeurRetour=text;
+    }
+  }
+  return text
+  
 
   unless window.location.pathname=='/admin'
     #console.log('Envoi du Hello initial') 
@@ -143,6 +161,7 @@ $(document).ready ->
     decalage=d.getTimezoneOffset()/60
     message.h=(parseInt(message.h)-decalage)%24;
     message.message=highlightPseudo message.message
+    message.message=ircLike message.message
     if last_msg_id != message.user.id
       $('#messages').append(Mustache.render(msg_template,message))
       last_msg_id = message.user.id
