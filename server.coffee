@@ -63,11 +63,16 @@ app.get '/messages', (req, res) ->
     if message_me==message.message
       return "<b>#{message.user.username}:</b> #{message.message}"
     else
-      return message_me
+      return '*'+message_me
   ).join("<br/>")
 app.get '/timestamp', (req, res) ->
   res.send all_messages.map((message) -> 
-    "<b>#{message.user.username}</b> [#{(message.h+2)%24}:#{message.m}:#{message.s}]: <span id='[#{(message.h+2)%24}:#{message.m}:#{message.s}]'>#{message.message}</span>"
+    message_me = ircLike message.message, message.user.username
+    if message_me==message.message
+      return "<b>#{message.user.username}</b> [#{(message.h+2)%24}:#{message.m}:#{message.s}]: <span id='[#{(message.h+2)%24}:#{message.m}:#{message.s}]'>#{message.message}</span>"
+    else
+      return '*'+message_me
+    
   ).join("<br/>")
 app.get '/questions', (req, res) ->
   res.send all_messages.filter( (msg,idx) -> 
