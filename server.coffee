@@ -61,9 +61,9 @@ app.get '/messages', (req, res) ->
   res.send all_messages.map((message) -> 
     message_me = ircLike message.message, message.user.username
     if message_me==message.message
-      return message_me
-    else
       return "<b>#{message.user.username}:</b> #{message.message}"
+    else
+      return message_me
   ).join("<br/>")
 app.get '/timestamp', (req, res) ->
   res.send all_messages.map((message) -> 
