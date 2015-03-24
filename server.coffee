@@ -58,7 +58,13 @@ app.get('/', routes.index)
 app.get('/admin', routes.admin)
 app.get('/users', user.list)
 app.get '/messages', (req, res) ->
-  res.send all_messages.map((message) -> "<b>#{message.user.username}:</b> #{message.message}").join("<br/>")
+  res.send all_messages.map((message) -> 
+    message_me = ircLike message.message, message.user.username
+    if message_me==message.message
+      return message_me
+    else
+      return "<b>#{message.user.username}:</b> #{message.message}"
+  ).join("<br/>")
 app.get '/timestamp', (req, res) ->
   res.send all_messages.map((message) -> 
     "<b>#{message.user.username}</b> [#{(message.h+2)%24}:#{message.m}:#{message.s}]: <span id='[#{(message.h+2)%24}:#{message.m}:#{message.s}]'>#{message.message}</span>"
@@ -78,7 +84,21 @@ httpServer = http.createServer(app).listen(app.get('port'), ->
 )
 
 
-
+ircLike= (text,pseudo) -> 
+  stringTab = text.split(" ")
+  stringMe = text.split("/me")     
+  valeurRetour =""
+  if stringTab.length >= 2
+    if stringTab[0].localeCompare("/me")==0
+      valeurRetour = "<i> "
+      valeurRetour = valeurRetour.concat(pseudo) 
+      valeurRetour = valeurRetour.concat(stringMe[1])
+      valeurRetour = valeurRetour.concat("</i>")
+    else
+      valeurRetour=text
+  else
+    valeurRetour=text
+  return valeurRetour
 
 
 #socket.io configuration
