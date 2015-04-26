@@ -225,7 +225,7 @@ get_image = (url,cb) ->
     proto=https 
   else
     proto=http
-  console.log "chargement images en RAM : ",url
+  console.log "chargement images en RAM 2: ",url
   proto.get url, (response)->
       console.log "image chargée"
       content_type=response.headers['content-type']
