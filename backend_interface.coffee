@@ -124,7 +124,7 @@ class Backend
 					catch e
 						console.log "req:",e
 					
-				req.on 'error', (err)->console.log "impossible de contacter le backend" ,err
+				req.on 'error', (err)->console.log err
 				req.write params  
 				req.end()
 			catch e
