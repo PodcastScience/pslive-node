@@ -227,8 +227,10 @@ get_image = (url,cb) ->
     proto=http
   console.log "chargement images en RAM : ",url
   proto.get url, (response)->
+      console.log "image chargée"
       content_type=response.headers['content-type']
       data=''
+      console.log "apel de la callback"
       if !(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
         cb nom,data,content_type
       response.setEncoding('binary')
