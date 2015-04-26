@@ -226,7 +226,8 @@ get_image = (url,cb) ->
   else
     proto=http
   console.log "chargement images en RAM 2: ",url
-  proto.get url, (response)->
+  try
+    proto.get url, (response)->
       console.log "image chargée"
       content_type=response.headers['content-type']
       data=''
@@ -241,6 +242,8 @@ get_image = (url,cb) ->
       response.on 'end',()->
         console.log "Fin du chargement de "+nom+":"
         cb nom,data,content_type
+  catch e
+    console.log "erreur dans le telechargement de l'image"  
 
 
 get_image_twitter = (url,cb) ->
