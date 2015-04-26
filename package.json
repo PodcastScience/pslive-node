@@ -6,24 +6,25 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "3.3.5",
-    "socket.io"   :  "~0.9.16",    
-    "jade": "1.1.5",
+    "MD5": "1.2.0",
+    "cheerio": "0.17.0",
     "coffee": "0.0.1",
     "coffee-script": "1.6.3",
     "connect-assets": "2.5.3",
+    "express": "3.3.5",
+    "gm": "^1.17.0",
+    "jade": "1.1.5",
+    "lwip": "0.0.5",
     "markdown": "0.5.0",
-    "MD5": "1.2.0",
+    "mime": "1.2.11",
     "mongoose": "3.8.4",
     "mu2": "0.5.20",
-    "validator": "3.2.0",
-    "aws-sdk": "latest",
     "oauth": "0.9.8",
-    "mime": "1.2.11",
-    "cheerio": "0.17.0"
+    "socket.io": "~0.9.16",
+    "validator": "3.2.0"
   },
   "engines": {
     "node": "0.8.x",
     "npm": "1.1.x"
-  }  
+  }
 }

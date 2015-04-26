@@ -176,11 +176,15 @@ insertChatroomImages = (text,user,avatar) ->
             'tweet':replaceURLWithHTMLLinks text
             'media_type' : 'img'
           }
+          switch content_type
+            when 'image/jpeg' then img_format='JPG'; break;
+            when 'image/gif' then img_format='GIF'; break;
+            when 'image/png' then img_format='PNG'; break;
           for idx,i of liste_images
             if i.nom==nom
               console.log "image deja presente"
               return false
-          backend.upload_image nomEvent, nom, user,user,avatar, text, data, (url_wp)->  
+          backend.upload_image nomEvent, nom, user,user,avatar, text, data,img_format, (url_wp)->  
             console.log "image uploadée"
             param_img.url=url_wp
             console.log param_img
