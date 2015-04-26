@@ -58,7 +58,9 @@ class Backend
 		console.log "upload_image/Entrée dans upload_image"
 		console.log "upload_image/id_emission",@id_emission
 
-		id_emission=@id_emission
+		id_emission	= @id_emission
+		url			= @url
+		port 		= @port
 
 
 
@@ -77,10 +79,10 @@ class Backend
 						console.log "upload_image/erreur dans la generation du buffer"
 						return handle(err)
 					console.log "upload_image/upload de l'image retaillée"
-					_upload(episode,nom,auteur,user,avatar,message,buffer.toString('base64'),'localhost',3000,id_emission)
+					_upload(episode,nom,auteur,user,avatar,message,buffer.toString('base64'),url,port,id_emission)
 			else
 				console.log "upload_image/upload de l'image"
-				_upload(episode,nom,auteur,user,avatar,message,img_buf.toString('base64'),@url,@port,@id_emission)
+				_upload(episode,nom,auteur,user,avatar,message,img_buf.toString('base64'),url,port,id_emission)
 		catch e
 			console.log "upload_image/Erreur de retaillage",e
 			#console.log databin64
@@ -119,8 +121,6 @@ class Backend
 								cb data.url
 							catch e
 								console.log "upload_image/cb", e
-							
-							
 					catch e
 						console.log "upload_image/req:",e
 					
