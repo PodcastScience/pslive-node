@@ -55,34 +55,34 @@ class Backend
 
 
 	upload_image: (episode,nom,auteur,user,avatar,message,data,img_format,cb) ->
-		console.log "Entrée dans upload_image"
-		console.log @id_emission
+		console.log "upload_image/Entrée dans upload_image"
+		console.log "upload_image/id_emission",@id_emission
 
 		id_emission=@id_emission
 
 
 
 		try
-			console.log "transformation du l'image en buffer"
+			console.log "upload_image/transformation du l'image en buffer"
 			img_buf = new Buffer(data, 'binary')
-			console.log "verification de la taille de l'image"
+			console.log "upload_image/verification de la taille de l'image"
 			if img_buf.length > 1024*1024 
-				console.log "image trop grande."
+				console.log "upload_image/image trop grande."
 				_gm=gm(img_buf,nom)
-				console.log "retaillage de l'image"
+				console.log "upload_image/retaillage de l'image"
 				_gm=_gm.resize 800
-				console.log  "transformation du l'image retaillée en buffer (format " + img_format + ")"
+				console.log  "upload_image/transformation du l'image retaillée en buffer (format " + img_format + ")"
 				_gm=_gm.toBuffer img_format, (err, buffer)->
 					if (err) 
-						console.log "erreur dans la generation du buffer"
+						console.log "upload_image/erreur dans la generation du buffer"
 						return handle(err)
-					console.log "upload de l'image retaillée"
+					console.log "upload_image/upload de l'image retaillée"
 					_upload(episode,nom,auteur,user,avatar,message,buffer.toString('base64'),'localhost',3000,id_emission)
 			else
-				console.log "upload de l'image"
+				console.log "upload_image/upload de l'image"
 				_upload(episode,nom,auteur,user,avatar,message,img_buf.toString('base64'),@url,@port,@id_emission)
 		catch e
-			console.log "Erreur de retaillage",e
+			console.log "upload_image/Erreur de retaillage",e
 			#console.log databin64
 
 
@@ -98,7 +98,7 @@ class Backend
 					'content_type': mime.lookup(nom),
 					'id_episode': id_emission
 				})
-				console.log "upload d'une image : ",params.name
+				console.log "upload_image/upload d'une image : ",params.name
 				headers = {
 					'Content-Type': 'application/json',
 					'Content-Length':  Buffer.byteLength(params, 'utf-8')
@@ -111,29 +111,29 @@ class Backend
 					form: params,
 					headers: headers
 				}
-				console.log options
+				console.log "upload_image/options",options
 				req = http.request options, (res)-> 
 					try
 						http_request_callback res, (data)=>
 							try
 								cb data.url
 							catch e
-								console.log "cb", e
+								console.log "upload_image/cb", e
 							
 							
 					catch e
-						console.log "req:",e
+						console.log "upload_image/req:",e
 					
 				req.on 'error', (err)->console.log err
 				req.write params  
 				req.end()
 			catch e
-				console.log "Erreur d'upload",e
+				console.log "upload_image/Erreur d'upload",e
 
 
 
 	upload_video: (episode,nom,auteur,user,avatar,message,url,cb) ->
-		console.log "Entrée dans upload_video"
+		console.log "upload_video/Entrée dans upload_video"
 		try
 			params = JSON.stringify({
 				'name': nom, 
@@ -144,7 +144,7 @@ class Backend
 				'url': url,
 				'id_episode': @id_emission
 			})
-			console.log "envoi d'une video : ",params.name
+			console.log "upload_video/envoi d'une video : ",params.name
 			headers = {
 				'Content-Type': 'application/json',
 				'Content-Length':  Buffer.byteLength(params, 'utf-8')
@@ -163,17 +163,17 @@ class Backend
 						try
 							cb data.url
 						catch e
-							console.log "cb", e
+							console.log "upload_video/cb", e
 						
 						
 				catch e
-					console.log "req:",e
+					console.log "upload_video/req:",e
 				
 			req.on 'error', (err)->console.log err
 			req.write params  
 			req.end()
 		catch e
-			console.log "Erreur upload",e
+			console.log "upload_video/Erreur upload",e
 
 
 	download_images: (cb) ->
@@ -187,10 +187,10 @@ class Backend
 			method: 'get',
 			headers: headers
 		}
-		console.log "download des images : ", @id_emission
+		console.log "upload_video/download des images : ", @id_emission
 		req = http.request options, (res)-> 
 			http_request_callback res, (data)->
-				console.log data
+				console.log "upload_video/",data
 				meta_tmp=[]
 				try
 					data.map (image)->
@@ -215,23 +215,23 @@ class Backend
 								'media_type' : 'video'
 							}
 						meta_tmp.push img
-						console.log img.url
+						console.log "upload_video/",img.url
 				catch e
-					console.log "pas d'image"
-				console.log meta_tmp
+					console.log "upload_video/pas d'image"
+				console.log "upload_video/",meta_tmp
 				cb meta_tmp
-		req.on 'error',(err)->console.log err
+		req.on 'error',(err)->console.log "upload_video/",err
 		req.end()
 
 
 	select_emission: (nomEvent,episode,cb) ->
-		console.log "entrée dans la fonction select_emission"
+		console.log "select_emission/entrée dans la fonction select_emission"
 		params = JSON.stringify({
 			number: nomEvent, 
 			title: episode
 		})
-		console.log "*"+params+"*"
-		console.log params.length
+		console.log "select_emission/params*"+params+"*"
+		console.log "select_emission/length",params.length
 		headers = {
 			'Content-Type': 'application/json'
 			'Content-Length':  Buffer.byteLength(params, 'utf-8')
@@ -250,10 +250,10 @@ class Backend
 				try 
 					chatroom = JSON.parse(data.chatroom)
 				catch e
-					console.log  "Erreur du parsing de la chatroom",e
+					console.log  "select_emission/Erreur du parsing de la chatroom",e
 				cb chatroom
 
-		req.on('error', (err)->console.log err)
+		req.on('error', (err)->console.log 'select_emission/',err)
 		req.write params 
 		req.end()
 
@@ -275,7 +275,7 @@ class Backend
 			headers: headers
 		}
 		req = http.request options, (res)-> 
-		req.on('error',(err)->console.log err)
+		req.on('error',(err)->console.log "set_chatroom",err)
 		req.write params 
 		req.end()
 

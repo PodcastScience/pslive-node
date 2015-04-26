@@ -295,7 +295,7 @@ load_episode = (number,title,chatroom) =>
       liste_images=meta
     twitter.stream {track: '#'+nomEvent} 
 
-console.log backend
+console.log 'backend',backend
 
 backend.get_default_emission( load_episode )
 
@@ -306,15 +306,15 @@ send_chatroom = (socket_) ->
   console.log("envoi de l'historique")
   if nomEvent != 'podcastscience'
     for message in last_messages
-      console.log message
+      console.log 'send_chatroom/message:',message
       socket_.emit('nwmsg',message)
     for im in liste_images
-      console.log im
+      console.log 'send_chatroom/images',im
       site = im.url.split('/')[0]
       get_thumbnail site,'https://'+im.url,(url_thumbnail) ->
         im.url_thumbnail=url_thumbnail
         socket_.emit('add_img',im) 
-  console.log episode
+  console.log 'send_chatroom/episode:',episode
   socket_.emit('new-title',episode)
 
 change_chatroom = () ->
@@ -491,7 +491,7 @@ io.sockets.on 'connection', (socket) ->
       message.h = pad2(date.getHours())
       message.m = pad2(date.getMinutes())
       message.s = pad2(date.getSeconds()) 
-      console.log message
+      console.log 'nwmsg:',message
       all_messages.push message
       last_messages.push message
       last_messages.shift() if (last_messages.length > history)
@@ -523,7 +523,7 @@ io.sockets.on 'connection', (socket) ->
     if message.password == admin_password   
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
       backend.select_emission(nomEvent,message.title, (res) -> 
-        console.log res
+        console.log 'change-title',res
         all_messages  = (res || [])
         last_messages = []
         for msg in all_messages
@@ -552,7 +552,7 @@ io.sockets.on 'connection', (socket) ->
     episode='Bienvenue sur le balado qui fait aimer la science!'
     nomEvent = "podcastscience"
     backend.select_emission(nomEvent,episode, (res) -> 
-        console.log res
+        console.log 'reinit_chatroom',res
         last_messages = []  
         all_messages = []
         backend.download_images (meta)->
@@ -608,7 +608,7 @@ init_twitter = (twitter) ->
         backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, data, (url_wp)->  
           console.log "image uploadée"
           param_img.url=url_wp
-          console.log param_img
+          console.log 'init_twitter',param_img
           liste_images.push param_img 
           io.sockets.emit 'add_img',param_img
           console.log 'media:'+ nom
@@ -619,8 +619,8 @@ init_twitter = (twitter) ->
         when 'vimeo.com' then nom = url_o.pathname.split('/')[..].pop()
         when 'vine.co' then nom = url_o.pathname.split('/')[..].pop()
         else return false
-      console.log   '1',url_o
-      console.log   '2',url_o.query
+      console.log   'init_twitter/1',url_o
+      console.log   'init_twitter/2',url_o.query
       param_img={
         'nom' : nom, 
         'poster':poster,
@@ -638,7 +638,7 @@ init_twitter = (twitter) ->
         backend.upload_video nomEvent, nom, poster,poster_user,avatar, tweet, url, (url_wp)->  
         param_img.url=url
         param_img.site = site
-        console.log param_img
+        console.log 'init_twitter/param_img',param_img
         liste_images.push param_img 
         io.sockets.emit 'add_img',param_img
         console.log 'media:'+ nom
