@@ -149,7 +149,6 @@ $(document).ready ->
         u.name=user.name
     $('#members-list').find(id_to_find).fadeOut 300,()->
       $(this).remove()
-      last_msg_id=-1;
       chatroom_info formername+' s\'appelle désormais '+user.username
       $('#members-list').append(Mustache.render(user_box_template,user))
 
