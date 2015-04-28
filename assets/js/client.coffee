@@ -19,9 +19,14 @@ $(document).ready ->
   $('#user_box').remove()
 
 
-  chatrool_info=(message)->
+  chatroom_info=(message)->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
-    $('#messages').append(message)
+
+    if last_msg_id != -1
+      $('#messages').append('<li class="message_me message_info "><p ><i>* '+message+'</i></p></li>')
+      last_msg_id=-1;
+    else
+      $(".message_info:last").append('<p ><i>* '+message+'</i></p>')
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
@@ -118,8 +123,7 @@ $(document).ready ->
       #html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
       $('#members-list').append(Mustache.render(user_box_template,user))
       if new_connection
-        chatrool_info '<li class="message_info"><p ><i>'+user.username+' s\'est connecté(e)</i></p></li>'
-    last_msg_id=-1;
+        chatroom_info user.username+' s\'est connecté(e)'
 
   socket.on 'logged', (id)->
     userid=id
@@ -146,7 +150,7 @@ $(document).ready ->
     $('#members-list').find(id_to_find).fadeOut 300,()->
       $(this).remove()
       last_msg_id=-1;
-      chatrool_info '<li class="message_info"><p ><i>'+formername+' s\'appelle désormais '+user.username+'</i></p></li>'
+      chatroom_info formername+' s\'appelle désormais '+user.username
       $('#members-list').append(Mustache.render(user_box_template,user))
 
   # envoi de message
@@ -193,17 +197,19 @@ $(document).ready ->
     message.message=highlightPseudo message.message
     message_me=ircLike message.message, message.user.username
     if message_me==message.message
+      console.log "nouveau message:",message.message
       if last_msg_id != message.user.id
         $('#messages').append(Mustache.render(msg_template,message))
         last_msg_id = message.user.id
       else
         $(".message:last").append('<p id="msg_'+message.id+'">'+message.message+'</p>')
     else
+      console.log "nouveau me:",message_me
       if last_msg_id != -1
-        $('#messages').append('<li class="message_me message_info"><p id="msg_'+message.id+'">*'+message_me+'</p></li>')
+        $('#messages').append('<li class="message_me message_info "><p id="msg_'+message.id+'">*'+message_me+'</p></li>')
         last_msg_id=-1;
       else
-        $(".message_me:last").append('<p id="msg_'+message.id+'">*'+message_me+'</p>')
+        $(".message_info:last").append('<p id="msg_'+message.id+'">*'+message_me+'</p>')
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
