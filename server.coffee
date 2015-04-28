@@ -59,7 +59,7 @@ app.get('/admin', routes.admin)
 app.get('/users', user.list)
 app.get '/messages', (req, res) ->
   res.send all_messages.map((message) -> 
-    message_me = ircLike message.message, message.user.username
+    message_me = ircLike_me message.message, message.user.username
     if message_me==message.message
       return "<b>#{message.user.username}:</b> #{message.message}"
     else
@@ -67,7 +67,7 @@ app.get '/messages', (req, res) ->
   ).join("<br/>")
 app.get '/timestamp', (req, res) ->
   res.send all_messages.map((message) -> 
-    message_me = ircLike message.message, message.user.username
+    message_me = ircLike_me message.message, message.user.username
     if message_me==message.message
       return "<b>#{message.user.username}</b> [#{(message.h+2)%24}:#{message.m}:#{message.s}]: <span id='[#{(message.h+2)%24}:#{message.m}:#{message.s}]'>#{message.message}</span>"
     else
@@ -89,7 +89,7 @@ httpServer = http.createServer(app).listen(app.get('port'), ->
 )
 
 
-ircLike= (text,pseudo) -> 
+ircLike_me= (text,pseudo) -> 
   stringTab = text.split(" ")
   stringMe = text.split("/me")     
   valeurRetour =""
@@ -367,14 +367,15 @@ io.sockets.on 'connection', (socket) ->
     console.log('Ouverture de la connexion '+id_connexion+'. '+compte(liste_connex)+' connexions ouvertes')
     for key, value of users
       console.log('Ajout du user '+value.mail)
-      socket.emit('newuser',value)
+      socket.emit('newuser',value,false)
     
     
     
     
     
   #Login : l'utilisateurs se connecte a la Chatroom
-  socket.on 'login', (user) ->
+  socket.on 'login', (user,reco) ->
+    console.log "demande de login:",user
     #Verification si le client est connu. dans le cas contraire, on le deconnecte
     verif_connexion(user.id_connexion)
         
@@ -408,14 +409,14 @@ io.sockets.on 'connection', (socket) ->
         me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
         users[me.id] = me
         #on informe tout le monde qu'un nouvel utilisateur s'est connecté
-        io.sockets.emit('newuser',me)
+        io.sockets.emit('newuser',me,!reco)
         
         io.sockets.emit('update_compteur',{
           connecte:compte(users),
           cache:compte(liste_connex)-compte(users)
         })
       #on informe l'utilisateur qu'il est bien cnnecté
-      socket.emit('logged')
+      socket.emit('logged',me.id)
 
   
         
@@ -468,6 +469,18 @@ io.sockets.on 'connection', (socket) ->
       })
 
 
+  ircLike_nick= (text) -> 
+    stringTab = text.split(" ")
+    console.log "avant",users
+    stringMe = text.split("/nick")     
+    if stringTab.length >= 2 && stringTab[0].localeCompare("/nick")==0
+      formername = me.username
+      me.username = stringMe[1]
+      users[me.id].username = me.username
+      console.log "apres",users
+      io.sockets.emit 'changename',formername,me
+      return true
+    return false
 
   socket.on 'disconnect', ->
     #gestion de la coupure de connexion du client
@@ -480,23 +493,24 @@ io.sockets.on 'connection', (socket) ->
   # gestion des messages
   socket.on 'nwmsg', (message) ->
     if verif_connexion(message.id_connexion)
-      cpt_message+=1
-      message.user = me
-      date = new Date()
-      insertChatroomImages message.message , message.user.username ,message.user.avatar
-      message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
-      message.message = replaceSalaud(message.message)
-      id_last_message = md5(Date.now()+cpt_message+message.user.mail)
-      message.id = id_last_message
-      message.h = pad2(date.getHours())
-      message.m = pad2(date.getMinutes())
-      message.s = pad2(date.getSeconds()) 
-      console.log 'nwmsg:',message
-      all_messages.push message
-      last_messages.push message
-      last_messages.shift() if (last_messages.length > history)
-      io.sockets.emit('nwmsg',message)
-      backend.set_chatroom JSON.stringify(all_messages)
+      if ! ircLike_nick(message.message,me)
+        cpt_message+=1
+        message.user = me
+        date = new Date()
+        insertChatroomImages message.message , message.user.username ,message.user.avatar
+        message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
+        message.message = replaceSalaud(message.message)
+        id_last_message = md5(Date.now()+cpt_message+message.user.mail)
+        message.id = id_last_message
+        message.h = pad2(date.getHours())
+        message.m = pad2(date.getMinutes())
+        message.s = pad2(date.getSeconds()) 
+        console.log 'nwmsg:',message
+        all_messages.push message
+        last_messages.push message
+        last_messages.shift() if (last_messages.length > history)
+        io.sockets.emit('nwmsg',message)
+        backend.set_chatroom JSON.stringify(all_messages)
    
     
   socket.on 'editmsg', (message) -> 

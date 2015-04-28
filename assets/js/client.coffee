@@ -7,6 +7,7 @@ $(document).ready ->
   connect_url = "/"
   id_connexion= false
   username=""
+  userid=""
   email=""
   last_msg_id = false
   last_msg_txt = ""  
@@ -18,7 +19,11 @@ $(document).ready ->
   $('#user_box').remove()
 
 
-
+  chatrool_info=(message)->
+    flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
+    $('#messages').append(message)
+    if flag_scrollauto
+      $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
   highlightPseudo= (text) ->
     userref=''
@@ -26,8 +31,8 @@ $(document).ready ->
     userlist.sort((a,b)-> b.length-a.length)
     for u in userlist 
       idx="i"+(Math.floor((90000000000)*Math.random())+10000000000);
-      equiv.push { 'idx' : idx , 'name' : u }
-      pattern=RegExp("@("+u+")","ig")
+      equiv.push { 'idx' : idx , 'name' : u.name }
+      pattern=RegExp("@("+u.name+")","ig")
       text=text.replace(pattern,"@"+idx)
     for val in equiv 
       pattern=RegExp("@("+val.idx+")","ig")
@@ -69,8 +74,12 @@ $(document).ready ->
   socket.on 'Olleh', (id) ->
     console.log('Olleh recu *'+id+'*')
     id_connexion=id
+    console.log "username:",username
+    console.log "email:",email
     if( username != "" && email != "")
-      send_login()
+      send_login(true)
+    else
+      console.log 'Merci de vous authentifier'
 
   socket.on 'update_compteur', (connected) ->
     str=""
@@ -91,7 +100,7 @@ $(document).ready ->
     e.preventDefault()
     username = $('#username').val()
     email = $('#mail').val()
-    send_login()
+    send_login(false)
     
 
   socket.on 'erreur', (message) ->
@@ -102,14 +111,18 @@ $(document).ready ->
     
 
   # gestion des utilisateurs
-  socket.on 'newuser', (user) ->
+  socket.on 'newuser', (user,new_connection) ->
     id_to_find = "\##{user.id}"
-    userlist.push(user.username)
+    userlist.push({'name':user.username,'id':user.id})
     if($('#members-list').find(id_to_find).length == 0)
       #html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
       $('#members-list').append(Mustache.render(user_box_template,user))
+      if new_connection
+        chatrool_info '<li class="message_info"><p ><i>'+user.username+' s\'est connecté(e)</i></p></li>'
+    last_msg_id=-1;
 
-  socket.on 'logged', ->
+  socket.on 'logged', (id)->
+    userid=id
     $('#login').fadeOut()
     $('#send-message').removeAttr('disabled')
     $('#send-message').css('opacity',1)
@@ -118,8 +131,23 @@ $(document).ready ->
 
   socket.on 'disuser', (user) ->
     id_to_find = "\##{user.id}"
-    $('#members-list').find(id_to_find).fadeOut()
+    $('#members-list').find(id_to_find).fadeOut(300,()->$(this).remove()) 
 
+
+  socket.on 'changename', (formername,user) -> 
+    console.log "recherche de l'id "+user.id
+    id_to_find = "\##{user.id}"
+    if user.id==userid
+      username=user.username
+      console.log "nouveau username local : ",username
+    for u in userlist
+      if u.id==userid
+        u.name=user.name
+    $('#members-list').find(id_to_find).fadeOut 300,()->
+      $(this).remove()
+      last_msg_id=-1;
+      chatrool_info '<li class="message_info"><p ><i>'+formername+' s\'appelle désormais '+user.username+'</i></p></li>'
+      $('#members-list').append(Mustache.render(user_box_template,user))
 
   # envoi de message
   envoi_nouveau_message = (e) ->
@@ -172,14 +200,14 @@ $(document).ready ->
         $(".message:last").append('<p id="msg_'+message.id+'">'+message.message+'</p>')
     else
       if last_msg_id != -1
-        $('#messages').append('<li class="message_me"><p id="msg_'+message.id+'">*'+message_me+'</p></li>')
+        $('#messages').append('<li class="message_me message_info"><p id="msg_'+message.id+'">*'+message_me+'</p></li>')
         last_msg_id=-1;
       else
         $(".message_me:last").append('<p id="msg_'+message.id+'">*'+message_me+'</p>')
     if flag_scrollauto
       $('#main').animate({scrollTop: $('#messages').prop('scrollHeight')},500)
 
-
+ 
   $('#admin-form').submit( (e) ->
     e.preventDefault()
     #maj du titre
@@ -220,7 +248,7 @@ $(document).ready ->
       console.log("Il s'est fait jeté")
       $('#members-list li').remove()
       $('.nb-connected').html("")
-      
+      console.log "Envoi du Hello"
       socket.emit('Hello',id_connexion)
 
 
@@ -325,12 +353,13 @@ $(document).ready ->
     console.log("il s'est barré")
     undefined if socket.emit 'triggered-beforeunload'
 
-  send_login = () ->
+  send_login = (reco) ->
+    console.log "emission d'un login"
     socket.emit('login', {
       username: username,
       mail: email,
       id_connexion: id_connexion
-      })
+      },reco)
 
   display_loginform = () ->
     if(!id_connexion)

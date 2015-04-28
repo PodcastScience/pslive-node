@@ -575,7 +575,10 @@
 		color:#e41d3d;
 		font-weight: bolder;
 	}
-
+	.message_info{
+		font-size: small;
+		font-size: #555;
+	}
 	.write {
 		padding-top: 1em;
 		padding-bottom: 1em;

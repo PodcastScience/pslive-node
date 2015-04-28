@@ -72,7 +72,7 @@ class Backend
 				console.log "upload_image/image trop grande."
 				_gm=gm(img_buf,nom)
 				console.log "upload_image/retaillage de l'image"
-				_gm=_gm.resize 800
+				_gm=_gm.resize null,600
 				console.log  "upload_image/transformation du l'image retaillée en buffer (format " + img_format + ")"
 				_gm=_gm.toBuffer img_format, (err, buffer)->
 					if (err) 
