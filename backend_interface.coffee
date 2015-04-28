@@ -68,7 +68,7 @@ class Backend
 			console.log "upload_image/transformation du l'image en buffer"
 			img_buf = new Buffer(data, 'binary')
 			console.log "upload_image/verification de la taille de l'image"
-			if img_buf.length > 1024*1024 
+			if img_buf.length > 1024*1024 || 1==1
 				console.log "upload_image/image trop grande."
 				_gm=gm(img_buf,nom)
 				console.log "upload_image/retaillage de l'image"
