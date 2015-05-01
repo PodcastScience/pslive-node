@@ -58,7 +58,7 @@ class Backend
 		console.log "upload_image/Entrée dans upload_image"
 		console.log "upload_image/id_emission",@id_emission
 
-		
+
 		_upload = (episode,nom,auteur,user,avatar,message,databin64,url,port,id_emission)->
 			try
 				params = JSON.stringify({
@@ -118,13 +118,16 @@ class Backend
 				_gm=gm(img_buf,nom)
 				console.log "upload_image/retaillage de l'image"
 				_gm=_gm.resize null,600
-				console.log  "upload_image/transformation du l'image retaillée en buffer (format " + img_format + ")"
-				_gm=_gm.toBuffer img_format, (err, buffer)->
-					if (err) 
-						console.log "upload_image/erreur dans la generation du buffer"
-						return handle(err)
-					console.log "upload_image/upload de l'image retaillée"
-					_upload(episode,nom,auteur,user,avatar,message,buffer.toString('base64'),url,port,id_emission)
+				if _gm.length > 1024*1024 
+					cb "TOO_BIG"
+				else
+					console.log  "upload_image/transformation du l'image retaillée en buffer (format " + img_format + ")"
+					_gm=_gm.toBuffer img_format, (err, buffer)->
+						if (err) 
+							console.log "upload_image/erreur dans la generation du buffer"
+							return handle(err)
+						console.log "upload_image/upload de l'image retaillée"
+						_upload(episode,nom,auteur,user,avatar,message,buffer.toString('base64'),url,port,id_emission)
 			else
 				console.log "upload_image/upload de l'image"
 				_upload(episode,nom,auteur,user,avatar,message,img_buf.toString('base64'),url,port,id_emission)

@@ -160,7 +160,7 @@ replaceURLWithHTMLLinks = (text) ->
   return text.replace(exp,"<a href='$1' target='_blank'>$1</a>")
 
 
-insertChatroomImages = (text,user,avatar) -> 
+insertChatroomImages = (text,user,avatar,socket_) -> 
   exp = /https?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]/i
   console.log text
   if tab_url = text.match(exp)
@@ -185,12 +185,16 @@ insertChatroomImages = (text,user,avatar) ->
               console.log "image deja presente"
               return false
           backend.upload_image nomEvent, nom, user,user,avatar, text, data,img_format, (url_wp)->  
-            console.log "image uploadée"
-            param_img.url=url_wp
-            console.log param_img
-            liste_images.push param_img 
-            io.sockets.emit 'add_img',param_img
-            console.log 'media:'+ nom
+            if url_wp=="TOO_BIG"
+              socket_.emit "ERR_IMTOOBIG"
+              console.log "image trop grosse"
+            else
+              console.log "image uploadée"
+              param_img.url=url_wp
+              console.log param_img
+              liste_images.push param_img 
+              io.sockets.emit 'add_img',param_img
+              console.log 'media:'+ nom
 
 
 
@@ -498,7 +502,7 @@ io.sockets.on 'connection', (socket) ->
         cpt_message+=1
         message.user = me
         date = new Date()
-        insertChatroomImages message.message , message.user.username ,message.user.avatar
+        insertChatroomImages message.message , message.user.username ,message.user.avatar,socket
         message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
         message.message = replaceSalaud(message.message)
         id_last_message = md5(Date.now()+cpt_message+message.user.mail)
@@ -626,12 +630,13 @@ init_twitter = (twitter) ->
             console.log "image deja presente"
             return false
         backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, data,img_format, (url_wp)->  
-          console.log "image uploadée"
-          param_img.url=url_wp
-          console.log 'init_twitter',param_img
-          liste_images.push param_img 
-          io.sockets.emit 'add_img',param_img
-          console.log 'media:'+ nom
+          if url_wp!="TOO_BIG"
+            console.log "image uploadée"
+            param_img.url=url_wp
+            console.log 'init_twitter',param_img
+            liste_images.push param_img 
+            io.sockets.emit 'add_img',param_img
+            console.log 'media:'+ nom
     if media_type == 'video'
       url_o = url_parser.parse data.entities.urls[0].expanded_url ,  true , true
       switch site
@@ -681,7 +686,6 @@ init_twitter = (twitter) ->
     io.sockets.emit 'twitter_close'
     twitter = new Twitter(auth_twitter) 
     init_twitter twitter
-
 
 
 init_twitter twitter
