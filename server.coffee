@@ -251,6 +251,7 @@ get_image_twitter = (url,cb) ->
   console.log "chargement images en RAM : ",url
   http.get url+':large', (response)->
       data=''
+      content_type=response.headers['content-type']
       response.setEncoding('binary')
       console.log "reception d'une reponse"
       response.on 'data',
@@ -258,7 +259,7 @@ get_image_twitter = (url,cb) ->
         console.log "data"
       response.on 'end',()->
         console.log "Fin du chargement de "+nom+":"
-        cb nom,data
+        cb nom,data,content_type
 
 
 get_thumbnail = (site,url,cb) ->
@@ -606,7 +607,7 @@ init_twitter = (twitter) ->
     return 0 if (url==null) || (typeof(url) == 'undefined')
 
     if media_type == 'img'
-      get_image_twitter url, (nom,data)->
+      get_image_twitter url, (nom,data,content_type)->
         param_img={
           'nom' : nom, 
           'poster':poster,
@@ -615,11 +616,16 @@ init_twitter = (twitter) ->
           'tweet':replaceURLWithHTMLLinks tweet
           'media_type' : media_type
         }
+        img_format=""
+        switch content_type
+            when 'image/jpeg' then img_format='JPG'; break;
+            when 'image/gif' then img_format='GIF'; break;
+            when 'image/png' then img_format='PNG'; break;
         for idx,i of liste_images
           if i.nom==nom
             console.log "image deja presente"
             return false
-        backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, data, (url_wp)->  
+        backend.upload_image nomEvent, nom, poster,poster_user,avatar, tweet, data,img_format, (url_wp)->  
           console.log "image uploadée"
           param_img.url=url_wp
           console.log 'init_twitter',param_img

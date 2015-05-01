@@ -58,36 +58,7 @@ class Backend
 		console.log "upload_image/Entrée dans upload_image"
 		console.log "upload_image/id_emission",@id_emission
 
-		id_emission	= @id_emission
-		url			= @url
-		port 		= @port
-
-
-
-		try
-			console.log "upload_image/transformation du l'image en buffer"
-			img_buf = new Buffer(data, 'binary')
-			console.log "upload_image/verification de la taille de l'image"
-			if img_buf.length > 1024*1024 || 1==1
-				console.log "upload_image/image trop grande."
-				_gm=gm(img_buf,nom)
-				console.log "upload_image/retaillage de l'image"
-				_gm=_gm.resize null,600
-				console.log  "upload_image/transformation du l'image retaillée en buffer (format " + img_format + ")"
-				_gm=_gm.toBuffer img_format, (err, buffer)->
-					if (err) 
-						console.log "upload_image/erreur dans la generation du buffer"
-						return handle(err)
-					console.log "upload_image/upload de l'image retaillée"
-					_upload(episode,nom,auteur,user,avatar,message,buffer.toString('base64'),url,port,id_emission)
-			else
-				console.log "upload_image/upload de l'image"
-				_upload(episode,nom,auteur,user,avatar,message,img_buf.toString('base64'),url,port,id_emission)
-		catch e
-			console.log "upload_image/Erreur de retaillage",e
-			#console.log databin64
-
-
+		
 		_upload = (episode,nom,auteur,user,avatar,message,databin64,url,port,id_emission)->
 			try
 				params = JSON.stringify({
@@ -129,6 +100,37 @@ class Backend
 				req.end()
 			catch e
 				console.log "upload_image/Erreur d'upload",e
+
+
+
+		id_emission	= @id_emission
+		url			= @url
+		port 		= @port
+
+
+
+		try
+			console.log "upload_image/transformation du l'image en buffer"
+			img_buf = new Buffer(data, 'binary')
+			console.log "upload_image/verification de la taille de l'image"
+			if img_buf.length > 1024*1024 
+				console.log "upload_image/image trop grande."
+				_gm=gm(img_buf,nom)
+				console.log "upload_image/retaillage de l'image"
+				_gm=_gm.resize null,600
+				console.log  "upload_image/transformation du l'image retaillée en buffer (format " + img_format + ")"
+				_gm=_gm.toBuffer img_format, (err, buffer)->
+					if (err) 
+						console.log "upload_image/erreur dans la generation du buffer"
+						return handle(err)
+					console.log "upload_image/upload de l'image retaillée"
+					_upload(episode,nom,auteur,user,avatar,message,buffer.toString('base64'),url,port,id_emission)
+			else
+				console.log "upload_image/upload de l'image"
+				_upload(episode,nom,auteur,user,avatar,message,img_buf.toString('base64'),url,port,id_emission)
+		catch e
+			console.log "upload_image/Erreur de retaillage",e
+			#console.log databin64
 
 
 
