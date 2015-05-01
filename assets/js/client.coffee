@@ -113,7 +113,9 @@ $(document).ready ->
     $('#wrong-mail').html(message).fadeIn()
 
 
-    
+  # Gestion des erreurs
+  socket.on "ERR_IMTOOBIG",() ->
+    chatroom_info "ERREUR : L'image est trop grande (>2Mo) et n'a pas pu être suffisament reduite."
 
   # gestion des utilisateurs
   socket.on 'newuser', (user,new_connection) ->
