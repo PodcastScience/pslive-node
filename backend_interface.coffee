@@ -117,6 +117,7 @@ class Backend
 				console.log "upload_image/image trop grande."
 				_gm=gm(img_buf,nom)
 				console.log "upload_image/retaillage de l'image"
+				_gm=_gm.coalesce()
 				_gm=_gm.resize null,600
 				if _gm.length > 1024*1024 
 					cb "TOO_BIG"
