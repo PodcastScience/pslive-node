@@ -32,8 +32,7 @@ $(document).ready ->
   highlightPseudo= (text) ->
     userref=''
     equiv=[]
-    userlist.sort((a,b)-> b.length-a.length)
-    for u in userlist 
+    for u in userlist.sort((a,b)-> b.name.length-a.name.length)
       idx="i"+(Math.floor((90000000000)*Math.random())+10000000000);
       equiv.push { 'idx' : idx , 'name' : u.name }
       pattern=RegExp("@("+u.name+")","ig")
