@@ -84,7 +84,7 @@ class Backend
 					form: params,
 					headers: headers
 				}
-				console.log "upload_image/options",options
+				#console.log "upload_image/options",options
 				req = http.request options, (res)-> 
 					try
 						http_request_callback res, (data)=>

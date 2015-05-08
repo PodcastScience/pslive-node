@@ -229,7 +229,11 @@ $(document).ready(function() {
 	$aside = $('.aside');
 	$write = $('.write');
 	$online = $('.online');
-	
+	var pathArray = window.location.pathname.split( '/' );
+	if(pathArray[1]=="presentation")
+		isPresentation = true;
+	else
+		isPresentation = false;
 	// auto height
 	function autoHeight() {
 		// Tu mesures combien ?
@@ -255,9 +259,17 @@ $(document).ready(function() {
 		$content.css('padding-top', h_header);
 		
 		// Layout col
-		if ( w_win <= 1200 ) {
-			var for100_w_chatroom = 40; //%
-			var for100_w_write = 36; //%
+		if ( w_win <= 1200 || isPresentation ) {
+			if(isPresentation)
+			{
+				var for100_w_chatroom = 30; //%
+				var for100_w_write = 26; //%
+			}
+			else
+			{
+				var for100_w_chatroom = 40; //%
+				var for100_w_write = 36; //%
+			}
 		} else {
 			var for100_w_chatroom = 32.89830508474576; //%
 			var for100_w_write = 28.89830508474576; //%

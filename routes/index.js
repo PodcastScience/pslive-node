@@ -10,3 +10,7 @@ exports.admin = function(req, res){
 exports.index = function(req, res){
   res.render('index', { title: 'PodcastScience Live' });
 };
+
+exports.presentation = function(req, res){
+  res.render('presentation', { title: 'PodcastScience Live' });
+};

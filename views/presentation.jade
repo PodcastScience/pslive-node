@@ -1,0 +1,95 @@
+extends layout
+
+
+
+block bloc_header
+  header
+    .wrap.clearfix
+      a.logo(href='http://podcastscience.fm')
+        img(src='images/PodcastScience.png', width='210', height='25', alt='PodcastScience')
+      h1#title-episode 
+      .rec Live
+
+
+
+
+
+block bloc_sharypic
+  ul#slider
+  span#lasttheartbeat toto
+
+            
+
+
+
+
+
+
+block bloc_chatroom
+  div#onChat
+    div#main.chatroom
+      div#wrap_messages
+        div#messages
+          h2.clearfix.nb-connected
+          ul#message-box
+            li(id="{{id}}" )
+              img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar
+              .message
+                span.pseudo {{user.username}}
+                span.timestamp &nbsp[{{h}}:{{m}}:{{s}}]
+                p(id="msg_{{id}}") {{{message}}}
+  div.write
+      form#message-form  
+        input(type="text-area", placeholder='Poster un message')#message-to-send.newmsg
+        input(type="submit", value='Envoyer')#send-message
+        span.minitext Posez vos questions avec la mention 
+          b @ps
+
+
+
+
+block user_box
+  div#user_box
+    li(id="{{id}}")
+      img(src="{{avatar}}" alt="Avatar {{user.username}}")
+      span.pseudo
+        | {{username}}
+
+
+
+
+
+block bloc_liste_poditeurs
+  .online
+    h2.nb-connected
+    ul#members-list
+      block user_box
+
+
+
+
+block block_msg_nolive
+  .offlive
+    h2
+      | Patience !
+      span Il est encore trop tôt pour le live.
+    p
+      | Rendez-vous tout les 
+      strong  Mercredi à 20h30 
+      | (CET) et réagissez sur le chat !
+    p Et si Nico est là, illustrations en bonus :)
+
+
+
+
+
+
+
+block bloc_content
+  .wrap.content.clearfix
+    .onlive.presentation
+      .aside
+        block bloc_sharypic
+      block bloc_chatroom
+      block bloc_liste_poditeurs
+    block block_msg_nolive

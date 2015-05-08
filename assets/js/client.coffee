@@ -18,7 +18,6 @@ $(document).ready ->
   user_box_template = $('#user_box').html()
   $('#user_box').remove()
 
-
   chatroom_info=(message)->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
 
@@ -89,15 +88,15 @@ $(document).ready ->
   socket.on 'update_compteur', (connected) ->
     str=""
     if (connected.connecte==0)
-      str+="<span class='connectes'>"+connected.connecte+"</span> auditeur connecté"
+      str+="<p><span class='connectes'>"+connected.connecte+"</span> auditeur connecté</p>"
     if (connected.connecte==1)
-      str+="<span class='connectes'>"+connected.connecte+"</span> auditeur connecté"
+      str+="<p><span class='connectes'>"+connected.connecte+"</span> auditeur connecté</p>"
     if (connected.connecte>1)
-      str+="<span class='connectes'>"+connected.connecte+"</span> auditeurs connectés"
+      str+="<p><span class='connectes'>"+connected.connecte+"</span> auditeurs connectés</p>"
     if (connected.cache==1)
-        str+="<br>(plus <span class='caches'>"+connected.cache+"</span> qui se cache)"
+        str+="<p>(plus <span class='caches'>"+connected.cache+"</span> qui se cache)</p>"
     if (connected.cache>1)
-        str+="<br>(plus <span class='caches'>"+connected.cache+"</span> qui se cachent)"
+        str+="<p>(plus <span class='caches'>"+connected.cache+"</span> qui se cachent)</p>"
     $('.nb-connected').html(str)
 
   # log des users
@@ -119,8 +118,9 @@ $(document).ready ->
 
   # gestion des utilisateurs
   socket.on 'newuser', (user,new_connection) ->
+    console.log 'ajout de '+user.username
     id_to_find = "\##{user.id}"
-    userlist.push({'name':user.username,'id':user.id})
+    userlist.push({'name':user.username,'id':user.id,'avatar25':user.avatar25})
     if($('#members-list').find(id_to_find).length == 0)
       #html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
       $('#members-list').append(Mustache.render(user_box_template,user))
@@ -134,8 +134,36 @@ $(document).ready ->
     $('#send-message').css('opacity',1)
     $('#message-form').fadeIn()
     $('#message-to-send').focus()
-
+    $('#message-to-send').atwho({
+      at: "@",
+      data:userlist,
+      displayTpl: "<li><img src=${avatar25}/>${name}</li>",
+      callbacks:{
+          filter: (query, data, searchKey) ->
+            # !!null #=> false; !!undefined #=> false; !!'' #=> false;
+            _results = []
+            for item in userlist
+              if ~new String(item[searchKey]).toLowerCase().indexOf query.toLowerCase()
+                _results.push item if item[searchKey]!=username
+                  
+            _results
+      }
+    }).atwho({
+      at: "/",
+      data:['me','nick']
+    }).on({
+        'shown.atwho':  (e) -> 
+          $(this).data('autocompleting', true)
+        ,
+        'hidden.atwho':  (e) -> 
+          $(this).data('autocompleting', false)
+        })
   socket.on 'disuser', (user) ->
+    new_userlist = []
+    for u in userlist
+      if u.id!=user.id
+        new_userlist.push(u)
+    userlist = new_userlist
     id_to_find = "\##{user.id}"
     $('#members-list').find(id_to_find).fadeOut(300,()->$(this).remove()) 
 
@@ -147,8 +175,8 @@ $(document).ready ->
       username=user.username
       console.log "nouveau username local : ",username
     for u in userlist
-      if u.id==userid
-        u.name=user.name
+      if u.id==user.id
+        u.name=user.username
     $('#members-list').find(id_to_find).fadeOut 300,()->
       $(this).remove()
       chatroom_info formername+' s\'appelle désormais '+user.username
@@ -255,6 +283,7 @@ $(document).ready ->
       console.log("Il s'est fait jeté")
       $('#members-list li').remove()
       $('.nb-connected').html("")
+      userlist=[]
       console.log "Envoi du Hello"
       socket.emit('Hello',id_connexion)
 
@@ -423,7 +452,7 @@ $(document).ready ->
       console.log 'test'
     if e.which == 38 
       e.preventDefault()
-      if input.is('.newmsg')
+      if input.is('.newmsg')  &&  !$('#message-to-send').data('autocompleting')
         $('#message-form').off 'submit'
         $('#message-form').on 'submit',  envoi_modif_message
         input.addClass('editmsg')
@@ -431,11 +460,12 @@ $(document).ready ->
         input.val(last_msg_txt)
         input[0].selectionStart = last_msg_txt.length
         input[0].selectionEnd = last_msg_txt.length
-    if e.which == 40 && input.is('.editmsg')
-      e.preventDefault()
-      $('#message-form').off 'submit'
-      $('#message-form').on 'submit',  envoi_nouveau_message
-      input.addClass('newmsg')
-      input.removeClass('editmsg')
-      input.val("")
+    if e.which == 40 
+      if input.is('.editmsg')  &&  !$('#message-to-send').data('autocompleting')
+        e.preventDefault()
+        $('#message-form').off 'submit'
+        $('#message-form').on 'submit',  envoi_nouveau_message
+        input.addClass('newmsg')
+        input.removeClass('editmsg')
+        input.val("")
 

@@ -171,7 +171,7 @@
 		box-sizing: border-box;
 	}
 	input[type=text],
-	input[type=text-area] {
+	input[type=text-area],#message-to-send {
 		padding: .5em;
 		border: 1px solid #e1e1e1;
 		background: #fff;
@@ -179,7 +179,7 @@
 		color: #797981;
 	}
 	input[type=text]:focus,
-	input[type=text-area]:focus {
+	input[type=text-area]:focus,#message-to-send:focus {
 		color: #3d3d41;
 		border-color: #3d3d41;
 	}
@@ -261,6 +261,10 @@
 	.content #messages,
 	.content .online {
 		padding-top: 2.64285714285714em;
+	}
+
+	.content .presentation .aside {
+		padding-top: 1em;
 	}
 
 	h2 {
@@ -585,7 +589,7 @@
 		background: #fff;
 		box-shadow: 0 -1px 0 #e1e1e1, -1px 0 #e1e1e1, 1px 0 0 #E1E1E1;
 	}
-	.write input[type=text-area] {
+	.write input[type=text-area],#message-to-send {
 		margin-top: .3em;
 		width: 66%;
 		border: 0;
@@ -602,21 +606,29 @@
 		line-height: 1em;
 	}
 	.chatroom h2 span,
-	.online h2 span.connectes {
+	h2 span.connectes{
 		float: left;
 		position: relative;
 		top: .15em;
 		margin: 0 .3em .5em 0;
 		font-weight: 300;
-		font-size: 2.14285714285714rem;
+		font-size: 2.14285714285714em;
 		color: #e41d3d;
 	}
-	.online h2 span.caches {
+	h2 span.caches {
+		margin: 0;
+		margin-bottom: 1.4rem;
+		font-size: .92857142857143rem;
+		line-height: 1em;
+		float: none;
 		color: #e41d3d;
 		font-weight: 500;
 	}
 	.chatroom h2 span {
 		position: static;
+	}
+	h2.nb-connected span.connectes{
+		position: relative;
 	}
 
 	.online #members-list li {
@@ -872,9 +884,12 @@
 	@media (max-width: 640px) {
 		.login form, .login .info { float: none; width: auto; }
 		input[type=submit] { float: none !important; width: 100% !important; display: block; padding: 2em 0;}
-		.content .write input[type=text-area] { margin-bottom: 2em; }
+		.content .write input[type=text-area],#message-to-send { margin-bottom: 2em; }
 	}
-
+	.presentation .chatroom h2 { display: block; }
+	.presentation .online { display: none; }
+	.content .presentation .aside { width: 70%; }
+	.content .presentation .chatroom { width: 30%; }
 	ul { 
 		list-style-type: none; 
 	}
@@ -888,10 +903,10 @@
     input.newmsg{
         background-color: #fff
     }
-    input.editmsg{
+    #message-to-send.editmsg{
         background-color: #b0c7dd
     }
-    input.editmsg:focus{
+    #message-to-send.editmsg:focus{
         color: #fff
     }
 
@@ -906,6 +921,10 @@
     	text-align: center;
     	display: block;
     	position: relative;
+    }
+    .presentation #slider li{
+    	width:800px;
+    	height:600px;
     }
 
 
