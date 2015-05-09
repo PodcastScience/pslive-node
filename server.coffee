@@ -91,6 +91,7 @@ app.get '/liste_images', (req, res) ->
     console.log 'liste_images',data
     res.send data.map((image) -> 
       d = new Date(image.created_at)
+      d.setHours(d.getHours() + 2)
       console.log 'd '+d
       date_str = pad2(d.getDate())+'/'+pad2(d.getMonth())+'/'+d.getFullYear()
       time_str = pad2(d.getHours())+':'+pad2(d.getMinutes())
