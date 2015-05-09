@@ -193,7 +193,7 @@ class Backend
 			method: 'get',
 			headers: headers
 		}
-		console.log "upload_video/download des images : ", @id_emission
+		console.log "download_images/download des images : ", @id_emission
 		req = http.request options, (res)-> 
 			http_request_callback res, (data)->
 				console.log "upload_video/",data
@@ -207,8 +207,10 @@ class Backend
 								'poster' : image.author,
 								'poster_user' : image.user,
 								'avatar' : image.avatar,
-								'tweet' : image.msg
-								'media_type' : 'img'
+								'tweet' : image.msg,
+								'media_type' : 'img',
+								'created_at' : image.created_at,
+								'updated_at' : image.updated_at
 							}
 						if image.media_type == 'video'
 							img = {
@@ -217,14 +219,16 @@ class Backend
 								'poster' : image.author,
 								'poster_user' : image.user,
 								'avatar' : image.avatar,
-								'tweet' : image.msg
-								'media_type' : 'video'
+								'tweet' : image.msg,
+								'media_type' : 'video',
+								'created_at' : image.created_at,
+								'updated_at' : image.updated_at
 							}
 						meta_tmp.push img
-						console.log "upload_video/",img.url
+						console.log "download_images/",img.url
 				catch e
-					console.log "upload_video/pas d'image"
-				console.log "upload_video/",meta_tmp
+					console.log "download_images/pas d'image"
+				console.log "download_images/",meta_tmp
 				cb meta_tmp
 		req.on 'error',(err)->console.log "upload_video/",err
 		req.end()

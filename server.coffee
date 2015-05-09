@@ -86,6 +86,25 @@ app.get '/questions', (req, res) ->
     "<b>#{message.user.username}</b><a href='/timestamp#[#{(message.h+2)%24}:#{message.m}:#{message.s}]'>[#{(message.h+2)%24}:#{message.m}:#{message.s}]</a>: #{message.message}"
   ).join("<br/>");
 
+app.get '/liste_images', (req, res) ->
+  backend.download_images (data)->
+    console.log 'liste_images',data
+    res.send data.map((image) -> 
+      d = new Date(image.created_at)
+      console.log 'd '+d
+      date_str = pad2(d.getDate())+'/'+pad2(d.getMonth())+'/'+d.getFullYear()
+      time_str = pad2(d.getHours())+':'+pad2(d.getMinutes())
+      "<b>#{date_str} #{time_str}</b> : 
+        <a href='#{image.url}'  style='display: inline-block;width:50px;height:50px;'>
+          <img src='#{image.url}' style='max-width:50px;max-height:50px;'/>
+        </a>
+        <a href='#{image.url}'>
+          #{image.url}
+        </a>"
+    ).join("<br/>")
+
+
+
 httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
 )
