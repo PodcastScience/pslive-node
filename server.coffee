@@ -13,7 +13,7 @@ url_parser = require('url')
 validator = require('validator')
 Twitter = require('./twitter');
 Backend = require('./backend_interface');
-#PsImagesQueue = require('./ps_images_queue');
+PsImagesQueue = require('./ps_images_queue');
 fs = require('fs')
 mime = require('mime')
 app = express()
@@ -160,7 +160,7 @@ backend = new Backend({
     port: (process.env.PSLIVE_BACKEND_PORT || 3000)
   })
 
-#images_queue = new PsImagesQueue { sockets: io.sockets, delay:5000}
+images_queue = new PsImagesQueue { sockets: io.sockets, delay:10000}
 
 last_messages   = []
 all_messages    = []
@@ -216,8 +216,8 @@ insertChatroomImages = (text,user,avatar,socket_) ->
               param_img.url=url_wp
               console.log param_img
               liste_images.push param_img 
-              #images_queue.add param_img
-              io.sockets.emit 'add_img',param_img
+              images_queue.add param_img
+              #io.sockets.emit 'add_img',param_img
               console.log 'media:'+ nom
 
 
@@ -608,6 +608,11 @@ io.sockets.on 'connection', (socket) ->
 
 
 
+  socket.on "test", () ->
+    console.log 'test'
+    insertChatroomImages 'http://www.lecosmographe.com/blog/wp-content/uploads/2013/08/ngc1232-690x690.jpg' , 'pascal' ,'http://www.lecosmographe.com/blog/wp-content/uploads/2013/08/ngc1232-690x690.jpg',socket
+    insertChatroomImages 'http://www.astrosurf.com/luxorion/Images/m20-hyp.jpg' , 'pascal' ,'http://www.astrosurf.com/luxorion/Images/m20-hyp.jpg',socket
+
 
 
 
@@ -660,8 +665,8 @@ init_twitter = (twitter) ->
             param_img.url=url_wp
             console.log 'init_twitter',param_img
             liste_images.push param_img 
-            #images_queue.add param_img
-            io.sockets.emit 'add_img',param_img
+            images_queue.add param_img
+            #io.sockets.emit 'add_img',param_img
             console.log 'media:'+ nom
     if media_type == 'video'
       url_o = url_parser.parse data.entities.urls[0].expanded_url ,  true , true
@@ -691,8 +696,8 @@ init_twitter = (twitter) ->
         param_img.site = site
         console.log 'init_twitter/param_img',param_img
         liste_images.push param_img 
-        #images_queue.add param_img
-        io.sockets.emit 'add_img',param_img
+        images_queue.add param_img
+        #io.sockets.emit 'add_img',param_img
         console.log 'media:'+ nom
 
 
