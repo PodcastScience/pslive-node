@@ -8,6 +8,7 @@ https = require('https')
 path = require('path')
 md5 = require('MD5')
 mu = require('mu2')
+querystring  = require("querystring")
 cheerio = require('cheerio')
 url_parser = require('url')
 validator = require('validator')
@@ -67,6 +68,12 @@ app.get '/messages', (req, res) ->
     else
       return '*'+message_me
   ).join("<br/>")
+
+app.get '/twitter_login', (req, res) ->
+  twitter.get_auth(res)
+app.get '/twitter_auth', (req, res) ->
+  twitter.get_auth_step2(res,req)
+
 app.get '/timestamp', (req, res) ->
   res.send all_messages.map((message) -> 
     message_me = ircLike_me message.message, message.user.username
@@ -399,7 +406,12 @@ io.sockets.on 'connection', (socket) ->
       socket.emit('newuser',value,false)
     
     
-    
+  socket.on 'twitter_login', (tocken,id_connexion)->
+    console.log "connexion Twitter",tocken
+    verif_connexion(id_connexion)
+    twitter.get_auth_info tocken, (user)->
+      console.log "user twitter", user
+      connect_user user,false
     
     
   #Login : l'utilisateurs se connecte a la Chatroom
@@ -415,13 +427,16 @@ io.sockets.on 'connection', (socket) ->
     unless validator.isLength(user.username,3,30)
       socket.emit('erreur',"Le nom d'utilisateur doit être compris entre 3 et 30 lettres")
       return -1
+    user.avatar= 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
+    connect_user user,reco
 
+  connect_user = (user,reco) ->
+    console.log "connexion du user",user
     try
-
       # Verification de l'existance de l'utilisateur
       # Le cas échéant, on incremente un compteur
       for key, existing_user of users
-        #console.log 'Verif '+existing_user.mail+'/'+existing_user.username
+        console.log 'Verif '+existing_user.mail+'/'+existing_user.username
         if (user.mail == existing_user.mail) && (user.mail!='')
           me = existing_user
           console.log '\tuser already exist!'
@@ -430,13 +445,13 @@ io.sockets.on 'connection', (socket) ->
 
       #dans le cas contraire, on le créé dans la userlist
       unless me
+        console.log "creation du user"
         me = user
         #me.id = user.mail.replace('@','-').replace(/\./gi, "-")
         me.id = Date.now()
         me.cpt=1
         console.log 'cpt '+me.mail+':'+me.cpt
-        me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
-        me.avatar25 = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=25'
+        #me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
         users[me.id] = me
         #on informe tout le monde qu'un nouvel utilisateur s'est connecté
         io.sockets.emit('newuser',me,!reco)
@@ -444,9 +459,14 @@ io.sockets.on 'connection', (socket) ->
         io.sockets.emit('update_compteur',{
           connecte:compte(users),
           cache:compte(liste_connex)-compte(users)
-        })
-      #on informe l'utilisateur qu'il est bien cnnecté
-      socket.emit('logged',me.id)
+        })    
+        #on informe l'utilisateur qu'il est bien cnnecté
+        socket.emit('logged',me.id)
+    catch e
+      console.log "erreur de connexion",e
+      
+      
+
 
   
         
@@ -518,6 +538,8 @@ io.sockets.on 'connection', (socket) ->
     if verif_connexion(id_connexion)
       deconnexion()
 
+  socket.on 'test', () ->
+    twitter.get_auth(res)
 
 
   # gestion des messages

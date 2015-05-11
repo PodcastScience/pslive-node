@@ -33,7 +33,7 @@ block bloc_chatroom
           h2.clearfix.nb-connected
           ul#message-box
             li(id="{{id}}" )
-              img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar
+              img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar.avatar40
               .message
                 span.pseudo {{user.username}}
                 span.timestamp &nbsp[{{h}}:{{m}}:{{s}}]
@@ -51,7 +51,7 @@ block bloc_chatroom
 block user_box
   div#user_box
     li(id="{{id}}")
-      img(src="{{avatar}}" alt="Avatar {{user.username}}")
+      img(src="{{avatar}}" alt="Avatar {{user.username}}").avatar40
       span.pseudo
         | {{username}}
 

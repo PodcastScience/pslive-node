@@ -34,6 +34,8 @@ block bloc_login
       input(type="text" name="login" placeholder="Nom d'utilisateur")#username
       input(type="text" name="mail" placeholder="E-mail")#mail
       input(type="submit" value="Discuter")
+      a(href='twitter_login')
+        img(src='images/sign-in-with-twitter-link.png')
 
 
 
@@ -77,7 +79,7 @@ block bloc_chatroom
           h2.clearfix.nb-connected
           ul#message-box
             li(id="{{id}}" )
-              img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar
+              img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar.avatar40
               .message
                 span.pseudo {{user.username}}
                 span.timestamp &nbsp[{{h}}:{{m}}:{{s}}]
@@ -95,7 +97,7 @@ block bloc_chatroom
 block user_box
   div#user_box
     li(id="{{id}}")
-      img(src="{{avatar}}" alt="Avatar {{user.username}}")
+      img(src="{{avatar}}" alt="Avatar {{user.username}}").avatar40
       span.pseudo
         | {{username}}
 

@@ -18,6 +18,19 @@ $(document).ready ->
   user_box_template = $('#user_box').html()
   $('#user_box').remove()
 
+
+  getParameterByName = (name) ->
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]")
+    regex = new RegExp "[\\?&]" + name + "=([^&#]*)"
+    results = regex.exec location.search
+    if results!=null && results.length>=2
+      console.log "analyse des param get"
+      return decodeURIComponent results[1].replace(/\+/g, " ") || null
+    console.log "pas de param get"
+    return null
+
+  twitter_token = getParameterByName('twitter_token')
+
   chatroom_info=(message)->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
 
@@ -79,10 +92,14 @@ $(document).ready ->
     id_connexion=id
     console.log "username:",username
     console.log "email:",email
-    if( username != "" && email != "")
-      send_login(true)
+    console.log 'twitter_token',twitter_token
+    if twitter_token!=null
+      socket.emit 'twitter_login',twitter_token,id_connexion
     else
-      console.log 'Merci de vous authentifier'
+      if( username != "" && email != "")
+        send_login(true)
+      else
+        console.log 'Merci de vous authentifier'
 
   socket.on 'update_compteur', (connected) ->
     str=""
@@ -119,7 +136,7 @@ $(document).ready ->
   socket.on 'newuser', (user,new_connection) ->
     console.log 'ajout de '+user.username
     id_to_find = "\##{user.id}"
-    userlist.push({'name':user.username,'id':user.id,'avatar25':user.avatar25})
+    userlist.push({'name':user.username,'id':user.id,'avatar':user.avatar})
     if($('#members-list').find(id_to_find).length == 0)
       #html_to_append = "<img src=\"#{user.avatar}\" id=\"#{user.id}\">" 
       $('#members-list').append(Mustache.render(user_box_template,user))
@@ -136,7 +153,7 @@ $(document).ready ->
     $('#message-to-send').atwho({
       at: "@",
       data:userlist,
-      displayTpl: "<li><img src=${avatar25}/>${name}</li>",
+      displayTpl: "<li><img class='avatar25' src=${avatar}/>${name}</li>",
       callbacks:{
           filter: (query, data, searchKey) ->
             # !!null #=> false; !!undefined #=> false; !!'' #=> false;
@@ -380,9 +397,9 @@ $(document).ready ->
    #     </li>')
 
 
-  $('.rec').on 'dblclick', ->
-    console.log 'Demande de Refresh'
-    socket.emit 'refreshSP' 
+  $('.rec').on 'click', ->
+    console.log 'test'
+    socket.emit 'test' 
 
   $(window).on 'beforeunload', ->
     console.log("il s'est barré")

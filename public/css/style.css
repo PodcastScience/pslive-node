@@ -1082,3 +1082,12 @@
 	.inside_box{
 		height: 100%;
 	}
+
+	.avatar40 {
+		height : 40px;
+		width  : 40px;
+	}
+	.avatar25 {
+		height : 25px;
+		width  : 25px;
+	}

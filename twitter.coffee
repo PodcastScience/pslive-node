@@ -1,17 +1,21 @@
 oauth   = require('oauth')
 events  = require('events')
 util  = require("util")
+querystring  = require("querystring")
 
 url = {
   filter      : 'https://stream.twitter.com/1.1/statuses/filter.json'
   request_token   : 'https://api.twitter.com/oauth/request_token'  
   access_token  : 'https://api.twitter.com/oauth/access_token'
+  userinfo  : 'https://api.twitter.com/1.1/account/verify_credentials.json'
 }
 
 
 class Stream extends events.EventEmitter
   stream_imm=null
+  auth_tockens= null
   constructor: (params) ->
+    auth_tockens= []
     return new Stream(params) if !(this instanceof Stream) 
     events.EventEmitter.call(this);
     @params = params;
@@ -97,8 +101,71 @@ class Stream extends events.EventEmitter
   stream : (params) ->
   	setTimeout (()->stream_imm params) , 10000
 
+  get_auth : (res) =>
+    request = @oauth.post(
+        url.request_token,
+        @params.access_token_key,
+        @params.access_token_secret,
+        {oauth_callback:"http://localhost:3001/twitter_auth"}, 
+        (e,data) =>
+          if e
+            console.log e
+            res.redirect('http://live.podcastscience.fm')
+          else
+            response = querystring.parse(data)
+            if response.oauth_callback_confirmed != 'true'
+              res.redirect('http://live.podcastscience.fm')
+            else
+              console.log "step1/response:",response
+              res.redirect('https://twitter.com/oauth/authenticate?oauth_token='+response.oauth_token)
 
+      )
+  get_auth_step2 : (res,req) =>
+    console.log "step2",req.query
+    request = @oauth.post(
+        url.access_token,
+        @params.access_token_key,
+        @params.access_token_secret,
+        {
+          oauth_token:req.query.oauth_token,
+          oauth_verifier:req.query.oauth_verifier
+        }, 
+        (e,data) =>
+          if e
+            console.log e
+            res.redirect('http://live.podcastscience.fm')
+          else
+            response = querystring.parse(data)
+            console.log response
 
+            auth_tockens[response.oauth_token] = response.oauth_token_secret
+            res.redirect('http://localhost:3001?twitter_token='+response.oauth_token)
+
+      )
+  get_auth_info : (key,cb) =>
+    console.log 'twitter/ recuperation des infos utilisateurs',key
+    request = @oauth.get(
+        url.userinfo,
+        key,
+        auth_tockens[key] ,
+        (e,data) =>
+          if e
+            console.log e
+          else
+            response = JSON.parse(data)
+            console.log "response" ,response
+            cb {
+              name : response.name
+              username : response.screen_name
+              avatar : response.profile_image_url
+              mail : response.name+'@twitter'
+            }
+            #name/sceen_name/profile_image_url
+            #console.log response
+            #res.redirect('http://localhost:3001')
+
+      )
+  
 
 module.exports = Stream
 	
