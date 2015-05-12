@@ -69,8 +69,9 @@ app.get '/messages', (req, res) ->
       return '*'+message_me
   ).join("<br/>")
 
-app.get '/twitter_login', (req, res) ->
-  twitter.get_auth(res)
+
+app.get '/close', (req, res) ->
+  res.send('<script>window.close()</script>')
 app.get '/twitter_auth', (req, res) ->
   twitter.get_auth_step2(res,req)
 
@@ -377,6 +378,10 @@ io.sockets.on 'connection', (socket) ->
   
     send_chatroom socket
 
+  socket.on 'twitter_auth', () ->
+    console.log  "demande d'auth twitter"
+    verif_connexion(id_connexion)
+    twitter.get_auth(socket,id_connexion)
 
   # gestion de la connexion au live. Le client evoi un Hello au serveur
   # qui lui reponf Olleh avec un id qui permettra de au serveur de s'assurer
@@ -411,7 +416,7 @@ io.sockets.on 'connection', (socket) ->
     verif_connexion(id_connexion)
     twitter.get_auth_info tocken, (user)->
       console.log "user twitter", user
-      connect_user user,false
+      connect_user user,false,'twitter'
     
     
   #Login : l'utilisateurs se connecte a la Chatroom
@@ -428,9 +433,9 @@ io.sockets.on 'connection', (socket) ->
       socket.emit('erreur',"Le nom d'utilisateur doit être compris entre 3 et 30 lettres")
       return -1
     user.avatar= 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
-    connect_user user,reco
+    connect_user user,reco ,'email'
 
-  connect_user = (user,reco) ->
+  connect_user = (user,reco,source) ->
     console.log "connexion du user",user
     try
       # Verification de l'existance de l'utilisateur
@@ -462,6 +467,8 @@ io.sockets.on 'connection', (socket) ->
         })    
         #on informe l'utilisateur qu'il est bien cnnecté
         socket.emit('logged',me.id)
+        if source=='twitter'
+          socket.emit 'twitter_logged',user
     catch e
       console.log "erreur de connexion",e
       
@@ -531,6 +538,13 @@ io.sockets.on 'connection', (socket) ->
       io.sockets.emit 'changename',formername,me
       return true
     return false
+
+  socket.on 'changename',(name) ->
+    formername = me.username
+    me.username = name
+    users[me.id].username = me.username
+    io.sockets.emit 'changename',formername,me
+
 
   socket.on 'disconnect', ->
     #gestion de la coupure de connexion du client

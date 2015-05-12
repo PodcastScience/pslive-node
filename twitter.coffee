@@ -14,8 +14,10 @@ url = {
 class Stream extends events.EventEmitter
   stream_imm=null
   auth_tockens= null
+  sockets= null
   constructor: (params) ->
     auth_tockens= []
+    sockets= []
     return new Stream(params) if !(this instanceof Stream) 
     events.EventEmitter.call(this);
     @params = params;
@@ -101,27 +103,26 @@ class Stream extends events.EventEmitter
   stream : (params) ->
   	setTimeout (()->stream_imm params) , 10000
 
-  get_auth : (res) =>
+  get_auth : (socket,id_connexion) =>
     request = @oauth.post(
         url.request_token,
         @params.access_token_key,
         @params.access_token_secret,
-        {oauth_callback:"http://localhost:3001/twitter_auth"}, 
+        {oauth_callback:"http://localhost:3001/twitter_auth/?id="+id_connexion}, 
         (e,data) =>
           if e
             console.log e
-            res.redirect('http://live.podcastscience.fm')
           else
             response = querystring.parse(data)
-            if response.oauth_callback_confirmed != 'true'
-              res.redirect('http://live.podcastscience.fm')
-            else
+            if response.oauth_callback_confirmed == 'true'
               console.log "step1/response:",response
-              res.redirect('https://twitter.com/oauth/authenticate?oauth_token='+response.oauth_token)
+              sockets[id_connexion]=socket
+              socket.emit 'openurl' , 'https://twitter.com/oauth/authenticate?oauth_token='+response.oauth_token
 
       )
   get_auth_step2 : (res,req) =>
     console.log "step2",req.query
+    socket=sockets[req.query.id]
     request = @oauth.post(
         url.access_token,
         @params.access_token_key,
@@ -133,13 +134,13 @@ class Stream extends events.EventEmitter
         (e,data) =>
           if e
             console.log e
-            res.redirect('http://live.podcastscience.fm')
           else
             response = querystring.parse(data)
             console.log response
 
             auth_tockens[response.oauth_token] = response.oauth_token_secret
-            res.redirect('http://localhost:3001?twitter_token='+response.oauth_token)
+            socket.emit 'twitter_auth_ok',response.oauth_token
+            res.redirect('http://localhost:3001/close')
 
       )
   get_auth_info : (key,cb) =>
@@ -155,10 +156,9 @@ class Stream extends events.EventEmitter
             response = JSON.parse(data)
             console.log "response" ,response
             cb {
-              name : response.name
-              username : response.screen_name
+              username : response.name
               avatar : response.profile_image_url
-              mail : response.name+'@twitter'
+              mail : response.screen_name+'@twitter'
             }
             #name/sceen_name/profile_image_url
             #console.log response

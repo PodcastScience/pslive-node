@@ -18,18 +18,21 @@ $(document).ready ->
   user_box_template = $('#user_box').html()
   $('#user_box').remove()
 
+  $('#twitter_auth_link').on 'click', ()-> socket.emit 'twitter_auth'
 
-  getParameterByName = (name) ->
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]")
-    regex = new RegExp "[\\?&]" + name + "=([^&#]*)"
-    results = regex.exec location.search
-    if results!=null && results.length>=2
-      console.log "analyse des param get"
-      return decodeURIComponent results[1].replace(/\+/g, " ") || null
-    console.log "pas de param get"
-    return null
 
-  twitter_token = getParameterByName('twitter_token')
+  #getParameterByName = (name) ->
+  #  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]")
+  #  regex = new RegExp "[\\?&]" + name + "=([^&#]*)"
+  #  results = regex.exec location.search
+  #  if results!=null && results.length>=2
+  #    console.log "analyse des param get"
+  #    return decodeURIComponent results[1].replace(/\+/g, " ") || null
+  #  console.log "pas de param get"
+  #  return null
+  #
+  #twitter_token = getParameterByName('twitter_token')
+  twitter_token = null
 
   chatroom_info=(message)->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
@@ -94,7 +97,7 @@ $(document).ready ->
     console.log "email:",email
     console.log 'twitter_token',twitter_token
     if twitter_token!=null
-      socket.emit 'twitter_login',twitter_token,id_connexion
+      socket.emit 'twitter_auth'
     else
       if( username != "" && email != "")
         send_login(true)
@@ -122,6 +125,9 @@ $(document).ready ->
     email = $('#mail').val()
     send_login(false)
     
+  socket.on 'twitter_auth_ok', (token) ->  
+    twitter_token=token
+    socket.emit 'twitter_login',twitter_token,id_connexion
 
   socket.on 'erreur', (message) ->
     #console.log('Erreur recu')
@@ -174,6 +180,16 @@ $(document).ready ->
         'hidden.atwho':  (e) -> 
           $(this).data('autocompleting', false)
         })
+
+  socket.on 'openurl',(url) -> window.open url,'Auth','menubar=no, scrollbars=no'
+
+  socket.on 'twitter_logged', (user) ->
+    email = user.email
+    if username=='' or username==user.username
+      username = user.username
+    else
+      socket.emit 'changename',username
+    
   socket.on 'disuser', (user) ->
     new_userlist = []
     for u in userlist
