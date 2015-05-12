@@ -108,7 +108,7 @@ class Stream extends events.EventEmitter
         url.request_token,
         @params.access_token_key,
         @params.access_token_secret,
-        {oauth_callback:"http://localhost:3001/twitter_auth/?id="+id_connexion}, 
+        {oauth_callback:"http://live.podcastscience.fm/twitter_auth/?id="+id_connexion}, 
         (e,data) =>
           if e
             console.log e
@@ -140,7 +140,7 @@ class Stream extends events.EventEmitter
 
             auth_tockens[response.oauth_token] = response.oauth_token_secret
             socket.emit 'twitter_auth_ok',response.oauth_token
-            res.redirect('http://localhost:3001/close')
+            res.redirect('http://live.podcastscience.fm/close')
 
       )
   get_auth_info : (key,cb) =>
