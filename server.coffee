@@ -197,8 +197,19 @@ insertChatroomImages = (text,user,avatar,socket_) ->
   if tab_url = text.match(exp)
     console.log tab_url
     tab_url.map (url)->
+      url=url.replace(/\/$/,'')
       get_image url, (nom,data,content_type)->
         if(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
+          switch content_type
+            when 'image/jpeg' then img_format='jpg'; break;
+            when 'image/gif' then img_format='gif'; break;
+            when 'image/png' then img_format='png'; break;
+          chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+          nom=''
+          for i in [0 .. 25]
+            randomNumber = Math.floor(Math.random() * 62)
+            nom += chars.substring randomNumber, randomNumber + 1
+          nom=nom+'.'+img_format
           param_img={
             'nom' : nom, 
             'poster':user,
@@ -207,10 +218,8 @@ insertChatroomImages = (text,user,avatar,socket_) ->
             'tweet':replaceURLWithHTMLLinks text
             'media_type' : 'img'
           }
-          switch content_type
-            when 'image/jpeg' then img_format='JPG'; break;
-            when 'image/gif' then img_format='GIF'; break;
-            when 'image/png' then img_format='PNG'; break;
+          console.log "****************image*********",param_img
+          img_format=img_format.toUpperCase()
           for idx,i of liste_images
             if i.nom==nom
               console.log "image deja presente"
@@ -553,7 +562,7 @@ io.sockets.on 'connection', (socket) ->
       deconnexion()
 
   socket.on 'test', () ->
-    twitter.get_auth(res)
+    twitter.get_auth(socket,id_connexion)
 
 
   # gestion des messages

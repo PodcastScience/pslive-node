@@ -2,7 +2,7 @@ oauth   = require('oauth')
 events  = require('events')
 util  = require("util")
 querystring  = require("querystring")
-
+server='http://localhost:3001'
 url = {
   filter      : 'https://stream.twitter.com/1.1/statuses/filter.json'
   request_token   : 'https://api.twitter.com/oauth/request_token'  
@@ -108,7 +108,7 @@ class Stream extends events.EventEmitter
         url.request_token,
         @params.access_token_key,
         @params.access_token_secret,
-        {oauth_callback:"http://live.podcastscience.fm/twitter_auth/?id="+id_connexion}, 
+        {oauth_callback:server+"/twitter_auth/?id="+id_connexion}, 
         (e,data) =>
           if e
             console.log e
@@ -140,7 +140,7 @@ class Stream extends events.EventEmitter
 
             auth_tockens[response.oauth_token] = response.oauth_token_secret
             socket.emit 'twitter_auth_ok',response.oauth_token
-            res.redirect('http://live.podcastscience.fm/close')
+            res.redirect(server+'/close')
 
       )
   get_auth_info : (key,cb) =>
