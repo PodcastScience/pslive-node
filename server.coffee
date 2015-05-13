@@ -562,7 +562,7 @@ io.sockets.on 'connection', (socket) ->
       deconnexion()
 
   socket.on 'test', () ->
-    twitter.get_auth(socket,id_connexion)
+    console.log "test"
 
 
   # gestion des messages
