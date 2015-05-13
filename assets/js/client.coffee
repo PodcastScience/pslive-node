@@ -21,17 +21,6 @@ $(document).ready ->
   $('#twitter_auth_link').on 'click', ()-> socket.emit 'twitter_auth'
 
 
-  #getParameterByName = (name) ->
-  #  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]")
-  #  regex = new RegExp "[\\?&]" + name + "=([^&#]*)"
-  #  results = regex.exec location.search
-  #  if results!=null && results.length>=2
-  #    console.log "analyse des param get"
-  #    return decodeURIComponent results[1].replace(/\+/g, " ") || null
-  #  console.log "pas de param get"
-  #  return null
-  #
-  #twitter_token = getParameterByName('twitter_token')
   twitter_token = null
 
   chatroom_info=(message)->
@@ -406,12 +395,6 @@ $(document).ready ->
         slider.refresh()
         slider.goToSlide(0)
        
-     # $('#slider').prepend('<li class="slider_elt" data-thumb="'+im.url+'">
-#<iframe id="player" type="text/html" width="640" height="390"
- # src="http://www.youtube.com/embed/'+im.nom+'?enablejsapi=1&origin=http://live.podcastscience.fm"
-  #frameborder="0"></iframe>
-   #     </li>')
-
 
   $('.rec').on 'click', ->
     console.log 'test'
