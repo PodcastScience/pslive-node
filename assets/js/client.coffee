@@ -114,9 +114,10 @@ $(document).ready ->
     email = $('#mail').val()
     send_login(false)
     
-  socket.on 'twitter_auth_ok', (token) ->  
+  socket.on 'twitter_auth_ok', (token) ->
+    reco = (twitter_token!=null)  
     twitter_token=token
-    socket.emit 'twitter_login',twitter_token,id_connexion
+    socket.emit 'twitter_login',twitter_token,id_connexion,reco
 
   socket.on 'erreur', (message) ->
     #console.log('Erreur recu')

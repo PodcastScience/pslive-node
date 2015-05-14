@@ -420,12 +420,12 @@ io.sockets.on 'connection', (socket) ->
       socket.emit('newuser',value,false)
     
     
-  socket.on 'twitter_login', (tocken,id_connexion)->
+  socket.on 'twitter_login', (tocken,id_connexion,reco)->
     console.log "connexion Twitter",tocken
     verif_connexion(id_connexion)
     twitter.get_auth_info tocken, (user)->
       console.log "user twitter", user
-      connect_user user,false,'twitter'
+      connect_user user,reco,'twitter'
     
     
   #Login : l'utilisateurs se connecte a la Chatroom
