@@ -555,6 +555,11 @@
 	}
 
 
+	#messages img.inline {
+		display: inline;
+		float: none;
+		height: 15px;
+	}
 	#messages img {
 		float: left;
 		margin-right: 1em;

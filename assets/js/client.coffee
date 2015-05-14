@@ -162,7 +162,16 @@ $(document).ready ->
       }
     }).atwho({
       at: "/",
-      data:['me','nick']
+      data:[
+        {cmd:'me',suffix:' '},
+        {cmd:'nick',suffix:' '},
+        {cmd:'bière',suffix:' @'}
+      ],
+      searchKey:'cmd',
+      displayTpl:'<li>${cmd}</li>',
+      insertTpl:'/${cmd}${suffix}',
+      suffix:''
+
     }).on({
         'shown.atwho':  (e) -> 
           $(this).data('autocompleting', true)
@@ -203,6 +212,9 @@ $(document).ready ->
       $(this).remove()
       chatroom_info formername+' s\'appelle désormais '+user.username
       $('#members-list').append(Mustache.render(user_box_template,user))
+
+  socket.on 'chatroom_info',(text) ->
+    chatroom_info text
 
   # envoi de message
   envoi_nouveau_message = (e) ->

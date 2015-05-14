@@ -136,6 +136,7 @@ ircLike_me= (text,pseudo) ->
   return valeurRetour
 
 
+
 #socket.io configuration
 io = require('socket.io').listen(httpServer)
 io.configure ->
@@ -538,15 +539,35 @@ io.sockets.on 'connection', (socket) ->
   ircLike_nick= (text) -> 
     stringTab = text.split(" ")
     console.log "avant",users
-    stringMe = text.split("/nick ")     
+    stringNick = text.split("/nick ")     
     if stringTab.length >= 2 && stringTab[0].localeCompare("/nick")==0
       formername = me.username
-      me.username = stringMe[1]
-      users[me.id].username = me.username
-      console.log "apres",users
-      io.sockets.emit 'changename',formername,me
+      if stringNick[1]!=''
+        me.username = stringNick[1]
+        users[me.id].username = me.username
+        console.log "apres",users
+        io.sockets.emit 'changename',formername,me
       return true
     return false
+
+
+  biere= (text) -> 
+    stringTab = text.split(" ")
+    stringBiere = text.split("/bière")     
+    valeurMessage =""
+    if stringTab.length >= 2
+      if stringTab[0].localeCompare("/bière")==0
+        if stringBiere[1]!=''
+          valeurMessage = valeurMessage.concat(me.username) 
+          valeurMessage = valeurMessage.concat(" offre une bière à ")
+          valeurMessage = valeurMessage.concat(stringBiere[1])
+          valeurMessage = valeurMessage.concat("<img class='inline' src='images/biere.png'>")
+          io.sockets.emit 'chatroom_info',valeurMessage
+        return true
+      else
+        return false
+    else
+      return false
 
   socket.on 'changename',(name) ->
     formername = me.username
@@ -568,7 +589,7 @@ io.sockets.on 'connection', (socket) ->
   # gestion des messages
   socket.on 'nwmsg', (message) ->
     if verif_connexion(message.id_connexion)
-      if ! ircLike_nick(message.message,me)
+      if ! ircLike_nick(message.message,me) && ! biere(message.message)
         cpt_message+=1
         message.user = me
         date = new Date()
