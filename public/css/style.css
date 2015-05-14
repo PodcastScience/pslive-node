@@ -200,7 +200,9 @@
 	input[type=submit]:active {
 		background: #bf1935;
 	}
-
+	#twitter_auth_link img{
+		cursor:pointer
+	}
 
 
 	/* ----------------------------- */
