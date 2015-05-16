@@ -205,12 +205,7 @@ insertChatroomImages = (text,user,avatar,socket_) ->
             when 'image/jpeg' then img_format='jpg'; break;
             when 'image/gif' then img_format='gif'; break;
             when 'image/png' then img_format='png'; break;
-          chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-          nom=''
-          for i in [0 .. 25]
-            randomNumber = Math.floor(Math.random() * 62)
-            nom += chars.substring randomNumber, randomNumber + 1
-          nom=nom+'.'+img_format
+          nom=md5 nom+'.'+img_format
           param_img={
             'nom' : nom, 
             'poster':user,
