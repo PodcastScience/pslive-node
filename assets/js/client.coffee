@@ -409,9 +409,9 @@ $(document).ready ->
         slider.goToSlide(0)
        
 
-  $('.rec').on 'click', ->
-    console.log 'test'
-    socket.emit 'test' 
+  $('.rec').on 'click', () ->
+    console.log "test"
+    socket.emit "test"
 
   $(window).on 'beforeunload', ->
     console.log("il s'est barré")
