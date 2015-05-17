@@ -17,6 +17,32 @@ block bloc_player
     iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html",height="80",width="400",scrolling="no",frameborder="0",allowtransparency="true" )
   
 
+block menu
+  #menu_button.admin_class
+    img(src="images/menu.png",height='25',width='25')
+  #menu.admin_class.menu_hidden
+    #admin_title 
+      h2 Configuration
+      ul
+        li
+          form#admin-form
+            input(type="hidden" value='')#admin-password
+            p
+              label
+                h4 Numéro de l'épisode
+              input(type="text-area")#episode-number
+            p
+              label 
+                h4 Titre de l'épisode
+              input(type="text-area")#episode-title
+            p
+              button(type="submit").btn#send-admin Envoyer
+              button(type="button").btn#reinitChatroomButton Réinitialiser
+        li
+          p
+            h4 Dernier heartbeat twitter:&nbsp
+              span#lasttheartbeat aucun
+
 
 
 block bloc_login
@@ -44,7 +70,7 @@ block bloc_login
 
 block bloc_sharypic
   ul#slider
-  span#lasttheartbeat toto
+  
 
             
 

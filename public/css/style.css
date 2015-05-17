@@ -221,7 +221,7 @@
 	header .rec { float: right; }
 
 	header .logo {
-		padding: 1.4em 2% 1.4em 0;
+		padding: 1.4em 2% 1.4em 1.4em;
 	}
 	header .logo img {
 		
@@ -1005,10 +1005,6 @@
 
     .twitter_heartbeat {
     	border-color: red;
-
-    }
-    #lasttheartbeat{
-    	display: none;
     }
 
 
@@ -1101,4 +1097,54 @@
 
 	.admin_class {
 		display: none;
+	}
+
+	.admin_class_active{
+		display: block;
+	}
+
+	#menu_button{
+		position: fixed;
+		padding-top: 1.4em;
+		top: 0;
+		left: 0;
+		z-index:11001;
+	}
+
+	#menu_button img {
+		height: 25px;
+		width: 25px;
+	}
+
+
+	#menu.menu_shown{
+		display: block
+	}
+	#menu.menu_hidden{
+		display: none;
+	}
+	#menu_button.active img{
+    -ms-transform: rotate(90deg); /* IE 9 */
+    -ms-transform-origin: 50% 50%;
+    -webkit-transform: rotate(90deg); /* Chrome, Safari, Opera */
+    -webkit-transform-origin: 50% 50%;
+    transform: rotate(90deg);
+    transform-origin: 50% 50%;
+	}
+	#menu {
+		position: fixed;
+		height: 100%;
+		width: 400px;
+		background-color: #FFFFFF;
+		border-right: 1px solid #e1e1e1;
+		z-index: 11000;
+
+	}
+	#menu li{
+		padding:1em;
+	}
+	#admin_title{
+		padding-left:2em;
+		padding-top: 0.5em;
+		float: left;
 	}

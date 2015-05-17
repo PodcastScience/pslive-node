@@ -143,7 +143,10 @@ $(document).ready ->
   socket.on 'logged', (id,_is_admin)->
     userid=id
     is_admin=_is_admin
-    $('.admin_class').css('display','block') if is_admin
+    if is_admin
+      $('.admin_class').addClass('admin_class_active')
+      $('.admin_class').removeClass('admin_class')
+      hide_menu()
     $('#login').fadeOut()
     $('#send-message').removeAttr('disabled')
     $('#send-message').css('opacity',1)
@@ -461,6 +464,10 @@ $(document).ready ->
       e.preventDefault()
       console.log("Reinitiailisation de la chatroom")
       socket.emit('reinit_chatroom',$('#admin-password2').val())
+
+  $('#reinitChatroomButton').on 'click',  (e) ->
+      console.log("Reinitiailisation de la chatroom")
+      socket.emit('reinit_chatroom',"")
             
   socket.on 'del_msglist', () ->
     # Message ne marchent plus apres le vidage mais remarche si on redemarre le serveur 
@@ -521,4 +528,19 @@ $(document).ready ->
         input.addClass('newmsg')
         input.removeClass('editmsg')
         input.val("")
+
+display_menu=() ->
+  $("#menu").addClass 'menuShown'
+  $("#menu").removeClass 'menu_hidden'
+  $("#menu_button").addClass 'active'
+  $('#menu_button').attr('onclick','').unbind('click')
+  $("#menu_button").on 'click',hide_menu
+
+
+hide_menu=() ->
+  $("#menu").addClass 'menu_hidden'
+  $("#menu").removeClass 'menuShown'
+  $("#menu_button").removeClass 'active'
+  $('#menu_button').attr('onclick','').unbind('click')
+  $("#menu_button").on 'click',display_menu
 
