@@ -422,6 +422,9 @@ $(document).ready ->
         console.log 'vine',im
         slider.refresh()
         slider.goToSlide(0)
+    if is_admin
+      $('.admin_class').addClass('admin_class_active')
+      $('.admin_class').removeClass('admin_class')
     $('.selection_image_'+im.signature).on 'click',{'signature':im.signature},adm_select_img
        
   adm_select_img = (param) ->
