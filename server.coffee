@@ -162,11 +162,7 @@ io.configure ->
 users = new Object()
 
 
-admin_list = [
-  'pasmetz@twitter',
-  'NicoTupe@twitter'
-]
-
+admin_list=JSON.parse(process.env.PSLIVE_ADMINLIST)
 auth_twitter = {
     consumer_key:         process.env.PSLIVE_TWITTER_CONSUMERKEY,
     consumer_secret:      process.env.PSLIVE_TWITTER_CONSUMERSECRET,
