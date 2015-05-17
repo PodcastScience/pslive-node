@@ -6,6 +6,7 @@ $(document).ready ->
 
   connect_url = "/"
   id_connexion= false
+  is_admin = false
   username=""
   userid=""
   email=""
@@ -139,8 +140,10 @@ $(document).ready ->
       if new_connection
         chatroom_info user.username+' s\'est connecté(e)'
 
-  socket.on 'logged', (id)->
+  socket.on 'logged', (id,_is_admin)->
     userid=id
+    is_admin=_is_admin
+    $('.admin_class').css('display','block') if is_admin
     $('#login').fadeOut()
     $('#send-message').removeAttr('disabled')
     $('#send-message').css('opacity',1)
@@ -333,7 +336,7 @@ $(document).ready ->
     console.log("Ajout d'image : ",im)
     if(im.media_type=='img' || im.media_type!='video')
       $('#slider').prepend('
-          <li class="slider_elt" data-thumb="'+im.url+'">
+          <li class="slider_elt" data-thumb="'+im.url+'" id="slider_'+im.signature+'">
             <img  class="img_slider" title="par '+im.poster+'" src="'+im.url+'" alt="par '+im.poster+'" onclick="openLightboxImage(\''+im.url+'\')" >
             <div class="author">
               <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">
@@ -341,6 +344,9 @@ $(document).ready ->
               </a>
               <span class="tweet">
                 <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'
+              </span>
+              <span class="admin_class">
+                <a  class="selection_image_'+im.signature+'"  >(mettre en avant)</a>
               </span>
             </div>
           </li>
@@ -351,7 +357,7 @@ $(document).ready ->
       site = im.url.split('/')[0]
       if(site=='youtube.com')
         $('#slider').prepend('
-          <li class="slider_elt" data-thumb="http://img.youtube.com/vi/'+im.nom+'/1.jpg">
+          <li class="slider_elt" data-thumb="http://img.youtube.com/vi/'+im.nom+'/1.jpg" id="slider_'+im.signature+'">
             <img  class="img_slider"  title="par '+im.poster+'" src="http://img.youtube.com/vi/'+im.nom+'/0.jpg" alt="par '+im.poster+'">
             <img  class="btn_play" src="images/play.png"  onclick="openLightboxYouTube(\''+im.nom+'\')">
             <div class="author">
@@ -360,6 +366,9 @@ $(document).ready ->
               </a>
               <span class="tweet">
                 <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'
+              </span>
+              <span class="admin_class">
+                <a  class="selection_image_'+im.signature+'"  >(mettre en avant)</a>
               </span>
             </div>
           </li>
@@ -372,7 +381,7 @@ $(document).ready ->
           dataType: 'JSON'
         }).done((data)->
           $('#slider').prepend('
-            <li class="slider_elt" data-thumb="'+data[0].thumbnail_small+'">
+            <li class="slider_elt" data-thumb="'+data[0].thumbnail_small+'" id="slider_'+im.signature+'">
               <img  class="img_slider"  title="par '+im.poster+'" src="'+data[0].thumbnail_large+'" alt="par '+im.poster+'">
               <img  class="btn_play" src="images/play.png"  onclick="openLightboxVimeo(\''+im.nom+'\')">
               <div class="author">
@@ -382,6 +391,9 @@ $(document).ready ->
                 <span class="tweet">
                   <a class="linkTwitter" href="http://twitter.com/'+im.poster_user+'"  target="_blank">@'+im.poster_user+'</a> : '+im.tweet+'
                 </span>
+              <span class="admin_class">
+                <a  class="selection_image_'+im.signature+'"  >(mettre en avant)</a>
+              </span>
               </div>
             </li>
           ')
@@ -390,7 +402,7 @@ $(document).ready ->
         )
       if(site=='vine.co')   
         $('#slider').prepend('
-          <li class="slider_elt" data-thumb="'+im.url_thumbnail+'">
+          <li class="slider_elt" data-thumb="'+im.url_thumbnail+'"  id="slider_'+im.signature+'">
               <!--iframe class="vine-embed" src="https://vine.co/v/'+im.nom+'/embed/simple?related=0" width="100%" height="100%" frameborder="0"></iframe-->
               <img class="vine-embed" src="'+im.url_thumbnail+'" width="100%" height="100%" frameborder="0"/>
               <img class="btn_play" src="images/play.png"  onclick="openLightboxVine(\''+im.nom+'\')">
@@ -407,7 +419,20 @@ $(document).ready ->
         console.log 'vine',im
         slider.refresh()
         slider.goToSlide(0)
+    $('.selection_image_'+im.signature).on 'click',{'signature':im.signature},adm_select_img
        
+  adm_select_img = (param) ->
+    console.log "affichage de "+param.data.signature+" chez tout le monde"
+    socket.emit "select_img",param.data.signature
+
+  socket.on 'select_img',(signature) ->
+    console.log "recherche de l'image a afficher",signature
+    $('.slider_elt').each (index,image)->
+      #children renvoi un array, mettre en place map()
+        console.log $(image).attr('src') 
+        if $(image).attr('id')=='slider_'+signature
+          slider.goToSlide(index) 
+
 
   $('.rec').on 'click', () ->
     console.log "test"

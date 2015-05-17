@@ -29,7 +29,6 @@ app = express()
 
 
 
-
 #all environments
 app.use require('connect-assets')()
 console.log js('client')
@@ -118,6 +117,12 @@ httpServer = http.createServer(app).listen(app.get('port'), ->
   console.log('Express server listening on port ' + app.get('port'))
 )
 
+is_admin = (user) =>
+  for adm in admin_list
+    console.log "is "+user.mail+" admin?",adm
+    return true if adm==user.mail
+  return false
+
 
 ircLike_me= (text,pseudo) -> 
   stringTab = text.split(" ")
@@ -155,6 +160,12 @@ io.configure ->
 
 #Initialisation des variables
 users = new Object()
+
+
+admin_list = [
+  'pasmetz@twitter',
+  'NicoTupe@twitter'
+]
 
 auth_twitter = {
     consumer_key:         process.env.PSLIVE_TWITTER_CONSUMERKEY,
@@ -205,7 +216,7 @@ insertChatroomImages = (text,user,avatar,socket_) ->
             when 'image/jpeg' then img_format='jpg'; break;
             when 'image/gif' then img_format='gif'; break;
             when 'image/png' then img_format='png'; break;
-          nom=md5 nom+'.'+img_format
+          nom=md5(nom)+'.'+img_format
           param_img={
             'nom' : nom, 
             'poster':user,
@@ -227,6 +238,7 @@ insertChatroomImages = (text,user,avatar,socket_) ->
             else
               console.log "image uploadée"
               param_img.url=url_wp
+              param_img.signature = md5(url_wp)
               console.log param_img
               liste_images.push param_img 
               images_queue.add param_img
@@ -355,6 +367,7 @@ send_chatroom = (socket_) ->
       site = im.url.split('/')[0]
       get_thumbnail site,'https://'+im.url,(url_thumbnail) ->
         im.url_thumbnail=url_thumbnail
+        im.signature=md5 im.url
         socket_.emit('add_img',im) 
   console.log 'send_chatroom/episode:',episode
   socket_.emit('new-title',episode)
@@ -471,7 +484,7 @@ io.sockets.on 'connection', (socket) ->
           cache:compte(liste_connex)-compte(users)
         })    
         #on informe l'utilisateur qu'il est bien cnnecté
-        socket.emit('logged',me.id)
+        socket.emit 'logged', me.id, is_admin(me)
         if source=='twitter'
           socket.emit 'twitter_logged',user
     catch e
@@ -625,7 +638,7 @@ io.sockets.on 'connection', (socket) ->
   # Changement du titre et chargement de l'iframe
   socket.on 'change-title', (message) ->
     nomEvent= 'ps' +message.number
-    if message.password == admin_password   
+    if message.password == admin_password  || is_admin(me)
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
       backend.select_emission(nomEvent,message.title, (res) -> 
         console.log 'change-title',res
@@ -653,20 +666,26 @@ io.sockets.on 'connection', (socket) ->
   # Reitinialisation de la chatroom
 #                
   socket.on 'reinit_chatroom', (password) ->
-    console.log("Reinitiailisation de la chatroom")
-    episode='Bienvenue sur le balado qui fait aimer la science!'
-    nomEvent = "podcastscience"
-    backend.select_emission(nomEvent,episode, (res) -> 
-        console.log 'reinit_chatroom',res
-        last_messages = []  
-        all_messages = []
-        backend.download_images (meta)->
-          liste_images=meta
-          change_chatroom()
-      )
-    try
-      twitter.destroy()
+    if password == admin_password  || is_admin(me)
+      console.log("Reinitiailisation de la chatroom")
+      episode='Bienvenue sur le balado qui fait aimer la science!'
+      nomEvent = "podcastscience"
+      backend.select_emission(nomEvent,episode, (res) -> 
+          console.log 'reinit_chatroom',res
+          last_messages = []  
+          all_messages = []
+          backend.download_images (meta)->
+            liste_images=meta
+            change_chatroom()
+        )
+      try
+        twitter.destroy()
 
+  socket.on 'select_img',(signature)->
+    console.log "demande de selection d'une image",signature
+    if is_admin(me)
+      console.log "demande acceptée"
+      io.sockets.emit 'select_img',signature 
 
 
   socket.on "test", () ->
@@ -724,6 +743,7 @@ init_twitter = (twitter) ->
           if url_wp!="TOO_BIG"
             console.log "image uploadée"
             param_img.url=url_wp
+            param_img.signature = md5(url_wp)
             console.log 'init_twitter',param_img
             liste_images.push param_img 
             images_queue.add param_img
@@ -754,6 +774,7 @@ init_twitter = (twitter) ->
         param_img.url_thumbnail=url_thumbnail
         backend.upload_video nomEvent, nom, poster,poster_user,avatar, tweet, url, (url_wp)->  
         param_img.url=url
+        param_img.signature = md5(url)
         param_img.site = site
         console.log 'init_twitter/param_img',param_img
         liste_images.push param_img 

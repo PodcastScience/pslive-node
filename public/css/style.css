@@ -1098,3 +1098,7 @@
 		height : 25px;
 		width  : 25px;
 	}
+
+	.admin_class {
+		display: none;
+	}
