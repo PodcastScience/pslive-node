@@ -13,6 +13,11 @@ $(document).ready ->
   last_msg_id = false
   last_msg_txt = ""  
   userlist = []
+  helplist = [
+        {cmd:'me',suffix:' '},
+        {cmd:'nick',suffix:' '},
+        {cmd:'bière',suffix:' @'}
+      ]
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html()
   $('#message-box li').remove()
@@ -146,6 +151,8 @@ $(document).ready ->
     if is_admin
       $('.admin_class').addClass('admin_class_active')
       $('.admin_class').removeClass('admin_class')
+      helplist.push  {cmd:'kick',suffix:' @'}
+      #cache le menu, pas le bouton...
       hide_menu()
     $('#login').fadeOut()
     $('#send-message').removeAttr('disabled')
@@ -168,11 +175,7 @@ $(document).ready ->
       }
     }).atwho({
       at: "/",
-      data:[
-        {cmd:'me',suffix:' '},
-        {cmd:'nick',suffix:' '},
-        {cmd:'bière',suffix:' @'}
-      ],
+      data:helplist
       searchKey:'cmd',
       displayTpl:'<li>${cmd}</li>',
       insertTpl:'/${cmd}${suffix}',
@@ -221,6 +224,27 @@ $(document).ready ->
 
   socket.on 'chatroom_info',(text) ->
     chatroom_info text
+
+  socket.on 'kick',(_username,message) ->
+    #socket.emit('disconnect',id_connexion)
+    chatroom_info message
+    if(_username==username)
+      username=""
+      #id_connexion=""
+      email=""
+      twitter_token=null
+      display_loginform {force:true}
+      $('#send-message').attr('disabled', 'disabled')
+      $('#send-message').css('opacity',0.5)
+      console.log("Il s'est fait jeté")
+      $('#members-list li').remove()
+      $('.nb-connected').html("")
+      socket.emit('disconnect',id_connexion)
+      socket = io.connect(connect_url)
+      userlist=[]
+      console.log "Envoi du Hello"
+      socket.emit('Hello',id_connexion)
+
 
   # envoi de message
   envoi_nouveau_message = (e) ->
@@ -442,7 +466,7 @@ $(document).ready ->
 
   $('.rec').on 'click', () ->
     console.log "test"
-    socket.emit "test"
+    socket.emit "logout"
 
   $(window).on 'beforeunload', ->
     console.log("il s'est barré")
@@ -456,8 +480,8 @@ $(document).ready ->
       id_connexion: id_connexion
       },reco)
 
-  display_loginform = () ->
-    if(!id_connexion)
+  display_loginform = (param = {force:false}) ->
+    if(!id_connexion || param.force)
       $('#login').fadeIn()
       $('#message-form').fadeOut()
       msg = "Damned! Vous avez été deconnecté !"

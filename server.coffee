@@ -454,6 +454,7 @@ io.sockets.on 'connection', (socket) ->
     try
       # Verification de l'existance de l'utilisateur
       # Le cas échéant, on incremente un compteur
+      me=null
       for key, existing_user of users
         console.log 'Verif '+existing_user.mail+'/'+existing_user.username
         if (user.mail == existing_user.mail) && (user.mail!='')
@@ -462,6 +463,7 @@ io.sockets.on 'connection', (socket) ->
           me.cpt += 1
           console.log '\tcpt '+me.mail+':'+me.cpt
 
+      console.log "me:",me
       #dans le cas contraire, on le créé dans la userlist
       unless me
         console.log "creation du user"
@@ -523,22 +525,51 @@ io.sockets.on 'connection', (socket) ->
     unless me == false
       logout()
     
+  searchPseudoInit= (text) ->
+    userlist=[]
+    text=text.trim()
+    for key, user of users
+      userlist.push {name:user.username,key:key}
+    console.log "recherche d'un pseudo initial dans "+text+":",userlist
+    for u in userlist.sort((a,b)-> b.name.length-a.name.length)
+      pattern=RegExp("^@("+u.name+")","ig")
+      pseudo=text.match(pattern)
+
+      console.log "recherche de *@"+u.name+"* dans "+text+" : *"+pseudo+"*",(pseudo==('@'+u.name))
+      if pseudo!=null
+        console.log "pseudo touvé",u.name
+        #+1 pour le @
+        reason=text.slice(u.name.length+1).trim()
+        return {pseudo:u.name,reason:reason,key:u.key}
+    console.log "aucun pseudo trouvé"
+    return {pseudo:'',reason:text,key:null}
 
   #gestion de la deconnexion de la chatroom
-  logout=() ->
+
+  logoutUser=(u) ->
     #on decremente le compteur de cnx du l'utilisateur
-    me.cpt -= 1
-    console.log 'cpt '+me.mail+':'+me.cpt
-    unless(me.cpt > 0)
+    console.log "entrée dans logoutUser",u
+    u.cpt -= 1
+    console.log 'cpt '+u.mail+':'+u.cpt
+    #u=null
+    unless(u.cpt > 0)
       #si le compteur arrive a 0, on le supprime de la userlist
       #et on en informe les autres clients
-      delete users[me.id]
-      io.sockets.emit('disuser',me)
+      console.log "suppression de "+u.username
+      delete users[u.id]
+      io.sockets.emit('disuser',u)
       io.sockets.emit('update_compteur',{
         connecte:compte(users),
         cache:compte(liste_connex)-compte(users)
-      })
+      }) 
 
+  logout=() ->
+    logoutUser me
+
+  socket.on 'logout',()->
+    console.log "demande de logout",me
+    io.sockets.emit 'kick',me.username,me.username+" s'est déconnecté(e)"
+    logoutUser me
 
   ircLike_nick= (text) -> 
     stringTab = text.split(" ")
@@ -555,6 +586,35 @@ io.sockets.on 'connection', (socket) ->
     return false
 
 
+
+  ircLike_kick= (text) -> 
+    return true if me == null
+    if !is_admin(me)
+      io.sockets.emit 'chatroom_info',"Non "+me.username+" ! Tu n'as pas le droit de kicker les gens !!!"
+      return true
+    stringTab = text.split(" ")
+    stringKick = text.split("/kick")     
+    valeurMessage =""
+    if stringTab.length >= 2
+      if stringTab[0].localeCompare("/kick")==0
+        if stringKick[1]!=''
+          param = searchPseudoInit stringKick[1]
+          console.log param
+          if param.pseudo=='' || param.pseudo==me.username
+            return true
+          valeurMessage = valeurMessage.concat(param.pseudo)
+          valeurMessage = valeurMessage.concat(" s'est fait éjecter par ")
+          valeurMessage = valeurMessage.concat(me.username) 
+          if param.reason != ''
+            valeurMessage = valeurMessage.concat(" ( "+param.reason+" )")
+          io.sockets.emit 'kick',param.pseudo,valeurMessage
+          logoutUser users[param.key]
+        return true
+      else
+        return false
+    else
+      return false
+
   biere= (text) -> 
     stringTab = text.split(" ")
     stringBiere = text.split("/bière")     
@@ -562,6 +622,7 @@ io.sockets.on 'connection', (socket) ->
     if stringTab.length >= 2
       if stringTab[0].localeCompare("/bière")==0
         if stringBiere[1]!=''
+
           valeurMessage = valeurMessage.concat(me.username) 
           valeurMessage = valeurMessage.concat(" offre une bière à ")
           valeurMessage = valeurMessage.concat(stringBiere[1])
@@ -593,7 +654,7 @@ io.sockets.on 'connection', (socket) ->
   # gestion des messages
   socket.on 'nwmsg', (message) ->
     if verif_connexion(message.id_connexion)
-      if ! ircLike_nick(message.message,me) && ! biere(message.message)
+      if ! ircLike_nick(message.message,me) && ! biere(message.message) &&  ! ircLike_kick(message.message,me)
         cpt_message+=1
         message.user = me
         date = new Date()
