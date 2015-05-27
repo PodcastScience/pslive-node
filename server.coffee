@@ -589,15 +589,15 @@ io.sockets.on 'connection', (socket) ->
 
   ircLike_kick= (text) -> 
     return true if me == null
-    if !is_admin(me)
-      io.sockets.emit 'chatroom_info',"Non "+me.username+" ! Tu n'as pas le droit de kicker les gens !!!"
-      return true
     stringTab = text.split(" ")
     stringKick = text.split("/kick")     
     valeurMessage =""
     if stringTab.length >= 2
       if stringTab[0].localeCompare("/kick")==0
-        if stringKick[1]!=''
+        if stringKick[1]!=''    
+          if !is_admin(me)
+            io.sockets.emit 'chatroom_info',"Non "+me.username+" ! Tu n'as pas le droit de kicker les gens !!!"
+            return true
           param = searchPseudoInit stringKick[1]
           console.log param
           if param.pseudo=='' || param.pseudo==me.username
