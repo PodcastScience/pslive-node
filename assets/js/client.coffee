@@ -283,7 +283,7 @@ $(document).ready ->
       $('#msg_'+message.id).html("<p>*"+message_me+"</p>")
     
   socket.on 'nwmsg', (message) -> 
-    flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
+    flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height()+10)
     d=new Date();
     decalage=d.getTimezoneOffset()/60
     message.h=(parseInt(message.h)-decalage)%24;
