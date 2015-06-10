@@ -26,7 +26,8 @@ $(document).ready ->
   $('#user_box').remove()
   waiting_image_template = $('#waiting-images-list').html()
   $('#waiting-images-list li').remove()
-
+  
+  $('#twitter_auth_link').on 'click', ()-> socket.emit 'twitter_auth'
 
   activate_wait_thread=()->
     $(".hook").unbind('click')
