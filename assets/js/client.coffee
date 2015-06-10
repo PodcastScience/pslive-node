@@ -13,6 +13,7 @@ $(document).ready ->
   last_msg_id = false
   last_msg_txt = ""  
   userlist = []
+  images_en_attente=[]
   helplist = [
         {cmd:'me',suffix:' '},
         {cmd:'nick',suffix:' '},
@@ -23,11 +24,29 @@ $(document).ready ->
   $('#message-box li').remove()
   user_box_template = $('#user_box').html()
   $('#user_box').remove()
+  waiting_image_template = $('#waiting-images-list').html()
+  $('#waiting-images-list li').remove()
 
-  $('#twitter_auth_link').on 'click', ()-> socket.emit 'twitter_auth'
 
+  activate_wait_thread=()->
+    $(".hook").unbind('click')
+    $(".hook").on 'click', desactivate_wait_thread
+    $(".wait_thread").addClass 'active'
+
+  desactivate_wait_thread=()->
+    $(".hook").unbind('click')
+    $(".hook").on 'click', activate_wait_thread
+    $(".wait_thread").removeClass 'active'
+
+  $(".hook").on 'click', activate_wait_thread
 
   twitter_token = null
+
+  to_thumbnail = (url)->
+    tab=url.split('.')
+    l= tab.length
+    tab[l-2]+='-150x150'
+    tab.join('.')
 
   chatroom_info=(message)->
     flag_scrollauto=$('#messages').prop('scrollHeight')<=($('#main').prop('scrollTop')+$('#main').height())
@@ -145,13 +164,16 @@ $(document).ready ->
       if new_connection
         chatroom_info user.username+' s\'est connecté(e)'
 
-  socket.on 'logged', (id,_is_admin)->
+  socket.on 'logged', (id,_is_admin,url)->
+    console.log "logged",url
     userid=id
     is_admin=_is_admin
     if is_admin
       $('.admin_class').addClass('admin_class_active')
       $('.admin_class').removeClass('admin_class')
+      $('#backend_link a').attr('href',url)
       helplist.push  {cmd:'kick',suffix:' @'}
+
       #cache le menu, pas le bouton...
       hide_menu()
     $('#login').fadeOut()
@@ -496,6 +518,19 @@ $(document).ready ->
       console.log("Reinitiailisation de la chatroom")
       socket.emit('reinit_chatroom',"")
             
+
+  socket.on 'maj_waiting_images', (data) ->
+    images_en_attente=data
+    $('#waiting-images-list li').remove()
+    for im in images_en_attente
+      im.urlThumbnail=to_thumbnail im.url
+      console.log "maj_waiting_images:",Mustache.render(waiting_image_template,im)
+      $('#waiting-images-list').append Mustache.render(waiting_image_template,im)
+    $('.waiting-image').on 'dblclick',(e)-> 
+      sign= $(e.target).data('sign')
+      console.log 'post de ',sign
+      socket.emit 'post-waiting-image',sign
+
   socket.on 'del_msglist', () ->
     # Message ne marchent plus apres le vidage mais remarche si on redemarre le serveur 
     console.log("Vidage de la liste des messages")
@@ -557,6 +592,8 @@ $(document).ready ->
         input.val("")
 
 display_menu=() ->
+
+  $('.content').on 'click', ()-> hide_menu()
   $("#menu").addClass 'menuShown'
   $("#menu").removeClass 'menu_hidden'
   $("#menu_button").addClass 'active'
@@ -568,6 +605,7 @@ hide_menu=() ->
   $("#menu").addClass 'menu_hidden'
   $("#menu").removeClass 'menuShown'
   $("#menu_button").removeClass 'active'
+  $('.content').unbind('click')
   $('#menu_button').attr('onclick','').unbind('click')
   $("#menu_button").on 'click',display_menu
 

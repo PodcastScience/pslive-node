@@ -109,6 +109,11 @@ block bloc_liste_poditeurs
 
 
 
+block bloc_liste_images_en_attente
+  .online.hidden
+    ul#waiting-image-list
+      li
+        img(src="{{image_url}}")
 
 block block_msg_nolive
   .offlive

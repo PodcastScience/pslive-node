@@ -12,6 +12,7 @@ class Backend
 		console.log "mise en place du backend",params
 
 
+
 	http_request_callback = (res,cb) ->
 		str=""
 		res.on 'data',  (chunk) ->
@@ -24,6 +25,9 @@ class Backend
 				console.log str
 			cb data_JSON 
 	
+
+	get_backend_url: ()=>
+		'http://'+@url+':'+@port+'/episodes_default'
 
 
 	get_default_emission: (cb) ->
@@ -287,6 +291,48 @@ class Backend
 		req = http.request options, (res)-> 
 		req.on('error',(err)->console.log "set_chatroom",err)
 		req.write params 
+		req.end()
+
+	post_waiting_image: (sign)->
+		params = '{}'
+		headers = {
+			'Content-Type': 'application/json',
+			'Content-Length':  Buffer.byteLength(params, 'utf-8')
+		}
+		options = {
+			host: @url,
+			port: @port,
+			path: '/episodes/' + @id_emission + '/queue/post/'+sign+'.json',
+			method: 'post',
+			form: params,
+			headers: headers
+		}
+		console.log 'post_waiting_image',options
+		req = http.request options, (res)-> 
+		req.on('error',(err)->console.log "post_waiting_image",err)
+		req.write params 
+		req.end()
+
+
+	get_queue: (cb)->
+		headers = {
+			'Content-Type': 'application/json'
+		}
+		options = {
+			host: @url,
+			port: @port,
+			path: '/episodes/' + @id_emission + '/queue',
+			method: 'get',
+			headers: headers
+		}
+		req = http.request options, (res)=> 
+			http_request_callback res, (data)=>
+				try
+					cb data
+				catch e
+					console.log e
+					cb []
+		req.on 'error',(err)->console.log Error
 		req.end()
 
 

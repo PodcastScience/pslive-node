@@ -111,6 +111,59 @@ app.get '/liste_images', (req, res) ->
         </a>"
     ).join("<br/>")
 
+app.post '/post_image', (req,res)->
+  if req.body.image=='{}' ||  req.body.image=='' || typeof(req.body.image)==undefined
+    res.end ''
+    return
+  image = JSON.parse(req.body.image)
+  console.log "+",image
+  try
+    if image.media_type == 'img'
+      img = {
+        'nom' : image.name, 
+        'url' : image.url,
+        'poster' : image.author,
+        'poster_user' : image.user,
+        'avatar' : image.avatar,
+        'tweet' : image.msg,
+        'media_type' : 'img',
+        'created_at' : image.created_at,
+        'updated_at' : image.updated_at
+      }
+    if image.media_type == 'video'
+      img = {
+        'nom' : image.name, 
+        'url' : image.url,
+        'poster' : image.author,
+        'poster_user' : image.user,
+        'avatar' : image.avatar,
+        'tweet' : image.msg,
+        'media_type' : 'video',
+        'created_at' : image.created_at,
+        'updated_at' : image.updated_at
+      }
+    meta_tmp.push img
+    console.log "download_images/",img.url
+  catch e
+    console.log "download_images/pas d'image"
+  console.log "-",image
+  img.signature = image.sign
+  liste_images.push img 
+  images_queue.add img
+  update_waiting_image()
+  res.end ''
+
+app.post '/update_queue', (req,res)->
+  console.log "maj de la file d'attente",req.body
+  if req.body.image=='{}' ||  req.body.image=='' || typeof(req.body.image)==undefined
+    res.end ''
+    return
+  images_en_attente = JSON.parse(req.body.queue)
+  io.sockets.emit 'maj_waiting_images',images_en_attente
+  res.end ''
+
+
+
 
 
 httpServer = http.createServer(app).listen(app.get('port'), ->
@@ -178,13 +231,14 @@ backend = new Backend({
 
 images_queue = new PsImagesQueue { sockets: io.sockets, delay:10000}
 
-last_messages   = []
-all_messages    = []
-liste_images    = []
-history         = 10
-nomEvent        = ''
-admin_password  = process.env.PSLIVE_ADMIN_PASSWORD
-episode         = 'Bienvenue sur le balado qui fait aimer la science!'
+last_messages     = []
+all_messages      = []
+liste_images      = []
+images_en_attente = []
+history           = 10
+nomEvent          = ''
+admin_password    = process.env.PSLIVE_ADMIN_PASSWORD
+episode           = 'Bienvenue sur le balado qui fait aimer la science!'
 
 
 
@@ -341,6 +395,8 @@ load_episode = (number,title,chatroom) =>
       episode=title
     else
       episode= "<span class='number'> Episode #"+number+" - </span> "+title
+
+    update_waiting_image()
     backend.download_images (meta)->      
       liste_images=meta
     twitter.stream {track: '#'+nomEvent} 
@@ -348,6 +404,14 @@ load_episode = (number,title,chatroom) =>
 console.log 'backend',backend
 
 backend.get_default_emission( load_episode )
+
+
+
+update_waiting_image= ()->
+  backend.get_queue (data)-> 
+    images_en_attente=data
+    io.sockets.emit 'maj_waiting_images',data
+
 
 
 
@@ -365,6 +429,7 @@ send_chatroom = (socket_) ->
         im.url_thumbnail=url_thumbnail
         im.signature=md5 im.url
         socket_.emit('add_img',im) 
+  update_waiting_image()
   console.log 'send_chatroom/episode:',episode
   socket_.emit('new-title',episode)
 
@@ -475,14 +540,19 @@ io.sockets.on 'connection', (socket) ->
         #me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
         users[me.id] = me
         #on informe tout le monde qu'un nouvel utilisateur s'est connecté
-        io.sockets.emit('newuser',me,!reco)
+        io.sockets.emit 'newuser', me, !reco
         
-        io.sockets.emit('update_compteur',{
+        io.sockets.emit 'update_compteur',
           connecte:compte(users),
           cache:compte(liste_connex)-compte(users)
-        })    
+
         #on informe l'utilisateur qu'il est bien cnnecté
-        socket.emit 'logged', me.id, is_admin(me)
+         _is_admin=is_admin(me)
+         if _is_admin
+          backend_url=backend.get_backend_url()
+        else
+          backend_url=''
+        socket.emit 'logged', me.id, _is_admin,backend_url
         if source=='twitter'
           socket.emit 'twitter_logged',user
     catch e
@@ -704,6 +774,7 @@ io.sockets.on 'connection', (socket) ->
         for msg in all_messages
           last_messages.push msg
           last_messages.shift() if (last_messages.length > history)
+        update_waiting_image()
         backend.download_images (meta)->      
           liste_images=meta
           change_chatroom()
@@ -731,6 +802,8 @@ io.sockets.on 'connection', (socket) ->
           console.log 'reinit_chatroom',res
           last_messages = []  
           all_messages = []
+          images_en_attente=[]
+          sockets.emit 'maj_waiting_images',[]
           backend.download_images (meta)->
             liste_images=meta
             change_chatroom()
@@ -745,10 +818,16 @@ io.sockets.on 'connection', (socket) ->
       io.sockets.emit 'select_img',signature 
 
 
+
+  socket.on 'post-waiting-image', (signature)->
+    console.log "demande de l'envoi d'une image en attente ",signature
+    if is_admin(me)
+      backend.post_waiting_image signature
+
   socket.on "test", () ->
     console.log 'test'
-    insertChatroomImages 'http://www.lecosmographe.com/blog/wp-content/uploads/2013/08/ngc1232-690x690.jpg' , 'pascal' ,'http://www.lecosmographe.com/blog/wp-content/uploads/2013/08/ngc1232-690x690.jpg',socket
-    insertChatroomImages 'http://www.astrosurf.com/luxorion/Images/m20-hyp.jpg' , 'pascal' ,'http://www.astrosurf.com/luxorion/Images/m20-hyp.jpg',socket
+    #insertChatroomImages 'http://www.lecosmographe.com/blog/wp-content/uploads/2013/08/ngc1232-690x690.jpg' , 'pascal' ,'http://www.lecosmographe.com/blog/wp-content/uploads/2013/08/ngc1232-690x690.jpg',socket
+    #insertChatroomImages 'http://www.astrosurf.com/luxorion/Images/m20-hyp.jpg' , 'pascal' ,'http://www.astrosurf.com/luxorion/Images/m20-hyp.jpg',socket
 
 
 

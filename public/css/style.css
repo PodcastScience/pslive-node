@@ -134,7 +134,15 @@
 	#message-form, .ps_alert{
 		display: none;
 	}
+	.hidden
+	{
+		display: none;
+	}
 
+	.hidden #user_box, 
+	#message-form, .ps_alert{
+		display: none;
+	}
 	/*
 	 * Box
 	 */
@@ -1147,4 +1155,54 @@
 		padding-left:2em;
 		padding-top: 0.5em;
 		float: left;
+	}
+
+
+
+	#waiting-images-list , #backend_link{
+		text-align: center;
+	}
+
+
+	#waiting-images-list{
+		overflow: hidden;
+		height: 100%;
+	}
+	#waiting-images-list img{
+		border: 1px solid #e1e1e1;
+		margin-bottom: 5px;
+	}
+
+	.wait_thread{
+		height: 100%;
+		position: fixed;
+		width: 200px;
+		z-index: 20000;
+		background-color: #FFFFFF;
+		border: 1px solid #e1e1e1;
+		right: -200px;
+		-webkit-transition: right 0.15s linear;
+		-moz-transition: right 0.15s linear;
+		-ms-transition: right 0.15s linear;
+		-o-transition: right 0.15s linear;
+		transition: right 0.15s linear;
+	}
+
+	.hook{
+	  position: relative;
+	  text-align: center;
+	  display: block;
+	  left: -21px;
+	  height: 20px;
+	  width: 20px;
+	  top:-1px;
+		background-color: #FFFFFF;
+		border: 1px solid #e1e1e1;
+		border-right: none;
+		border-radius: 10px 0 0 10px;
+
+	}
+
+	.wait_thread.active{
+	  right: 0;
 	}

@@ -129,6 +129,17 @@ block user_box
 
 
 
+block bloc_liste_images_en_attente
+  .wait_thread.admin_class
+    .hook ::
+    #backend_link
+      h6
+        a( target="_blank") Backend
+    ul#waiting-images-list
+      li
+        img(src="{{urlThumbnail}}"  data-sign='{{sign}}').waiting-image
+
+
 
 
 block bloc_liste_poditeurs
@@ -168,4 +179,5 @@ block bloc_content
         block liens_sans_flash
       block bloc_chatroom
       block bloc_liste_poditeurs
+      block bloc_liste_images_en_attente
     block block_msg_nolive
