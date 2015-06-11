@@ -553,6 +553,7 @@ io.sockets.on 'connection', (socket) ->
         else
           backend_url=''
         socket.emit 'logged', me.id, _is_admin,backend_url
+        socket.emit  'pause_slide_show',images_queue.get_pause()
         if source=='twitter'
           socket.emit 'twitter_logged',user
     catch e
@@ -561,7 +562,7 @@ io.sockets.on 'connection', (socket) ->
       
 
 
-  
+
         
       
 
@@ -823,6 +824,12 @@ io.sockets.on 'connection', (socket) ->
     console.log "demande de l'envoi d'une image en attente ",signature
     if is_admin(me)
       backend.post_waiting_image signature
+
+
+  socket.on 'pause_slide_show', () -> 
+    if is_admin(me)
+      b_pause= images_queue.pause()
+      io.sockets.emit 'pause_slide_show',b_pause
 
   socket.on "test", () ->
     console.log 'test'

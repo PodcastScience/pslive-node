@@ -28,6 +28,7 @@ $(document).ready ->
   $('#waiting-images-list li').remove()
   
   $('#twitter_auth_link').on 'click', ()-> socket.emit 'twitter_auth'
+  $('#pause_slide_show').on 'click', ()-> socket.emit 'pause_slide_show'
 
   activate_wait_thread=()->
     $(".hook").unbind('click')
@@ -531,6 +532,12 @@ $(document).ready ->
       sign= $(e.target).data('sign')
       console.log 'post de ',sign
       socket.emit 'post-waiting-image',sign
+
+  socket.on 'pause_slide_show',(b)->
+    if b
+      $('#pause_slide_show').html('\u25B6 Play')
+    else
+      $('#pause_slide_show').html('\u23f8 Pause')
 
   socket.on 'del_msglist', () ->
     # Message ne marchent plus apres le vidage mais remarche si on redemarre le serveur 

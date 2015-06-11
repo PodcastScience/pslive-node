@@ -191,7 +191,7 @@
 		color: #3d3d41;
 		border-color: #3d3d41;
 	}
-	input[type=submit] {
+	input[type=submit],button {
 		padding: .6em 1.2em;
 		font-size: 1.07142857142857em;
 		text-transform: uppercase;
@@ -203,9 +203,9 @@
 		transition: .5s ease-in-out;
 		-webkit-appearance: none;
 	}
-	input[type=submit]:hover,
-	input[type=submit]:focus,
-	input[type=submit]:active {
+	input[type=submit]:hover,button:hover,
+	input[type=submit]:focus,button:focus,
+	input[type=submit]:active,button:active {
 		background: #bf1935;
 	}
 	#twitter_auth_link img{
@@ -1122,14 +1122,18 @@
 	#menu_button img {
 		height: 25px;
 		width: 25px;
+		-webkit-transition: -webkit-transform 0.15s linear;
+		-moz-transition: -moz-transform 0.15s linear;
+		-ms-transition: -ms-transform 0.15s linear;
+		-o-transition: -o-transform 0.15s linear;
+		transition: transform 0.15s linear;
 	}
 
 
 	#menu.menu_shown{
-		display: block
 	}
 	#menu.menu_hidden{
-		display: none;
+		left:-400px;
 	}
 	#menu_button.active img{
     -ms-transform: rotate(90deg); /* IE 9 */
@@ -1145,8 +1149,14 @@
 		width: 400px;
 		background-color: #FFFFFF;
 		border-right: 1px solid #e1e1e1;
-		z-index: 11000;
-
+		z-index: 9000;
+		left:0;
+		top:65px;
+		-webkit-transition: left 0.15s linear;
+		-moz-transition: left 0.15s linear;
+		-ms-transition: left 0.15s linear;
+		-o-transition: left 0.15s linear;
+		transition: left 0.15s linear;
 	}
 	#menu li{
 		padding:1em;
@@ -1177,7 +1187,7 @@
 		height: 100%;
 		position: fixed;
 		width: 200px;
-		z-index: 20000;
+		z-index: 9000;
 		background-color: #FFFFFF;
 		border: 1px solid #e1e1e1;
 		right: -200px;
@@ -1188,19 +1198,34 @@
 		transition: right 0.15s linear;
 	}
 
+	.wait_thread h2{
+		margin: 25px;
+	}
+	.wait_thread button{
+		margin: 25px 0 0 25px;
+		width: 150px
+	}
 	.hook{
-	  position: relative;
+	  position: absolute;
 	  text-align: center;
 	  display: block;
 	  left: -21px;
 	  height: 40px;
 	  width: 20px;
-	  top:-1px;
+	  top:15px;
 		background-color: #FFFFFF;
 		border: 1px solid #e1e1e1;
 		border-right: none;
 		border-radius: 10px 0 0 10px;
 
+	}
+
+	.hook div{
+		border-left: 2px dotted #d1d1d1;
+	  border-right: 2px dotted #d1d1d1;
+	  height: 22px;
+	  width: 4px;
+	  margin: 9px 9px 9px 8px;
 	}
 
 	.wait_thread.active{

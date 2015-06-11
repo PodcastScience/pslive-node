@@ -132,8 +132,11 @@ block user_box
 block bloc_liste_images_en_attente
   .wait_thread.admin_class
     .hook 
+      div
+    button#pause_slide_show &#9208; Pause
+    h2 Images en attente
     #backend_link
-      h6
+      h4
         a( target="_blank") Backend
     ul#waiting-images-list
       li
