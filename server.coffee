@@ -804,7 +804,7 @@ io.sockets.on 'connection', (socket) ->
           last_messages = []  
           all_messages = []
           images_en_attente=[]
-          sockets.emit 'maj_waiting_images',[]
+          io.sockets.emit 'maj_waiting_images',[]
           backend.download_images (meta)->
             liste_images=meta
             change_chatroom()
