@@ -1181,6 +1181,14 @@
 	#waiting-images-list img{
 		border: 1px solid #e1e1e1;
 		margin-bottom: 5px;
+		margin-left: 25px;
+  	position: relative; 
+  	top: 50%; 
+  	left:50%;
+  	-webkit-transform: translateY(-50%) translateX(-50%); 
+  	-moz-transform: translateY(-50%) translateX(-50%); 
+  	-o-transform: translateY(-50%) translateX(-50%); 
+  	transform: translateY(-50%) translateX(-50%); 
 	}
 	#waiting-images-list li{
 		border: 1px solid #e1e1e1;
@@ -1188,6 +1196,7 @@
 		height:150px;
 		width:150px;
 		overflow: hidden;
+		text-align: center;
 	}
 
 	.wait_thread{
