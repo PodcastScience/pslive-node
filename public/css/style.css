@@ -1181,7 +1181,6 @@
 	#waiting-images-list img{
 		border: 1px solid #e1e1e1;
 		margin-bottom: 5px;
-		margin-left: 25px;
   	position: relative; 
   	top: 50%; 
   	left:50%;
@@ -1192,9 +1191,10 @@
 	}
 	#waiting-images-list li{
 		border: 1px solid #e1e1e1;
-		background-color: #fcfcfc;
+		background-color: #f2f2f2;
 		height:150px;
 		width:150px;
+		margin-left: 25px;
 		overflow: hidden;
 		text-align: center;
 	}
