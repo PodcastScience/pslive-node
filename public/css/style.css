@@ -1182,6 +1182,13 @@
 		border: 1px solid #e1e1e1;
 		margin-bottom: 5px;
 	}
+	#waiting-images-list li{
+		border: 1px solid #e1e1e1;
+		background-color: #fcfcfc;
+		height:150px;
+		width:150px;
+		overflow: hidden;
+	}
 
 	.wait_thread{
 		height: 100%;
