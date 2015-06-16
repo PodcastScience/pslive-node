@@ -1183,6 +1183,7 @@
   	position: relative; 
   	top: 50%; 
   	left:50%;
+  	min-height: 100px;
   	-webkit-transform: translateY(-50%) translateX(-50%); 
   	-moz-transform: translateY(-50%) translateX(-50%); 
   	-o-transform: translateY(-50%) translateX(-50%); 
