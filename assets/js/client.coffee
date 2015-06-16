@@ -47,7 +47,7 @@ $(document).ready ->
   to_thumbnail = (url)->
     tab=url.split('.')
     l= tab.length
-    tab[l-2]+='-150x150'
+    #tab[l-2]+='-150x150'
     tab.join('.')
 
   chatroom_info=(message)->
