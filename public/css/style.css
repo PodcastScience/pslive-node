@@ -1180,7 +1180,6 @@
 	}
 	#waiting-images-list img{
 		border: 1px solid #e1e1e1;
-		margin-bottom: 5px;
   	position: relative; 
   	top: 50%; 
   	left:50%;
@@ -1195,6 +1194,7 @@
 		height:150px;
 		width:150px;
 		margin-left: 25px;
+		margin-bottom: 5px;
 		overflow: hidden;
 		text-align: center;
 	}
