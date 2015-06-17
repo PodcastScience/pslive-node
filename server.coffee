@@ -546,16 +546,16 @@ io.sockets.on 'connection', (socket) ->
           connecte:compte(users),
           cache:compte(liste_connex)-compte(users)
 
-        #on informe l'utilisateur qu'il est bien cnnecté
-         _is_admin=is_admin(me)
-         if _is_admin
-          backend_url=backend.get_backend_url()
-        else
-          backend_url=''
-        socket.emit 'logged', me.id, _is_admin,backend_url
-        socket.emit  'pause_slide_show',images_queue.get_pause()
-        if source=='twitter'
-          socket.emit 'twitter_logged',user
+      #on informe l'utilisateur qu'il est bien cnnecté
+       _is_admin=is_admin(me)
+       if _is_admin
+        backend_url=backend.get_backend_url()
+      else
+        backend_url=''
+      socket.emit 'logged', me.id, _is_admin,backend_url
+      socket.emit  'pause_slide_show',images_queue.get_pause()
+      if source=='twitter'
+        socket.emit 'twitter_logged',user
     catch e
       console.log "erreur de connexion",e
       
