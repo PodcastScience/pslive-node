@@ -352,9 +352,15 @@ $(document).ready ->
 
 
 
-  socket.on 'new-title', (episode) ->
+  socket.on 'new-title', (episode,num,title,hashtag) ->
     #console.log("Nouveau Titre")
+    console.log "num:",num
+    console.log "title:",title
+    console.log "hashtag:",hashtag
     $('#title-episode').html(episode)
+    $('#episode-number').val(num)
+    $('#episode-title').val(title)
+    $('#hashtag').val(hashtag)
 
 
     

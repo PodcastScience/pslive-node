@@ -53,7 +53,7 @@ class Backend
 					cb(data.number,data.title,data.hashtag,chatroom)
 				catch e
 					@id_emission = 0
-					cb(0,"Bienvenue sur le balado qui fait aimer la science!",hashtag,{})
+					cb(0,"Bienvenue sur le balado qui fait aimer la science!",data.hashtag,{})
 		req.on 'error',(err)->console.log Error
 		req.end()
 

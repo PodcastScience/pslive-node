@@ -237,7 +237,9 @@ liste_images      = []
 images_en_attente = []
 history           = 10
 nomEvent          = ''
-hashtag          = ''
+hashtag           = ''
+num_episode       = ''
+title_episode     = ''
 admin_password    = process.env.PSLIVE_ADMIN_PASSWORD
 episode           = 'Bienvenue sur le balado qui fait aimer la science!'
 
@@ -394,14 +396,18 @@ load_episode = (number,title,_hashtag,chatroom) =>
     nomEvent = number
     hashtag = _hashtag
     if nomEvent == 'podcastscience'
+      num_episode = ''
+      title_episode = ''
       episode=title
     else
+      num_episode = number.substring(2)
+      title_episode = title
       episode= "<span class='number'> Episode #"+number+" - </span> "+title
 
     update_waiting_image()
     backend.download_images (meta)->      
       liste_images=meta
-    twitter.stream {track: '#'+nomEvent} 
+    twitter.stream {track: '#'+hashtag} 
 
 console.log 'backend',backend
 
@@ -433,7 +439,7 @@ send_chatroom = (socket_) ->
         socket_.emit('add_img',im) 
   update_waiting_image()
   console.log 'send_chatroom/episode:',episode
-  socket_.emit('new-title',episode)
+  socket_.emit('new-title',episode,num_episode,title_episode,hashtag)
 
 change_chatroom = () ->
   io.sockets.emit 'del_imglist'
@@ -456,7 +462,6 @@ io.sockets.on 'connection', (socket) ->
 
   envoieInitialChatroom = () ->
     #Envoi des messages récents au client
-  
     send_chatroom socket
 
   socket.on 'twitter_auth', () ->
@@ -768,9 +773,13 @@ io.sockets.on 'connection', (socket) ->
   # Changement du titre et lancement du scan de twitter
   socket.on 'change-title', (message) ->
     nomEvent= 'ps' +message.number
-    hashtag=  trim message.hashtag
+    hashtag= message.hashtag.trim()
     if hashtag==''
       hashtag=nomEvent
+
+    num_episode = message.number
+    title_episode = message.title
+
     if message.password == admin_password  || is_admin(me)
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
       backend.select_emission(nomEvent,message.title,hashtag, (res) -> 
@@ -802,10 +811,12 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'reinit_chatroom', (password) ->
     if password == admin_password  || is_admin(me)
       console.log("Reinitiailisation de la chatroom")
-      episode='Bienvenue sur le balado qui fait aimer la science!'
-      nomEvent = "podcastscience"
-      hashtag=""
-      backend.select_emission(nomEvent,episode, (res) -> 
+      episode       = 'Bienvenue sur le balado qui fait aimer la science!'
+      nomEvent      = "podcastscience"
+      hashtag       = ""
+      title_episode = ""
+      num_episode   = ""
+      backend.select_emission(nomEvent,episode,hashtag, (res) -> 
           console.log 'reinit_chatroom',res
           last_messages = []  
           all_messages = []
