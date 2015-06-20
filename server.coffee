@@ -394,14 +394,15 @@ load_episode = (number,title,_hashtag,chatroom) =>
       last_messages.push msg
       last_messages.shift() if (last_messages.length > history)
     nomEvent = number
-    hashtag = _hashtag
     if nomEvent == 'podcastscience'
       num_episode = ''
       title_episode = ''
+      hashtag =  ''
       episode=title
     else
       num_episode = number.substring(2)
       title_episode = title
+      hashtag = _hashtag
       episode= "<span class='number'> Episode #"+number+" - </span> "+title
 
     update_waiting_image()
