@@ -50,6 +50,7 @@ class Backend
 						chatroom = JSON.parse(data.chatroom)
 					catch e
 						console.log  "Erreur du parsing de la chatroom",e
+						console.log data.chatroom
 					cb(data.number,data.title,data.hashtag,chatroom)
 				catch e
 					@id_emission = 0
