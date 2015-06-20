@@ -338,6 +338,7 @@ $(document).ready ->
       socket.emit('change-title', {
         password: $('#admin-password').val(),
         number: $('#episode-number').val(),
+        hashtag: $("#hashtag").val(),
         createEvent: $('#create-event:checked').val()=='on',
         title: $('#episode-title').val()
         })

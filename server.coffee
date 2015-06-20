@@ -237,6 +237,7 @@ liste_images      = []
 images_en_attente = []
 history           = 10
 nomEvent          = ''
+hashtag          = ''
 admin_password    = process.env.PSLIVE_ADMIN_PASSWORD
 episode           = 'Bienvenue sur le balado qui fait aimer la science!'
 
@@ -383,7 +384,7 @@ get_thumbnail = (site,url,cb) ->
 
 liste_connex    = []
   
-load_episode = (number,title,chatroom) =>
+load_episode = (number,title,_hashtag,chatroom) =>
     console.log "*********************************************************"
     all_messages  = (chatroom || [])
     last_messages = []
@@ -391,6 +392,7 @@ load_episode = (number,title,chatroom) =>
       last_messages.push msg
       last_messages.shift() if (last_messages.length > history)
     nomEvent = number
+    hashtag = _hashtag
     if nomEvent == 'podcastscience'
       episode=title
     else
@@ -763,12 +765,15 @@ io.sockets.on 'connection', (socket) ->
             
 
 
-  # Changement du titre et chargement de l'iframe
+  # Changement du titre et lancement du scan de twitter
   socket.on 'change-title', (message) ->
     nomEvent= 'ps' +message.number
+    hashtag=  trim message.hashtag
+    if hashtag==''
+      hashtag=nomEvent
     if message.password == admin_password  || is_admin(me)
       episode= "<span class='number'> Episode #"+(message.number)+" - </span> "+message.title
-      backend.select_emission(nomEvent,message.title, (res) -> 
+      backend.select_emission(nomEvent,message.title,hashtag, (res) -> 
         console.log 'change-title',res
         all_messages  = (res || [])
         last_messages = []
@@ -783,7 +788,7 @@ io.sockets.on 'connection', (socket) ->
       try
         twitter.destroy()
       try
-        twitter.stream {track: '#'+nomEvent} 
+        twitter.stream {track: '#'+hashtag} 
       catch e
         console.log "erreur Twitter",e
     else
@@ -799,6 +804,7 @@ io.sockets.on 'connection', (socket) ->
       console.log("Reinitiailisation de la chatroom")
       episode='Bienvenue sur le balado qui fait aimer la science!'
       nomEvent = "podcastscience"
+      hashtag=""
       backend.select_emission(nomEvent,episode, (res) -> 
           console.log 'reinit_chatroom',res
           last_messages = []  

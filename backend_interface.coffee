@@ -50,10 +50,10 @@ class Backend
 						chatroom = JSON.parse(data.chatroom)
 					catch e
 						console.log  "Erreur du parsing de la chatroom",e
-					cb(data.number,data.title,chatroom)
+					cb(data.number,data.title,data.hashtag,chatroom)
 				catch e
 					@id_emission = 0
-					cb(0,"Bienvenue sur le balado qui fait aimer la science!",{})
+					cb(0,"Bienvenue sur le balado qui fait aimer la science!",hashtag,{})
 		req.on 'error',(err)->console.log Error
 		req.end()
 
@@ -238,11 +238,12 @@ class Backend
 		req.end()
 
 
-	select_emission: (nomEvent,episode,cb) ->
+	select_emission: (nomEvent,episode,_hashtag,cb) ->
 		console.log "select_emission/entrée dans la fonction select_emission"
 		params = JSON.stringify({
 			number: nomEvent, 
-			title: episode
+			title: episode,
+			hashtag: _hashtag
 		})
 		console.log "select_emission/params*"+params+"*"
 		console.log "select_emission/length",params.length

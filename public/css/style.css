@@ -1248,3 +1248,16 @@
 	.wait_thread.active{
 	  right: 0;
 	}
+
+
+	#admin-form input{
+		width: 20em;
+	}
+
+	#admin-form input#hashtag{
+		width: 19em;
+	}
+	.buttons{
+		margin-top: 1em;
+		margin-bottom: 2em;
+	}
