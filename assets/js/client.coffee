@@ -389,6 +389,10 @@ $(document).ready ->
     $('#slider').html('')
     slider.refresh()
 
+  socket.on 'remove_image',(signature)->
+    console.log "suppression de l'image ",signature
+    $('#slider_'+signature).remove()
+    slider.refresh()
 
   socket.on 'add_img',(im) ->
     console.log("Ajout d'image : ",im)
@@ -497,7 +501,7 @@ $(document).ready ->
 
   $('.rec').on 'click', () ->
     console.log "test"
-    socket.emit "logout"
+    #socket.emit "logout"
 
   $(window).on 'beforeunload', ->
     console.log("il s'est barré")

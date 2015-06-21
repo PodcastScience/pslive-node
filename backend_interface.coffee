@@ -12,6 +12,14 @@ class Backend
 		console.log "mise en place du backend",params
 
 
+	test_emission_en_cours: (id) ->
+		console.log  "test_emission_en_cours:"+id+'/'+@id_emission
+		if id==@id_emission
+			console.log  "vrai"
+			return true
+		else
+			console.log  "faux"
+			return false
 
 	http_request_callback = (res,cb) ->
 		str=""

@@ -27,8 +27,6 @@ app = express()
 
 
 
-
-
 #all environments
 app.use require('connect-assets')()
 console.log js('client')
@@ -59,6 +57,12 @@ app.get('/', routes.index)
 app.get('/presentation', routes.presentation)
 app.get('/admin', routes.admin)
 app.get('/users', user.list)
+
+
+
+
+
+
 app.get '/messages', (req, res) ->
   res.send all_messages.map((message) -> 
     message_me = ircLike_me message.message, message.user.username
@@ -69,10 +73,23 @@ app.get '/messages', (req, res) ->
   ).join("<br/>")
 
 
+
+
+
+
 app.get '/close', (req, res) ->
   res.send('<script>window.close()</script>')
+
+
+
 app.get '/twitter_auth', (req, res) ->
   twitter.get_auth_step2(res,req)
+
+
+
+
+
+
 
 app.get '/timestamp', (req, res) ->
   res.send all_messages.map((message) -> 
@@ -83,6 +100,12 @@ app.get '/timestamp', (req, res) ->
       return '*'+message_me
     
   ).join("<br/>")
+
+
+
+
+
+
 app.get '/questions', (req, res) ->
   res.send all_messages.filter( (msg,idx) -> 
     if typeof(msg)!='undefined' && typeof(msg.message)!='undefined'
@@ -92,6 +115,13 @@ app.get '/questions', (req, res) ->
   ).map((message) -> 
     "<b>#{message.user.username}</b><a href='/timestamp#[#{(message.h+2)%24}:#{message.m}:#{message.s}]'>[#{(message.h+2)%24}:#{message.m}:#{message.s}]</a>: #{message.message}"
   ).join("<br/>");
+
+
+
+
+
+
+
 
 app.get '/liste_images', (req, res) ->
   backend.download_images (data)->
@@ -111,11 +141,48 @@ app.get '/liste_images', (req, res) ->
         </a>"
     ).join("<br/>")
 
+
+
+
+
+
+app.post '/suppr_image', (req,res)->
+  console.log "suppr_image:liste_images au début:" , liste_images
+  if req.body.image=='{}' ||  req.body.image=='' || typeof(req.body.image)==undefined
+    res.end ''
+    return
+  image = JSON.parse(req.body.image)
+  if !(backend.test_emission_en_cours image.episode_id)
+    console.log "suppr_image: mauvais episode",image.episode_id
+    res.end ''
+    return 
+  images_queue.remove image.sign
+  console.log "suppr_image",image
+  idx=-1
+  for _idx,i of liste_images
+    if i.signature == image.sign
+      idx=_idx
+  img=liste_images.splice idx,1
+  img.forEach (i)->
+    console.log i
+    console.log i.signature
+    io.sockets.emit 'remove_image', i.signature
+  res.end ''
+
+
+
+
+
+
 app.post '/post_image', (req,res)->
   if req.body.image=='{}' ||  req.body.image=='' || typeof(req.body.image)==undefined
     res.end ''
     return
   image = JSON.parse(req.body.image)
+  if !(backend.test_emission_en_cours image.episode_id)
+    console.log "suppr_image: mauvais episode",image.episode_id
+    res.end ''
+    return 
   console.log "+",image
   try
     if image.media_type == 'img'
@@ -147,11 +214,17 @@ app.post '/post_image', (req,res)->
   catch e
     console.log "download_images/pas d'image"
   console.log "-",image
+  console.log "post_image",liste_images
   img.signature = image.sign
   liste_images.push img 
   images_queue.add img
   update_waiting_image()
   res.end ''
+
+
+
+
+
 
 app.post '/update_queue', (req,res)->
   console.log "maj de la file d'attente",req.body
@@ -159,8 +232,32 @@ app.post '/update_queue', (req,res)->
     res.end ''
     return
   images_en_attente = JSON.parse(req.body.queue)
+  _episode_id = JSON.parse(req.body.episode_id)
+  if !(backend.test_emission_en_cours _episode_id)
+    console.log "suppr_image: mauvais episode",image.episode_id
+    res.end ''
+    return false
   io.sockets.emit 'maj_waiting_images',images_en_attente
   res.end ''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -239,6 +336,7 @@ history           = 10
 nomEvent          = ''
 hashtag           = ''
 num_episode       = ''
+id_episode        = 0
 title_episode     = ''
 admin_password    = process.env.PSLIVE_ADMIN_PASSWORD
 episode           = 'Bienvenue sur le balado qui fait aimer la science!'

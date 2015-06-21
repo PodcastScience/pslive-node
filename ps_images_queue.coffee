@@ -21,6 +21,8 @@ class PsImagesQueue
 		else
 			this.send()
 
+	remove : (signature)->
+		queue=queue.filter (i)-> i.signature != signature
 
 	send : () =>
 		wait=true
