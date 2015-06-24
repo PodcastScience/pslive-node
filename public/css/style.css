@@ -904,6 +904,7 @@
 	.presentation .chatroom h2 { display: block; }
 	.presentation .online { display: none; }
 	.content .presentation .aside { width: 70%; }
+	.content .presentationfull .aside { width: 100%; }
 	.content .presentation .chatroom { width: 30%; }
 	ul { 
 		list-style-type: none; 
@@ -940,6 +941,12 @@
     .presentation #slider li{
     	width:800px;
     	height:600px;
+    }
+
+    .presentationfull #slider li{
+    	width:1024px;
+    	height:768px;
+    	max-height:768px;
     }
 
 

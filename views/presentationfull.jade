@@ -1,0 +1,48 @@
+extends layout
+
+
+
+block bloc_header
+  header
+    .wrap.clearfix
+      a.logo(href='http://podcastscience.fm')
+        img(src='images/PodcastScience.png', width='210', height='25', alt='PodcastScience')
+      h1#title-episode 
+      .rec Live
+
+
+
+
+
+block bloc_sharypic
+  ul#slider
+
+            
+
+
+
+
+
+block block_msg_nolive
+  .offlive
+    h2
+      | Patience !
+      span Il est encore trop tôt pour le live.
+    p
+      | Rendez-vous tout les 
+      strong  Mercredi à 20h30 
+      | (CET) et réagissez sur le chat !
+    p Et si Nico est là, illustrations en bonus :)
+
+
+
+
+
+
+
+block bloc_content
+  .wrap.content.clearfix
+    .onlive.presentationfull
+      .aside
+        block bloc_sharypic
+    block block_msg_nolive

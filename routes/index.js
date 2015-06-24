@@ -14,3 +14,6 @@ exports.index = function(req, res){
 exports.presentation = function(req, res){
   res.render('presentation', { title: 'PodcastScience Live' });
 };
+exports.presentationfull = function(req, res){
+  res.render('presentationfull', { title: 'PodcastScience Live' });
+};
