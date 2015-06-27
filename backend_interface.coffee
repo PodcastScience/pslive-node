@@ -196,55 +196,58 @@ class Backend
 
 
 	download_images: (cb) ->
-		headers = {
-			'Content-Type': 'application/json'
-		}
-		options = {
-			host: @url,
-			port: @port,
-			path: '/episodes/' + @id_emission + '/images.json',
-			method: 'get',
-			headers: headers
-		}
-		console.log "download_images/download des images : ", @id_emission
-		req = http.request options, (res)-> 
-			http_request_callback res, (data)->
-				console.log "upload_video/",data
-				meta_tmp=[]
-				try
-					data.map (image)->
-						if image.media_type == 'img'
-							img = {
-								'nom' : image.name, 
-								'url' : image.url,
-								'poster' : image.author,
-								'poster_user' : image.user,
-								'avatar' : image.avatar,
-								'tweet' : image.msg,
-								'media_type' : 'img',
-								'created_at' : image.created_at,
-								'updated_at' : image.updated_at
-							}
-						if image.media_type == 'video'
-							img = {
-								'nom' : image.name, 
-								'url' : image.url,
-								'poster' : image.author,
-								'poster_user' : image.user,
-								'avatar' : image.avatar,
-								'tweet' : image.msg,
-								'media_type' : 'video',
-								'created_at' : image.created_at,
-								'updated_at' : image.updated_at
-							}
-						meta_tmp.push img
-						console.log "download_images/",img.url
-				catch e
-					console.log "download_images/pas d'image"
-				console.log "download_images/",meta_tmp
-				cb meta_tmp
-		req.on 'error',(err)->console.log "upload_video/",err
-		req.end()
+		try
+			headers = {
+				'Content-Type': 'application/json'
+			}
+			options = {
+				host: @url,
+				port: @port,
+				path: '/episodes/' + @id_emission + '/images.json',
+				method: 'get',
+				headers: headers
+			}
+			console.log "download_images/download des images : ", @id_emission
+			req = http.request options, (res)-> 
+				http_request_callback res, (data)->
+					console.log "upload_video/",data
+					meta_tmp=[]
+					try
+						data.map (image)->
+							if image.media_type == 'img'
+								img = {
+									'nom' : image.name, 
+									'url' : image.url,
+									'poster' : image.author,
+									'poster_user' : image.user,
+									'avatar' : image.avatar,
+									'tweet' : image.msg,
+									'media_type' : 'img',
+									'created_at' : image.created_at,
+									'updated_at' : image.updated_at
+								}
+							if image.media_type == 'video'
+								img = {
+									'nom' : image.name, 
+									'url' : image.url,
+									'poster' : image.author,
+									'poster_user' : image.user,
+									'avatar' : image.avatar,
+									'tweet' : image.msg,
+									'media_type' : 'video',
+									'created_at' : image.created_at,
+									'updated_at' : image.updated_at
+								}
+							meta_tmp.push img
+							console.log "download_images/",img.url
+					catch e
+						console.log "download_images/pas d'image"
+					console.log "download_images/",meta_tmp
+					cb meta_tmp
+			req.on 'error',(err)->console.log "upload_video/",err
+			req.end()
+		catch e
+			console.log e
 
 
 	select_emission: (nomEvent,episode,_hashtag,cb) ->
@@ -283,67 +286,76 @@ class Backend
 
 
 	set_chatroom: (chatroom)->
-		params = JSON.stringify({
-			'chatroom': chatroom
-		})
-		headers = {
-			'Content-Type': 'application/json',
-			'Content-Length':  Buffer.byteLength(params, 'utf-8')
-		}
-		options = {
-			host: @url,
-			port: @port,
-			path: '/episodes/' + @id_emission + '/chatroom',
-			method: 'patch',
-			form: params,
-			headers: headers
-		}
-		req = http.request options, (res)-> 
-		req.on('error',(err)->console.log "set_chatroom",err)
-		req.write params 
-		req.end()
+		try
+			params = JSON.stringify({
+				'chatroom': chatroom
+			})
+			headers = {
+				'Content-Type': 'application/json',
+				'Content-Length':  Buffer.byteLength(params, 'utf-8')
+			}
+			options = {
+				host: @url,
+				port: @port,
+				path: '/episodes/' + @id_emission + '/chatroom',
+				method: 'patch',
+				form: params,
+				headers: headers
+			}
+			req = http.request options, (res)-> 
+			req.on('error',(err)->console.log "set_chatroom",err)
+			req.write params 
+			req.end()
+		catch e
+			console.log e
 
 	post_waiting_image: (sign)->
-		params = '{}'
-		headers = {
-			'Content-Type': 'application/json',
-			'Content-Length':  Buffer.byteLength(params, 'utf-8')
-		}
-		options = {
-			host: @url,
-			port: @port,
-			path: '/episodes/' + @id_emission + '/queue/post/'+sign+'.json',
-			method: 'post',
-			form: params,
-			headers: headers
-		}
-		console.log 'post_waiting_image',options
-		req = http.request options, (res)-> 
-		req.on('error',(err)->console.log "post_waiting_image",err)
-		req.write params 
-		req.end()
+		try
+			params = '{}'
+			headers = {
+				'Content-Type': 'application/json',
+				'Content-Length':  Buffer.byteLength(params, 'utf-8')
+			}
+			options = {
+				host: @url,
+				port: @port,
+				path: '/episodes/' + @id_emission + '/queue/post/'+sign+'.json',
+				method: 'post',
+				form: params,
+				headers: headers
+			}
+			console.log 'post_waiting_image',options
+			req = http.request options, (res)-> 
+			req.on('error',(err)->console.log "post_waiting_image",err)
+			req.write params 
+			req.end()
+		catch e
+			console.log e
 
 
 	get_queue: (cb)->
-		headers = {
-			'Content-Type': 'application/json'
-		}
-		options = {
-			host: @url,
-			port: @port,
-			path: '/episodes/' + @id_emission + '/queue',
-			method: 'get',
-			headers: headers
-		}
-		req = http.request options, (res)=> 
-			http_request_callback res, (data)=>
-				try
-					cb data
-				catch e
-					console.log e
-					cb []
-		req.on 'error',(err)->console.log Error
-		req.end()
+		try
+			headers = {
+				'Content-Type': 'application/json'
+			}
+			options = {
+				host: @url,
+				port: @port,
+				path: '/episodes/' + @id_emission + '/queue',
+				method: 'get',
+				headers: headers
+			}
+			req = http.request options, (res)=> 
+				http_request_callback res, (data)=>
+					try
+						cb data
+					catch e
+						console.log e
+						cb []
+			req.on 'error',(err)->console.log Error
+			req.end()
+		catch e
+			console.log e
 
 
 module.exports = Backend
