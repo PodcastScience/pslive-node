@@ -8,7 +8,7 @@
   "dependencies": {
     "MD5": "1.2.0",
     "cheerio": "0.17.0",
-    "coffee": "0.0.1",
+    "coffee": "1.1.0",
     "coffee-script": "1.6.3",
     "connect-assets": "2.5.3",
     "express": "3.3.5",
@@ -25,6 +25,6 @@
   },
   "engines": {
     "node": "0.8.x",
-    "npm": "1.1.x"
+    "npm": "2.13.x"
   }
 }
