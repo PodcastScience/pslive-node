@@ -812,6 +812,22 @@ io.sockets.on 'connection', (socket) ->
     else
       return false
 
+  tournee= (text) -> 
+    stringTab = text.split(" ")
+    stringBiere = text.split("/tournéegénérale")     
+    valeurMessage =""
+    if stringTab.length >= 2
+      if stringTab[0].localeCompare("/tournéegénérale")==0
+        valeurMessage = valeurMessage.concat(me.username) 
+        valeurMessage = valeurMessage.concat(" offre une bière à tout le monde")
+        valeurMessage = valeurMessage.concat("<img class='inline' src='images/biere.png'>")
+        io.sockets.emit 'chatroom_info',valeurMessage
+        return true
+      else
+        return false
+    else
+      return false
+
   socket.on 'changename',(name) ->
     formername = me.username
     me.username = name
@@ -832,7 +848,7 @@ io.sockets.on 'connection', (socket) ->
   # gestion des messages
   socket.on 'nwmsg', (message) ->
     if verif_connexion(message.id_connexion)
-      if ! ircLike_nick(message.message,me) && ! biere(message.message) &&  ! ircLike_kick(message.message,me)
+      if ! ircLike_nick(message.message,me) && ! biere(message.message) && ! tournee(message.message) &&  ! ircLike_kick(message.message,me)
         cpt_message+=1
         message.user = me
         date = new Date()
