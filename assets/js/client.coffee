@@ -18,7 +18,7 @@ $(document).ready ->
         {cmd:'me',suffix:' '},
         {cmd:'nick',suffix:' '},
         {cmd:'bière',suffix:' @'}
-        {cmd:'tournéegénérale',suffix:''}
+        {cmd:'tournéegénérale',suffix:' '}
       ]
   socket = io.connect(connect_url)
   msg_template = $('#message-box').html()
