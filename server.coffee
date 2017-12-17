@@ -976,14 +976,21 @@ init_twitter = (twitter) ->
   twitter.on 'data', (data) -> 
     console.log "reception : ",data
     console.log "url : ", data.entities.urls
+    console.log "media.url : ", data.extended_tweet.entities.media
     try
-      url         = data.entities.media[0].media_url
+      url         = data.extended_tweet.entities.media[0].media_url
+      console.log 1
       poster      = data.user.name
+      console.log 2
       poster_user = data.user.screen_name
+      console.log 3
       avatar      = data.user.profile_image_url
+      console.log 4
       tweet       = data.text
       media_type  = 'img'
+      console.log "Ceci est une image"
     catch e
+      console.log "Ceci n'est pas une image"
       try
         site = data.entities.urls[0].display_url.split('/')[0]
         if site=='vimeo.com' || site=='youtube.com'  || site=='vine.co' 
