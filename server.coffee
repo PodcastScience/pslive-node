@@ -974,11 +974,16 @@ io.sockets.on 'connection', (socket) ->
 
 init_twitter = (twitter) ->
   twitter.on 'data', (data) -> 
+    if typeof(data.extended_tweet)=='undefined'
+      entities=data.entities
+    else
+      entities=data.extended_tweet.entities
+    
     console.log "reception : ",data
-    console.log "url : ", data.entities.urls
-    console.log "media.url : ", data.extended_tweet.entities.media
+    console.log "url : ", entities.urls
+    
     try
-      url         = data.extended_tweet.entities.media[0].media_url
+      url         = entities.media[0].media_url
       console.log 1
       poster      = data.user.name
       console.log 2
@@ -992,9 +997,9 @@ init_twitter = (twitter) ->
     catch e
       console.log "Ceci n'est pas une image"
       try
-        site = data.entities.urls[0].display_url.split('/')[0]
+        site = entities.urls[0].display_url.split('/')[0]
         if site=='vimeo.com' || site=='youtube.com'  || site=='vine.co' 
-          url         = data.entities.urls[0].display_url
+          url         = entities.urls[0].display_url
           poster      = data.user.name
           poster_user = data.user.screen_name
           avatar      = data.user.profile_image_url
@@ -1033,7 +1038,7 @@ init_twitter = (twitter) ->
             #io.sockets.emit 'add_img',param_img
             console.log 'media:'+ nom
     if media_type == 'video'
-      url_o = url_parser.parse data.entities.urls[0].expanded_url ,  true , true
+      url_o = url_parser.parse entities.urls[0].expanded_url ,  true , true
       switch site
         when 'youtube.com' then nom = url_o.query.v
         when 'vimeo.com' then nom = url_o.pathname.split('/')[..].pop()
@@ -1053,7 +1058,7 @@ init_twitter = (twitter) ->
         if i.nom==nom
           console.log "video deja presente"
           return false
-      get_thumbnail  site,  data.entities.urls[0].expanded_url , (url_thumbnail)->
+      get_thumbnail  site,  entities.urls[0].expanded_url , (url_thumbnail)->
         param_img.url_thumbnail=url_thumbnail
         backend.upload_video nomEvent, nom, poster,poster_user,avatar, tweet, url, (url_wp)->  
         param_img.url=url
