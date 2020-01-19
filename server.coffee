@@ -54,6 +54,7 @@ if ('development' == app.get('env'))
 
 #router
 app.get('/', routes.index)
+app.get('/video', routes.video)
 app.get('/presentation', routes.presentation)
 app.get('/presentationfull', routes.presentationfull)
 app.get('/admin', routes.admin)

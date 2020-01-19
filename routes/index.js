@@ -11,6 +11,10 @@ exports.index = function(req, res){
   res.render('index', { title: 'PodcastScience Live' });
 };
 
+exports.video = function(req, res){
+  res.render('video', { title: 'PodcastScience Live' });
+};
+
 exports.presentation = function(req, res){
   res.render('presentation', { title: 'PodcastScience Live' });
 };
