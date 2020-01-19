@@ -24,7 +24,6 @@
     "validator": "3.2.0"
   },
   "engines": {
-    "node": "0.8.x",
-    "npm": "2.13.x"
+    "node": "6.11.x"
   }
 }

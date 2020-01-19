@@ -21,6 +21,7 @@ class Stream extends events.EventEmitter
     return new Stream(params) if !(this instanceof Stream) 
     events.EventEmitter.call(this);
     @params = params;
+    @tabTockenSockets= []
     @oauth = new oauth.OAuth(
       url.request_token,
       url.access_token,
@@ -108,21 +109,24 @@ class Stream extends events.EventEmitter
         url.request_token,
         @params.access_token_key,
         @params.access_token_secret,
-        {oauth_callback:server+"twitter_auth/?id="+id_connexion}, 
+        {oauth_callback:server+"twitter_auth"}, 
         (e,data) =>
           if e
             console.log e
+            console.log server+"twitter_auth"
           else
+            console.log data
             response = querystring.parse(data)
             if response.oauth_callback_confirmed == 'true'
               console.log "step1/response:",response
+              @tabTockenSockets[response.oauth_token]=id_connexion
               sockets[id_connexion]=socket
               socket.emit 'openurl' , 'https://twitter.com/oauth/authenticate?oauth_token='+response.oauth_token
 
       )
   get_auth_step2 : (res,req) =>
     console.log "step2",req.query
-    socket=sockets[req.query.id]
+    socket=sockets[@tabTockenSockets[req.query.oauth_token]]
     request = @oauth.post(
         url.access_token,
         @params.access_token_key,
