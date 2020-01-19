@@ -74,6 +74,15 @@ block bloc_sharypic
 
 block bloc_twitch
   div#twitch-embed
+
+block bloc_twitch_iframe
+  iframe(src="https://player.twitch.tv/?nicotupe"
+    height="450"
+    width="658"
+    frameborder="0"
+    scrolling="no"
+    allowfullscreen="true">
+  )
             
 
 block liens_sans_flash
@@ -179,7 +188,8 @@ block bloc_content
       .aside
         block bloc_player
         block bloc_login
-        block bloc_twitch
+        //- block bloc_twitch
+        block bloc_twitch_iframe
         //- block bloc_sharypic
         block bloc_reseauxsociaux
         block liens_sans_flash
