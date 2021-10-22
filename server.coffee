@@ -1,12 +1,15 @@
 
-require('coffee-script')
+require('coffeescript')
 express = require('express')
 routes = require('./routes')
+bodyParser = require('body-parser')
+errorHandler  = require('errorhandler')
+methodOverride  = require('method-override')
 user = require('./routes/user')
 http = require('http')
 https = require('https')
 path = require('path')
-md5 = require('MD5')
+md5 = require('md5')
 mu = require('mu2')
 querystring  = require("querystring")
 cheerio = require('cheerio')
@@ -17,6 +20,7 @@ Backend = require('./backend_interface');
 PsImagesQueue = require('./ps_images_queue');
 fs = require('fs')
 mime = require('mime')
+{ Server } = require('socket.io')
 app = express()
 
 
@@ -32,18 +36,18 @@ app.use require('connect-assets')()
 console.log js('client')
 app.set('port', process.env.PORT || 3001)
 app.set('views', __dirname + '/views')
-app.set('view engine', 'jade')
-app.use(express.favicon("/images/fav.png"))
-app.use(express.logger('dev'))
-app.use(express.bodyParser())
-app.use(express.methodOverride())
-app.use(app.router)
+app.set('view engine', 'pug')
+#app.use(express.favicon("/images/fav.png"))
+#app.use(express.logger('dev'))
+app.use(bodyParser())
+app.use(methodOverride())
+#app.use(app.router)
 app.use(express.static(path.join(__dirname, 'public')))
 app.locals.css = css
 app.locals.js = js
 #development only
 if ('development' == app.get('env'))
-  app.use(express.errorHandler())
+  app.use(errorHandler())
 
 
 
@@ -292,16 +296,11 @@ ircLike_me= (text,pseudo) ->
   return valeurRetour
 
 
-
 #socket.io configuration
-io = require('socket.io').listen(httpServer)
-io.configure ->
-  io.set("transports", ['websocket','flashsocket','htmlfile','xhr-polling','jsonp-polling'])
-  #io.set("polling duration", 100)
-  #io.set('close timeout', 200)
-  io.set('heartbeat timeout', 200)
-  # io.set('log colors',false)
-  io.set('log level',0)
+io = new Server(httpServer,({
+    "transports": ['websocket','flashsocket','htmlfile','xhr-polling','jsonp-polling'],
+    'heartbeat timeout': 200
+}))
 
 
 
@@ -312,8 +311,10 @@ io.configure ->
 #Initialisation des variables
 users = new Object()
 
+console.log("ici",process.env.PSLIVE_ADMINLIST)
 
 admin_list=JSON.parse(process.env.PSLIVE_ADMINLIST)
+console.log("la")
 auth_twitter = {
     consumer_key:         process.env.PSLIVE_TWITTER_CONSUMERKEY,
     consumer_secret:      process.env.PSLIVE_TWITTER_CONSUMERSECRET,

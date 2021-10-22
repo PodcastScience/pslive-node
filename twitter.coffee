@@ -18,6 +18,7 @@ class Stream extends events.EventEmitter
   constructor: (params) ->
     auth_tockens= []
     sockets= []
+    super()
     return new Stream(params) if !(this instanceof Stream) 
     events.EventEmitter.call(this);
     @params = params;
@@ -101,7 +102,7 @@ class Stream extends events.EventEmitter
       request.end()
 
   stream : (params) ->
-  	setTimeout (()->stream_imm params) , 10000
+    setTimeout (()->stream_imm params) , 10000
 
   get_auth : (socket,id_connexion) =>
     request = @oauth.post(
