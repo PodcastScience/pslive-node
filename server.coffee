@@ -58,6 +58,7 @@ if ('development' == app.get('env'))
 
 #router
 app.get('/', routes.index)
+app.get('/test', routes.test)
 app.get('/presentation', routes.presentation)
 app.get('/presentationfull', routes.presentationfull)
 app.get('/admin', routes.admin)
@@ -171,7 +172,7 @@ app.post '/suppr_image', (req,res)->
   img.forEach (i)->
     console.log i
     console.log i.signature
-    io.sockets.emit 'remove_image', i.signature
+    chatroomNamespace.emit 'remove_image', i.signature
   res.end ''
 
 
@@ -242,7 +243,7 @@ app.post '/update_queue', (req,res)->
     console.log "suppr_image: mauvais episode",image.episode_id
     res.end ''
     return false
-  io.sockets.emit 'maj_waiting_images',images_en_attente
+  chatroomNamespace.emit 'maj_waiting_images',images_en_attente
   res.end ''
 
 
@@ -298,10 +299,10 @@ ircLike_me= (text,pseudo) ->
 
 #socket.io configuration
 io = new Server(httpServer,({
-    "transports": ['websocket','flashsocket','htmlfile','xhr-polling','jsonp-polling'],
+    "transports": ['websocket','polling'],
     'heartbeat timeout': 200
 }))
-
+chatroomNamespace=io.of('/chatroom')
 
 
 
@@ -328,7 +329,7 @@ backend = new Backend({
     port: (process.env.PSLIVE_BACKEND_PORT || 3000)
   })
 
-images_queue = new PsImagesQueue { sockets: io.sockets, delay:10000}
+images_queue = new PsImagesQueue { chatroomNamespace: chatroomNamespace, delay:10000}
 
 last_messages     = []
 all_messages      = []
@@ -353,7 +354,9 @@ episode           = 'Bienvenue sur le balado qui fait aimer la science!'
 #simple
 replaceURLWithHTMLLinks = (text) -> 
   exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig
-  return text.replace(exp,"<a href='$1' target='_blank'>$1</a>")
+  retval= text.replace(exp,"<a href='$1' target='_blank'>$1</a>")
+  console.log "Detection d'une url", text.replace(exp,"<a href='$1' target='_blank'>$1</a>")
+  return retval
 
 
 insertChatroomImages = (text,user,avatar,socket_) -> 
@@ -364,6 +367,8 @@ insertChatroomImages = (text,user,avatar,socket_) ->
     tab_url.map (url)->
       url=url.replace(/\/$/,'')
       get_image url, (nom,data,content_type)->
+        console.log "****************image*********"
+        console.log "****************image*********",content_type
         if(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
           switch content_type
             when 'image/jpeg' then img_format='jpg'; break;
@@ -395,8 +400,10 @@ insertChatroomImages = (text,user,avatar,socket_) ->
               console.log param_img
               liste_images.push param_img 
               images_queue.add param_img
-              #io.sockets.emit 'add_img',param_img
+              #chatroomNamespace.emit 'add_img',param_img
               console.log 'media:'+ nom
+        else 
+          console.log "ceci n'est pas une image"
 
 
 
@@ -433,12 +440,14 @@ get_image = (url,cb) ->
     proto=http
   console.log "chargement images en RAM 2: ",url
   try
-    proto.get url, (response)->
+    proto.get url,{headers:{'User-Agent': 'podcastsciencebot/0.0 (https://podcastscience.fm; pascal@podcastscience.fm) generic-library/0.0'}} ,(response)->
+      response.setEncoding('binary');
       console.log "image chargée"
       content_type=response.headers['content-type']
       data=''
-      console.log "apel de la callback"
+      console.log "appel de la callback"
       if !(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
+        console.log "Erreur de content-type",response
         cb nom,data,content_type
       response.setEncoding('binary')
       console.log "reception d'une reponse"
@@ -449,7 +458,7 @@ get_image = (url,cb) ->
         console.log "Fin du chargement de "+nom+":"
         cb nom,data,content_type
   catch e
-    console.log "erreur dans le telechargement de l'image"  
+    console.log "erreur dans le telechargement de l'image"  ,e
 
 
 get_image_twitter = (url,cb) ->
@@ -519,7 +528,7 @@ backend.get_default_emission( load_episode )
 update_waiting_image= ()->
   backend.get_queue (data)-> 
     images_en_attente=data
-    io.sockets.emit 'maj_waiting_images',data
+    chatroomNamespace.emit 'maj_waiting_images',data
 
 
 
@@ -539,18 +548,23 @@ send_chatroom = (socket_) ->
         im.signature=md5 im.url
         socket_.emit('add_img',im) 
   update_waiting_image()
+  console.log 'socket:',socket_
   console.log 'send_chatroom/episode:',episode
-  socket_.emit('new-title',episode,num_episode,title_episode,hashtag)
+  socket_.emit 'new-title',episode,num_episode,title_episode,hashtag
 
 change_chatroom = () ->
-  io.sockets.emit 'del_imglist'
-  io.sockets.emit 'del_msglist'
-  send_chatroom io.sockets
+  chatroomNamespace.emit 'del_imglist'
+  chatroomNamespace.emit 'del_msglist'
+  send_chatroom chatroomNamespace
 
 
 
-io.sockets.on 'connection', (socket) ->
-  console.log "Nouvelle connexion... ("+io.sockets.clients().length+" sockets)"
+chatroomNamespace.on 'connection', (socket) ->
+  console.log "*********************************************************************************************"
+  console.log "*********************************************************************************************"
+  console.log "*********************************************************************************************"
+  console.log "*********************************************************************************************"
+  console.log "Nouvelle connexion... ("+chatroomNamespace.sockets.size+" sockets)"
 
 
 
@@ -588,7 +602,7 @@ io.sockets.on 'connection', (socket) ->
     if(id_demande=='')
       envoieInitialChatroom()
     #mise a jour du compteur et de la userlist pour tous les connectés
-    io.sockets.emit('update_compteur',{
+    chatroomNamespace.emit('update_compteur',{
       connecte:compte(users),
       cache:compte(liste_connex)-compte(users)
     })
@@ -648,9 +662,9 @@ io.sockets.on 'connection', (socket) ->
         #me.avatar = 'https://gravatar.com/avatar/' + md5(user.mail) + '?s=40'
         users[me.id] = me
         #on informe tout le monde qu'un nouvel utilisateur s'est connecté
-        io.sockets.emit 'newuser', me, !reco
+        chatroomNamespace.emit 'newuser', me, !reco
         
-        io.sockets.emit 'update_compteur',
+        chatroomNamespace.emit 'update_compteur',
           connecte:compte(users),
           cache:compte(liste_connex)-compte(users)
 
@@ -695,7 +709,7 @@ io.sockets.on 'connection', (socket) ->
     console.log('Suppression de la connexion '+id_connexion)
     delete liste_connex[id_connexion]
     #on met a jour le compteur des autres users
-    io.sockets.emit('update_compteur',{
+    chatroomNamespace.emit('update_compteur',{
       connecte:compte(users),
       cache:compte(liste_connex)-compte(users)
     })
@@ -736,8 +750,8 @@ io.sockets.on 'connection', (socket) ->
       #et on en informe les autres clients
       console.log "suppression de "+u.username
       delete users[u.id]
-      io.sockets.emit('disuser',u)
-      io.sockets.emit('update_compteur',{
+      chatroomNamespace.emit('disuser',u)
+      chatroomNamespace.emit('update_compteur',{
         connecte:compte(users),
         cache:compte(liste_connex)-compte(users)
       }) 
@@ -747,7 +761,7 @@ io.sockets.on 'connection', (socket) ->
 
   socket.on 'logout',()->
     console.log "demande de logout",me
-    io.sockets.emit 'kick',me.username,me.username+" s'est déconnecté(e)"
+    chatroomNamespace.emit 'kick',me.username,me.username+" s'est déconnecté(e)"
     logoutUser me
 
   ircLike_nick= (text) -> 
@@ -760,7 +774,7 @@ io.sockets.on 'connection', (socket) ->
         me.username = stringNick[1]
         users[me.id].username = me.username
         console.log "apres",users
-        io.sockets.emit 'changename',formername,me
+        chatroomNamespace.emit 'changename',formername,me
       return true
     return false
 
@@ -775,7 +789,7 @@ io.sockets.on 'connection', (socket) ->
       if stringTab[0].localeCompare("/kick")==0
         if stringKick[1]!=''    
           if !is_admin(me)
-            io.sockets.emit 'chatroom_info',"Non "+me.username+" ! Tu n'as pas le droit de kicker les gens !!!"
+            chatroomNamespace.emit 'chatroom_info',"Non "+me.username+" ! Tu n'as pas le droit de kicker les gens !!!"
             return true
           param = searchPseudoInit stringKick[1]
           console.log param
@@ -786,7 +800,7 @@ io.sockets.on 'connection', (socket) ->
           valeurMessage = valeurMessage.concat(me.username) 
           if param.reason != ''
             valeurMessage = valeurMessage.concat(" ( "+param.reason+" )")
-          io.sockets.emit 'kick',param.pseudo,valeurMessage
+          chatroomNamespace.emit 'kick',param.pseudo,valeurMessage
           logoutUser users[param.key]
         return true
       else
@@ -806,7 +820,7 @@ io.sockets.on 'connection', (socket) ->
           valeurMessage = valeurMessage.concat(" offre une bière à ")
           valeurMessage = valeurMessage.concat(stringBiere[1])
           valeurMessage = valeurMessage.concat("<img class='inline' src='images/biere.png'>")
-          io.sockets.emit 'chatroom_info',valeurMessage
+          chatroomNamespace.emit 'chatroom_info',valeurMessage
         return true
       else
         return false
@@ -822,7 +836,7 @@ io.sockets.on 'connection', (socket) ->
         valeurMessage = valeurMessage.concat(me.username) 
         valeurMessage = valeurMessage.concat(" offre une bière à tout le monde")
         valeurMessage = valeurMessage.concat("<img class='inline' src='images/biere.png'>")
-        io.sockets.emit 'chatroom_info',valeurMessage
+        chatroomNamespace.emit 'chatroom_info',valeurMessage
         return true
       else
         return false
@@ -833,7 +847,7 @@ io.sockets.on 'connection', (socket) ->
     formername = me.username
     me.username = name
     users[me.id].username = me.username
-    io.sockets.emit 'changename',formername,me
+    chatroomNamespace.emit 'changename',formername,me
 
 
   socket.on 'disconnect', ->
@@ -853,8 +867,8 @@ io.sockets.on 'connection', (socket) ->
         cpt_message+=1
         message.user = me
         date = new Date()
+        message.message = replaceURLWithHTMLLinks((message.message))
         insertChatroomImages message.message , message.user.username ,message.user.avatar,socket
-        message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
         message.message = replaceSalaud(message.message)
         id_last_message = md5(Date.now()+cpt_message+message.user.mail)
         message.id = id_last_message
@@ -865,18 +879,18 @@ io.sockets.on 'connection', (socket) ->
         all_messages.push message
         last_messages.push message
         last_messages.shift() if (last_messages.length > history)
-        io.sockets.emit('nwmsg',message)
+        chatroomNamespace.emit('nwmsg',message)
         backend.set_chatroom JSON.stringify(all_messages)
    
     
   socket.on 'editmsg', (message) -> 
     console.log("demande de modif de message : "+message.message)
     if verif_connexion(message.id_connexion)
-      message.message = replaceURLWithHTMLLinks(validator.escape(message.message))
+      message.message = replaceURLWithHTMLLinks((message.message))
       message.message = replaceSalaud(message.message)
       message.user = me
       message.id = id_last_message
-      io.sockets.emit('editmsg',message)
+      chatroomNamespace.emit('editmsg',message)
       for key,elt of all_messages
         elt.message = message.message if elt.id == id_last_message
       for key,elt of last_messages
@@ -938,7 +952,7 @@ io.sockets.on 'connection', (socket) ->
           last_messages = []  
           all_messages = []
           images_en_attente=[]
-          io.sockets.emit 'maj_waiting_images',[]
+          chatroomNamespace.emit 'maj_waiting_images',[]
           backend.download_images (meta)->
             liste_images=meta
             change_chatroom()
@@ -950,7 +964,7 @@ io.sockets.on 'connection', (socket) ->
     console.log "demande de selection d'une image",signature
     if is_admin(me)
       console.log "demande acceptée"
-      io.sockets.emit 'select_img',signature 
+      chatroomNamespace.emit 'select_img',signature 
 
 
 
@@ -963,7 +977,7 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'pause_slide_show', () -> 
     if is_admin(me)
       b_pause= images_queue.pause()
-      io.sockets.emit 'pause_slide_show',b_pause
+      chatroomNamespace.emit 'pause_slide_show',b_pause
 
   socket.on "test", () ->
     console.log 'test'
@@ -1036,7 +1050,7 @@ init_twitter = (twitter) ->
             console.log 'init_twitter',param_img
             liste_images.push param_img 
             images_queue.add param_img
-            #io.sockets.emit 'add_img',param_img
+            #chatroomNamespace.emit 'add_img',param_img
             console.log 'media:'+ nom
     if media_type == 'video'
       url_o = url_parser.parse entities.urls[0].expanded_url ,  true , true
@@ -1068,25 +1082,25 @@ init_twitter = (twitter) ->
         console.log 'init_twitter/param_img',param_img
         liste_images.push param_img 
         images_queue.add param_img
-        #io.sockets.emit 'add_img',param_img
+        #chatroomNamespace.emit 'add_img',param_img
         console.log 'media:'+ nom
 
 
   twitter.on 'start', () -> 
-    io.sockets.emit "twitter_start"
+    chatroomNamespace.emit "twitter_start"
 
 
   twitter.on 'error', (data) -> 
-    io.sockets.emit "errorTwitter",data
+    chatroomNamespace.emit "errorTwitter",data
 
 
   twitter.on 'heartbeat', (data) -> 
     console.log  "Twitter stream is alive"
-    io.sockets.emit 'heartbeat_twitter'
+    chatroomNamespace.emit 'heartbeat_twitter'
 
   twitter.on 'close', (data) -> 
     console.log  "Twitter stream is closed :",data
-    io.sockets.emit 'twitter_close'
+    chatroomNamespace.emit 'twitter_close'
     twitter = new Twitter(auth_twitter) 
     init_twitter twitter
 

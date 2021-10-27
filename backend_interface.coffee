@@ -1,6 +1,6 @@
 http = require 'http'
 mime = require 'mime'
-gm = require('gm').subClass({ imageMagick: true })
+sharp = require('sharp')
 
 class Backend
 
@@ -81,7 +81,7 @@ class Backend
 					'user': user,
 					'avatar': avatar,
 					'image': databin64,
-					'content_type': mime.lookup(nom),
+					'content_type': mime.getType(nom),
 					'id_episode': id_emission
 				})
 				console.log "upload_image/upload d'une image : ",params.name
@@ -124,24 +124,27 @@ class Backend
 
 		try
 			console.log "upload_image/transformation du l'image en buffer"
-			img_buf = new Buffer(data, 'binary')
-			console.log "upload_image/verification de la taille de l'image"
+			#img_buf = new Buffer(data, 'binary')
+			img_buf = new Buffer.from(data,'binary')
+			console.log "upload_image/verification de la taille de l'image",img_buf.length
 			if img_buf.length > 1024*1024 
 				console.log "upload_image/image trop grande."
-				_gm=gm(img_buf,nom)
-				console.log "upload_image/retaillage de l'image"
-				_gm=_gm.coalesce()
-				_gm=_gm.resize null,600
-				if _gm.length > 1024*1024 
-					cb "TOO_BIG"
-				else
-					console.log  "upload_image/transformation du l'image retaillée en buffer (format " + img_format + ")"
-					_gm=_gm.toBuffer img_format, (err, buffer)->
-						if (err) 
-							console.log "upload_image/erreur dans la generation du buffer"
-							return handle(err)
-						console.log "upload_image/upload de l'image retaillée"
-						_upload(episode,nom,auteur,user,avatar,message,buffer.toString('base64'),url,port,id_emission)
+				
+				sharp(img_buf).metadata()
+					.then (metadata) ->				
+						console.log "upload_image/metadata (succes)", metadata
+					.catch (error) ->
+						console.log "upload_image/metadata (erreur)", error
+				sharp(img_buf).toBuffer()
+					.then (img_buf2) ->				
+						console.log "upload_image/taille de l'image retaillée", img_buf2.length
+						if img_buf2.length > 1024*1024 
+							cb "TOO_BIG"
+						else
+							console.log "upload_image/upload de l'image retaillée"
+							_upload(episode,nom,auteur,user,avatar,message,data.toString('base64'),url,port,id_emission)
+					.catch (error) ->
+						console.log "upload_image/Erreur de sharp", error
 			else
 				console.log "upload_image/upload de l'image"
 				_upload(episode,nom,auteur,user,avatar,message,img_buf.toString('base64'),url,port,id_emission)

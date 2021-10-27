@@ -112,7 +112,7 @@ class Stream extends events.EventEmitter
         {oauth_callback:server+"twitter_auth/?id="+id_connexion}, 
         (e,data) =>
           if e
-            console.log e
+            console.log "erreur dans la tentative d'auth avec la callback *"+server+"twitter_auth/?id="+id_connexion,e
           else
             response = querystring.parse(data)
             if response.oauth_callback_confirmed == 'true'

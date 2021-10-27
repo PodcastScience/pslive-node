@@ -17,3 +17,7 @@ exports.presentation = function(req, res){
 exports.presentationfull = function(req, res){
   res.render('presentationfull', { title: 'PodcastScience Live' });
 };
+
+exports.test = function(req, res){
+  res.render('test', { title: 'PodcastScience Live' });
+};

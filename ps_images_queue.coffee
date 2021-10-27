@@ -8,7 +8,7 @@ class PsImagesQueue
 	me=@
 
 	constructor: (params) ->
-		sockets=params.sockets
+		sockets=params.chatroomNamespace
 		delay=params.delay
 		wait=false
 		console.log "Init de la file d'attente des images avec un delai de "+delay

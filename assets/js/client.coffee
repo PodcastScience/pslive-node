@@ -4,7 +4,7 @@ $(document).ready ->
   #     cheat: ->
   #       alert "C'est pas bien de diviser par zéro..."
 
-  connect_url = "/"
+  connect_url = "/chatroom"
   id_connexion= false
   is_admin = false
   username=""

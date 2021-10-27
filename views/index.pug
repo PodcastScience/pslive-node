@@ -1,4 +1,4 @@
-extends layout
+include layout
 
 
 
@@ -11,6 +11,7 @@ block bloc_header
       .rec Live
 
 
+//scrolling="no" frameborder="0" allowtransparency="true"
 block bloc_player
   .player
     iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html",height="80",width="400",scrolling="no",frameborder="0",allowtransparency="true" )
@@ -49,123 +50,6 @@ block menu
 
 
 
-block bloc_login
-  #login.login.clearfix
-    h2
-      | Connectez-vous
-      span.small pour participer à la discussion!
-    p#wrong-mail.ps_alert
-    .info
-      p
-        | Pour avoir un joli avatar, créez le sur 
-        a(href='http://fr.gravatar.com/') Gravatar
-        | .
-    form#loginform
-      input(type="text" name="login" placeholder="Nom d'utilisateur")#username
-      input(type="text" name="mail" placeholder="E-mail")#mail
-      input(type="submit" value="Discuter")
-      a#twitter_auth_link
-        img(src='images/sign-in-with-twitter-link.png')
-
-
-
-
-
-
-block bloc_sharypic
-  ul#slider
-  
-
-            
-
-block liens_sans_flash
-  .liens-sans-flash
-    p
-      a(href="http://bit.ly/PS-live96kMP3") Flux live mp3
-    p 
-      a(href="http://bit.ly/PS-live96kM3U") Flux live m3u  
-
-
-block bloc_reseauxsociaux
-  .share
-    | Passer le message sur
-    a.icon-googleplus(href='https://plus.google.com/share?url=http://live.podcastscience.fm')
-      span.caption Google plus
-    a.icon-twitter(href='https://twitter.com/intent/tweet?button_hashtag=psLive&text=Rejoignez+nous+sur+la+chatroom+et+suivez+@podcastscience+en+direct.&url=http://live.podcastscience.fm')
-      span.caption Twitter
-    a.icon-facebook(href='http://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flive.podcastscience.fm&p[summary]=Rejoignez+nous+sur+la+chatroom+et+suivez+le+live+podcastscience+en+direct')
-      span.caption Facebook
-
-
-
-
-
-
-block bloc_chatroom
-  div#onChat
-    div#main.chatroom
-      div#wrap_messages
-        div#messages
-          h2.clearfix.nb-connected
-          ul#message-box
-            li(id="{{id}}" )
-              img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar.avatar40
-              .message
-                span.pseudo {{user.username}}
-                span.timestamp &nbsp[{{h}}:{{m}}:{{s}}]
-                p(id="msg_{{id}}") {{{message}}}
-  div.write
-      form#message-form  
-        input(type='text' placeholder='Poster un message'   )#message-to-send.newmsg
-        input(type="submit", value='Envoyer')#send-message
-        span.minitext Posez vos questions avec la mention 
-          b @ps
-
-
-
-
-
-
-
-block bloc_liste_images_en_attente
-  .wait_thread.admin_class
-    .hook 
-      div
-    button#pause_slide_show &#9208; Pause
-    h2 Images en attente
-    #backend_link
-      h4
-        a( target="_blank") Backend
-    ul#waiting-images-list
-      li
-        img(src="{{urlThumbnail}}"  data-sign='{{sign}}' title="{{name}}").waiting-image
-
-
-
-
-block bloc_liste_poditeurs
-  .online
-    h2.nb-connected
-    ul#members-list
-      #user_box
-      li(id="{{id}}")
-        img(src="{{avatar}}" alt="Avatar {{user.username}}").avatar40
-        span.pseudo
-          | {{username}}
-
-
-block block_msg_nolive
-  .offlive
-    h2
-      | Patience !
-      span Il est encore trop tôt pour le live.
-    p
-      | Rendez-vous tout les 
-      strong  Mercredi à 20h30 
-      | (CET) et réagissez sur le chat !
-    p Et si Nico est là, illustrations en bonus :)
-
-
 
 
 
@@ -175,12 +59,81 @@ block bloc_content
   .wrap.content.clearfix
     .onlive
       .aside
-        block bloc_player
-        block bloc_login
-        block bloc_sharypic
-        block bloc_reseauxsociaux
-        block liens_sans_flash
-      block bloc_chatroom
-      block bloc_liste_poditeurs
-      block bloc_liste_images_en_attente
-    block block_msg_nolive
+        .player
+          iframe(src="http://static.infomaniak.ch/infomaniak/radio/html/podcastscience_player.html",height="80",width="400",scrolling="no",frameborder="0",allowtransparency="true" )
+        #login.login.clearfix
+          h2
+            | Connectez-vous
+            span.small pour participer à la discussion!
+          p#wrong-mail.ps_alert
+          .info
+            p
+              | Pour avoir un joli avatar, créez le sur 
+              a(href='http://fr.gravatar.com/') Gravatar
+              | .
+          form#loginform
+            input(type="text" name="login" placeholder="Nom d'utilisateur")#username
+            input(type="text" name="mail" placeholder="E-mail")#mail
+            input(type="submit" value="Discuter")
+            a#twitter_auth_link
+              img(src='images/sign-in-with-twitter-link.png')
+        ul#slider
+        .share
+          | Passer le message sur
+          a.icon-googleplus(href='https://plus.google.com/share?url=http://live.podcastscience.fm')
+            span.caption Google plus
+          a.icon-twitter(href='https://twitter.com/intent/tweet?button_hashtag=psLive&text=Rejoignez+nous+sur+la+chatroom+et+suivez+@podcastscience+en+direct.&url=http://live.podcastscience.fm')
+            span.caption Twitter
+          a.icon-facebook(href='http://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flive.podcastscience.fm&p[summary]=Rejoignez+nous+sur+la+chatroom+et+suivez+le+live+podcastscience+en+direct')
+            span.caption Facebook
+        .liens-sans-flash
+          p
+            a(href="http://bit.ly/PS-live96kMP3") Flux live mp3
+          p 
+            a(href="http://bit.ly/PS-live96kM3U") Flux live m3u 
+      div#onChat
+        div#main.chatroom
+          div#wrap_messages
+            div#messages
+              h2.clearfix.nb-connected
+              ul#message-box
+                li(id="{{id}}" )
+                  img(src="{{user.avatar}}" alt="Avatar {{user.username}}").avatar.avatar40
+                  .message
+                    span.pseudo {{user.username}}
+                    span.timestamp &nbsp[{{h}}:{{m}}:{{s}}]
+                    p(id="msg_{{id}}") {{{message}}}
+      div.write
+          form#message-form  
+            input(type='text' placeholder='Poster un message'   )#message-to-send.newmsg
+            input(type="submit", value='Envoyer')#send-message
+            span.minitext Posez vos questions avec la mention 
+              b @ps
+      .online
+        h2.nb-connected
+        ul#members-list
+        div#user_box
+          li(id="{{id}}")
+            img(src="{{avatar}}" alt="Avatar {{user.username}}").avatar40
+            span.pseudo
+            | {{username}}
+      .wait_thread.admin_class
+        .hook 
+          div
+        button#pause_slide_show &#9208; Pause
+        h2 Images en attente
+        #backend_link
+          h4
+            a( target="_blank") Backend
+        ul#waiting-images-list
+          li
+            img(src="{{urlThumbnail}}"  data-sign='{{sign}}' title="{{name}}").waiting-image
+    .offlive
+      h2
+        | Patience !
+        span Il est encore trop tôt pour le live.
+      p
+        | Rendez-vous tout les 
+        strong  Mercredi à 20h30 
+        | (CET) et réagissez sur le chat !
+      p Et si Nico est là, illustrations en bonus :)
