@@ -42,8 +42,8 @@ app.set('view engine', 'pug')
 #app.use(bodyParser())
 app.use(methodOverride())
 #app.use(app.router)
-app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.static(path.join(__dirname, 'assets')))
+app.use(express.static(path.join(__dirname, 'public')))
 #app.locals.css = css
 #app.locals.js = js
 #development only
