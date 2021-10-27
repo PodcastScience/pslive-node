@@ -2,7 +2,7 @@
 #require('coffeescript')
 express = require('express')
 routes = require('./routes')
-bodyParser = require('body-parser')
+#bodyParser = require('body-parser')
 errorHandler  = require('errorhandler')
 methodOverride  = require('method-override')
 user = require('./routes/user')
@@ -32,19 +32,19 @@ app = express()
 
 
 #all environments
-app.use require('connect-assets')()
-console.log js('client')
+#app.use require('connect-assets')()
+#console.log js('client')
 app.set('port', process.env.PORT || 3001)
 app.set('views', __dirname + '/views')
 app.set('view engine', 'pug')
 #app.use(express.favicon("/images/fav.png"))
 #app.use(express.logger('dev'))
-app.use(bodyParser())
+#app.use(bodyParser())
 app.use(methodOverride())
 #app.use(app.router)
 app.use(express.static(path.join(__dirname, 'public')))
-app.locals.css = css
-app.locals.js = js
+#app.locals.css = css
+#app.locals.js = js
 #development only
 if ('development' == app.get('env'))
   app.use(errorHandler())
