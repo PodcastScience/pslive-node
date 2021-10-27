@@ -28,8 +28,7 @@ app = express()
 
 
 
-
-const __dirname = path.resolve(path.dirname(''));
+__dirname = path.resolve path.dirname('')
 
 
 #all environments
