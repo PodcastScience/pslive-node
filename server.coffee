@@ -32,8 +32,8 @@ app = express()
 
 
 #all environments
-app.use require('connect-assets')()
-console.log js('client')
+#app.use require('connect-assets')()
+#console.log js('client')
 app.set('port', process.env.PORT || 3001)
 app.set('views', __dirname + '/views')
 app.set('view engine', 'pug')
