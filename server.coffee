@@ -1,5 +1,5 @@
 
-require('coffeescript')
+#require('coffeescript')
 express = require('express')
 routes = require('./routes')
 bodyParser = require('body-parser')
