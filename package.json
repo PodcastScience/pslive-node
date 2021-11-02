@@ -3,14 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node_modules/coffeescript/bin/coffee server.coffee",
+    "build": "webpack -p",
+    "heroku-postbuild": "webpack -p"
   },
   "dependencies": {
     "body-parser": "1.19.0",
     "cheerio": "1.0.0-rc.10",
     "coffee": "5.4.0",
-    "coffeescript": "2.6.1",
-    "connect-assets": "6.0.1",
+    "coffee-loader": "^3.0.0",
+    "coffeescript": "^2.6.1",
     "errorhandler": "1.5.1",
     "express": "4.17.1",
     "markdown": "0.5.0",
@@ -24,10 +26,14 @@
     "querystring": "0.2.0",
     "sharp": "^0.29.2",
     "socket.io": "4.3.1",
-    "validator": "13.6.0"
+    "validator": "13.6.0",
+    "webpack": "^5.60.0"
   },
   "engines": {
     "node": "14.18.x",
     "npm": "8.1.x"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.9.1"
   }
 }
