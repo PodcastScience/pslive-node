@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node_modules/coffeescript/bin/coffee server.coffee",
-    "build": "webpack -p",
-    "heroku-postbuild": "webpack -p"
+    "build": "webpack"
   },
   "dependencies": {
     "body-parser": "1.19.0",
