@@ -364,7 +364,7 @@ insertChatroomImages = (text,user,avatar,socket_) ->
       get_image url, (nom,data,content_type)->
         console.log "****************image*********"
         console.log "****************image*********",content_type
-        if(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
+        if(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' || 1==1 )
           switch content_type
             when 'image/jpeg' then img_format='jpg'; break;
             when 'image/gif' then img_format='gif'; break;
@@ -442,7 +442,7 @@ get_image = (url,cb) ->
       data=''
       console.log "appel de la callback"
       if !(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
-        console.log "Erreur de content-type",response
+        console.log "Erreur de content-type",response.headers
         cb nom,data,content_type
       response.setEncoding('binary')
       console.log "reception d'une reponse"
