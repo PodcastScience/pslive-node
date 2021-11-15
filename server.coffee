@@ -357,7 +357,7 @@ insertChatroomImages = (text,user,avatar,socket_) ->
       get_image url, (nom,data,content_type)->
         console.log "****************image*********"
         console.log "****************image*********",content_type
-        if(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' || 1==1 )
+        if(content_type == 'image/jpeg' || content_type == 'image/gif' || content_type == 'image/png' )
           switch content_type
             when 'image/jpeg' then img_format='jpg'; break;
             when 'image/gif' then img_format='gif'; break;
@@ -368,7 +368,7 @@ insertChatroomImages = (text,user,avatar,socket_) ->
             'poster':user,
             'poster_user':user,
             'avatar':avatar,
-            'tweet':replaceURLWithHTMLLinks text
+            'tweet': text
             'media_type' : 'img'
           }
           console.log "****************image*********",param_img
@@ -855,7 +855,7 @@ chatroomNamespace.on 'connection', (socket) ->
         cpt_message+=1
         message.user = me
         date = new Date()
-        message.message = replaceURLWithHTMLLinks((message.message))
+        message.message = replaceURLWithHTMLLinks message.message
         insertChatroomImages message.message , message.user.username ,message.user.avatar,socket
         message.message = replaceSalaud(message.message)
         id_last_message = md5(Date.now()+cpt_message+message.user.mail)
